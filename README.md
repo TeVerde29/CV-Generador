@@ -1,42 +1,77 @@
 # CV Generador
 
-Editor de currículums **que funciona entero en tu navegador**. Escribes tus datos, eliges una
-plantilla, ves el A4 en vivo y descargas el resultado en **Word, PDF y Markdown**. No hay backend:
-ni tus datos ni tu clave de API salen del navegador.
+Editor de currículums **que funciona entero en tu navegador**. Escribes tus datos, eliges un perfil y
+una plantilla, ves el A4 en vivo y descargas el resultado en **Word, PDF y Markdown**. No hay backend:
+tus datos nunca salen del navegador.
 
 ![Editor con datos de ejemplo](docs/capturas/01-editor.png)
 
-![Panel de diseño con las plantillas y el tema oscuro](docs/capturas/04-oscuro.png)
+![Perfil Clásico con la plantilla Manuscrito](docs/capturas/02-perfil-clasico.png)
 
-![Plantilla Folha con estructura de una columna](docs/capturas/02-cv-folha.png)
+![Panel de diseño: perfil, plantilla, estructura y paleta](docs/capturas/03-diseno.png)
+
+![El mismo CV con el tema oscuro](docs/capturas/04-oscuro.png)
 
 ![Análisis del CV frente a una oferta](docs/capturas/05-analisis.png)
 
-Interfaz con el sistema de diseño propio **Tea Green**: fondo crema, verdes de té y matcha, y
-tipografía editorial (Space Grotesk + Inter).
+La interfaz es **blanca con azul profesional**: superficies limpias, bordes grises y un azul
+corporativo (`#296cd8`) para acciones, foco y selección. No descarga ninguna fuente: usa las pilas
+del sistema, así que se ve igual sin conexión y no filtra visitas a un CDN.
 
 ---
 
 ## Qué tiene
 
-### Diseño
+### Perfil y plantilla: dos ejes independientes
 
-- **12 plantillas** que cambian tipografía, jerarquía y tratamiento de títulos sin tocar el
-  contenido: Folha, Linha, Manuscrito, Corporativo, Executivo, Consultoría, Técnico, Revista,
-  Compacto, Académico, Universidad y Tesis.
+Un currículum se decide en dos pasos que no se pisan entre sí.
+
+**El perfil** («Tipo de plantilla») decide **qué secciones aparecen, en qué orden y con qué
+títulos**. No cambia el aspecto. Hay ocho, sacados de arquetipos reales:
+
+| Perfil | Qué hace |
+|---|---|
+| Predeterminado | Todas las secciones, en el orden habitual |
+| Clásico | Abre con la formación; cierra con habilidades e intereses |
+| Ejecutivo | Experiencia y áreas de especialidad al frente |
+| Técnico | Competencias técnicas, proyectos y certificaciones con peso |
+| Estudiante | Proyectos académicos y actividades antes que la experiencia |
+| Sin experiencia | Formación, proyectos, voluntariado y cursos |
+| Una página | Solo lo esencial, para que quepa en una cara |
+| Ricra | Resumen, habilidades por familias, experiencia y proyectos |
+
+**La plantilla** decide el aspecto: tipografía, jerarquía y tratamiento de títulos. Hay doce, sin
+tocar el contenido: Folha, Linha, Manuscrito, Corporativo, Executivo, Consultoría, Técnico, Revista,
+Compacto, Académico, Universidad y Tesis. Se eligen de la rejilla por familias o del combo por
+nombre.
+
+Las doce comparten el mismo marcado y se diferencian solo por variables CSS. Eso hace que la vista
+previa y el PDF impreso sean **exactamente el mismo documento**, y que añadir una plantilla nueva
+sean unas pocas líneas de CSS.
+
+Además:
+
 - **4 estructuras de página**: una columna, barra lateral izquierda, barra lateral derecha y dos
   columnas. Con barra lateral, Competencias, Idiomas, Certificaciones e Intereses se colocan solos
   en la columna lateral.
-- **15 paletas** listas más paleta personalizada (principal, secundario y acento), entre ellas la
-  paleta de marca: Té verde, Matcha y Salvia.
+- **15 paletas** listas más paleta personalizada (principal, secundario y acento), entre ellas Té
+  verde, Matcha y Salvia.
+- **Secciones que se encienden y se apagan** desde «Orden de las secciones». Apagar una sección
+  conserva sus datos pero la saca del documento, del Word, del PDF y del Markdown.
 - **Biblioteca propia**: guarda paletas y combinaciones completas (plantilla + estructura + paleta +
   orden de secciones) y reutilízalas.
 - **Tema claro y oscuro** con detección de la preferencia del sistema.
 
-![Panel de diseño: plantillas, estructura y paleta](docs/capturas/03-diseno.png)
+### Foto (opcional)
 
-Las doce plantillas comparten el mismo marcado y se diferencian solo por variables CSS. Eso hace que
-la vista previa y el PDF impreso sean **exactamente el mismo documento**.
+- Está **apagada por defecto**: un CV sin foto es lo más seguro, y solo se añade si tú quieres.
+- Se **recorta a cuadrado y se reencoda a 512 px en el propio navegador** (unos 60 kB), no se sube a
+  ningún sitio y viaja dentro del CV.
+- Marco **cuadrado o redondo**.
+- La interfaz avisa de lo que importa: suma en España y Latinoamérica, pero en Estados Unidos y el
+  Reino Unido muchos filtros la penalizan.
+- Aparece también en el `.docx` (imagen flotante a la derecha del encabezado, sin romper el orden de
+  lectura para un ATS) y en el PDF. En Markdown se omite, porque un `.md` no lleva imágenes.
 
 ### Edición
 
@@ -45,31 +80,14 @@ la vista previa y el PDF impreso sean **exactamente el mismo documento**.
   intereses.
 - Listas de etiquetas para logros, competencias y tecnologías (Enter para añadir, Retroceso para
   quitar).
-- **Reordenar arrastrando**: cada elemento y cada sección tienen un tirador; el documento se reordena
-  mientras arrastras. Con el tirador enfocado, las flechas ↑ y ↓ mueven una posición.
-- **Orden de secciones configurable** desde el propio editor.
+- **Reordenar arrastrando**: cada elemento y cada sección tienen un tirador; el documento se
+  reordena mientras arrastras. Con el tirador enfocado, las flechas ↑ y ↓ mueven una posición.
+- **Orden y visibilidad de las secciones** desde el propio editor.
 - **Deshacer y rehacer de verdad** (`Ctrl+Z` / `Ctrl+Shift+Z`), con las pulsaciones agrupadas para no
-  retroceder carácter a carácter. Un arrastre entero se deshace de una vez, y el orden de las
-  secciones entra en el historial como cualquier otra edición.
-- **Autoguardado** en `localStorage` con indicador *Guardando… / Guardado*.
+  retroceder carácter a carácter. Un arrastre entero se deshace de una vez, y cambiar el orden o
+  apagar una sección entra en el historial como cualquier otra edición.
+- **Autoguardado** en `localStorage`: cada cambio se guarda solo, sin botones ni avisos.
 - **Copia de seguridad en JSON**: exportar e importar el CV completo.
-
-### Optimización con IA
-
-- Usa **tu propia clave de Gemini** contra el endpoint compatible con OpenAI
-  (`https://generativelanguage.googleapis.com/v1beta/openai`). La petición va del navegador a Google,
-  sin intermediarios.
-- La clave **vive solo en memoria**: no se escribe en `localStorage`, no se persiste y desaparece al
-  cerrar la pestaña. Puedes olvidarla con un botón.
-- Lista de modelos reales de tu clave (`Actualizar`), con campo libre por si prefieres escribir el
-  identificador.
-- **Probar conexión** antes de gastar una generación.
-- Le pegas la **oferta de trabajo** y reescribe tu CV para alinearlo con ese lenguaje.
-- La IA **solo reescribe lo que ya está**: tiene prohibido inventar empresas, fechas, titulaciones o
-  métricas. La respuesta se valida campo a campo contra tu CV original.
-- La propuesta **no se aplica sola**: aparece en la vista previa con un aviso y botones de
-  *Aplicar* o *Descartar*.
-- **Historial** de generaciones guardado en el navegador, con restauración en un clic.
 
 ### Análisis frente a la oferta
 
@@ -80,9 +98,9 @@ la vista previa y el PDF impreso sean **exactamente el mismo documento**.
 - Un botón **copia las palabras clave que faltan** para pegarlas donde las necesites.
 - **Nueve comprobaciones** sobre el documento (contacto, ubicación, enlace, perfil, fechas, logros con
   cifras, competencias, formación e idiomas), cada una diciendo por qué importa.
-- Todo ocurre **en tu navegador**: no se envía nada y **no gasta tokens**. La nota se recalcula
-  mientras escribes, así que puedes ver el efecto de una edición al instante. La oferta se guarda
-  junto al CV, con el resto de tu trabajo.
+- Todo ocurre **en tu navegador**: no se envía nada a ningún servidor. La nota se recalcula mientras
+  escribes, así que puedes ver el efecto de una edición al instante. La oferta se guarda junto al CV,
+  con el resto de tu trabajo.
 
 ### Exportación
 
@@ -128,22 +146,20 @@ sesión de DevTools por el puerto 9222).
 
 | Pieza | Elección | Por qué |
 |---|---|---|
-| Framework | Angular 19 (standalone + signals) | Reactividad sin `zone.js` innecesario, sin `NgModules` |
-| Estilos | SCSS + variables CSS | Control total del acabado editorial; las plantillas son solo variables |
-| Diseño | Sistema propio **Tea Green** | Colores, tipografía, radios y sombras definidos como tokens |
-| Tipografía | Space Grotesk + Inter, **autoalojadas** | Voz editorial sin depender de un CDN ni perder el uso sin conexión |
-| Word | [`docx`](https://www.npmjs.com/package/docx) 9 | Genera OOXML real en el navegador |
+| Framework | Angular 19 (standalone + signals) | Reactividad sin `NgModules` y sin sorpresas de detección |
+| Estilos | SCSS + variables CSS | Control total del acabado; las plantillas son solo variables |
+| Diseño | Sistema propio: blanco + azul `#296cd8` | Colores, radios y sombras definidos como tokens en un único archivo |
+| Tipografía | Pilas del sistema | Cero descargas, mismo aspecto sin conexión, nada que fijar |
+| Word | [`docx`](https://www.npmjs.com/package/docx) 9 | Genera OOXML real en el navegador, con imágenes y estilos |
 | PDF | Diálogo de impresión del navegador | Vectorial, sin dependencias y con fidelidad total al diseño |
-| IA | Gemini, endpoint OpenAI-compatible | CORS abierto: el navegador puede llamar directo a Google |
-| Backend | Ninguno | Los datos y la clave nunca salen del navegador |
+| Backend | Ninguno | Los datos nunca salen del navegador |
 
 Angular 19 se instaló con el CLI oficial. Sin Tailwind ni librerías de componentes: el sistema de
-diseño son tokens en `src/styles/_tokens.scss`, y las dos tipografías se sirven desde
-`public/fonts/` con `@font-face` en `src/styles/_fonts.scss`. Space Grotesk titula (marca y
-encabezados de panel), Inter compone el texto y la interfaz.
+diseño son tokens en `src/styles/_tokens.scss`, con temas claro y oscuro y contraste AA comprobado
+en los textos pequeños.
 
-El currículum, en cambio, **no** usa la tipografía de la aplicación: se imprime con pilas del
-sistema para garantizar que el `.docx` y el PDF se vean igual en cualquier equipo.
+El currículum tampoco usa nada descargado: se imprime con pilas del sistema para garantizar que el
+`.docx` y el PDF se vean igual en cualquier equipo.
 
 ---
 
@@ -153,8 +169,7 @@ sistema para garantizar que el `.docx` y el PDF se vean igual en cualquier equip
 karma.conf.js                     # lanzador de Chrome para las pruebas
 src/
 ├── styles/
-│   ├── _tokens.scss              # sistema Tea Green: color, tipografía, radios, sombras, temas
-│   ├── _fonts.scss               # @font-face de Space Grotesk e Inter (autoalojadas)
+│   ├── _tokens.scss              # sistema de diseño: color, tipografía, radios, sombras, temas
 │   └── …
 ├── styles.scss                   # reset + primitivas compartidas (.btn, .input, .toast…)
 └── app/
@@ -163,25 +178,24 @@ src/
     │   ├── models/
     │   │   ├── cv-data.ts        # contrato CVData + normalizador tolerante
     │   │   ├── catalog.ts        # 12 plantillas, 4 estructuras, 15 paletas, datos de ejemplo
+    │   │   ├── profiles.ts       # 8 perfiles de CV: secciones, orden y títulos
     │   │   ├── sections.ts       # claves, orden por defecto y etiquetas de sección
     │   │   ├── ats.ts            # analizador de palabras clave: extracción, revisión y nota
     │   │   ├── ats.spec.ts       # pruebas del analizador (lógica pura, sin DOM)
     │   │   └── labels.ts         # títulos de sección, niveles de idioma, nombres de archivo
     │   └── services/
     │       ├── cv-store.service.ts        # estado con signals, persistencia, CRUD, undo/redo
-    │       ├── gemini.service.ts          # cliente de Gemini, clave en memoria, prompt y parser
-    │       ├── exporter.service.ts        # Markdown, .docx y ventana de impresión (PDF)
+    │       ├── exporter.service.ts        # Markdown, .docx (con foto) y ventana de impresión
     │       ├── preview-registry.service.ts# expone el lienzo renderizado al exportador
     │       └── toast.service.ts
     ├── features/
     │   ├── editor/               # panel de datos
-    │   ├── design/               # panel de diseño
-    │   ├── ai/                   # panel de IA
+    │   ├── design/               # panel de diseño: perfil, plantilla, estructura, paleta
     │   ├── ats/                  # panel de análisis frente a la oferta
     │   ├── export/               # panel de exportación (popover)
     │   └── preview/
-    │       ├── preview.component.*        # zoom, ajuste de ancho, aviso de propuesta
-    │       └── cv-document/               # el A4: plantillas × estructuras × paletas
+    │       ├── preview.component.*        # zoom y ajuste de ancho
+    │       └── cv-document/               # el A4: perfiles × plantillas × estructuras × paletas
     └── shared/
         ├── tag-input/            # editor de listas de etiquetas
         └── sortable/             # directiva de reordenación con puntero y teclado
@@ -193,37 +207,44 @@ src/
 `localStorage` o por un JSON importado pasa por `normalizeCVData()`, que rellena campos ausentes y
 descarta tipos incorrectos: así una copia antigua o manipulada nunca rompe la aplicación.
 
+Un perfil no se guarda como un identificador. Se **deriva** comparando el orden y la visibilidad
+reales con cada perfil del catálogo; en cuanto ajustas el orden a mano, el selector dice
+«Personalizado». Así el desplegable nunca miente sobre lo que hay en el documento.
+
 Claves de almacenamiento (todas con prefijo `cvgen.`):
 
 | Clave | Contenido |
 |---|---|
-| `cvgen.data` | El CV (`CVData`) |
-| `cvgen.design` | Plantilla, estructura, paleta, colores personalizados, orden de secciones y marca al pie |
+| `cvgen.data` | El CV (`CVData`), foto incluida |
+| `cvgen.design` | Plantilla, estructura, paleta, colores personalizados, orden de secciones, secciones apagadas, forma de la foto y marca al pie |
 | `cvgen.palettes` | Paletas guardadas |
 | `cvgen.presets` | Combinaciones guardadas |
-| `cvgen.history` | Historial de generaciones (original y optimizado) |
 | `cvgen.offer` | La oferta pegada para el análisis de palabras clave |
 | `cvgen.theme` | Tema claro u oscuro |
-
-**La clave de API no está en esta tabla a propósito**: nunca se persiste.
 
 ---
 
 ## Decisiones que conviene conocer
 
-- **Sin backend.** Gemini expone cabeceras CORS en su endpoint compatible con OpenAI, así que el
-  navegador puede llamarlo directamente. Esto elimina el servidor, el coste, y sobre todo el
-  problema de custodiar la clave de otro.
+- **Sin backend.** Todo el estado vive en el navegador; publicar el sitio es servir ficheros
+  estáticos.
+- **Sin IA.** El análisis de palabras clave es aritmética sobre texto: instantáneo, reproducible y
+  sin depender de ningún servicio externo ni de ninguna clave. Por eso se recalcula en cada pulsación
+  y no sale nada del navegador.
 - **El PDF no usa una librería.** Se clona el lienzo ya renderizado junto con las hojas de estilo
   aplicadas y se imprime. Una librería de PDF obligaría a mantener un segundo motor de maquetación y
   el resultado nunca sería idéntico a lo que el usuario ve.
 - **Las plantillas son variables, no plantillas de HTML.** Un solo árbol de marcado, doce juegos de
-  tokens. Añadir una plantilla nueva son unas pocas líneas de CSS.
-- **La IA propone, no escribe.** El resultado se revisa antes de aplicarse y el parser valida el JSON
-  contra el CV original para que no pueda colarse contenido inventado.
-- **Lo que se puede calcular no se pregunta a un modelo.** El análisis de palabras clave es aritmética
-  sobre texto: es instantáneo, reproducible, no gasta tokens y no depende de que un modelo «vea» bien
-  la oferta. Por eso vive aparte de la IA, en su propia pestaña.
+  tokens.
+- **La foto se recorta antes de guardarla.** Guardar el archivo original reventaría el presupuesto de
+  `localStorage` (una foto de móvil son varios MB) y todos los diseños esperan un cuadrado, así que
+  el recorte ocurre una vez, en el navegador, y se guarda un JPEG pequeño.
+- **El perfil vacía, no borra.** Las secciones apagadas conservan sus datos y solo se vacían en la
+  copia que ven el documento y los exportadores. Encender una sección la devuelve completa.
+- **El orden de las secciones se respeta en la vista previa y en el PDF.** Word y Markdown conservan
+  los títulos y la visibilidad del perfil, pero escriben las secciones en el orden convencional del
+  documento, que es el que un ATS espera encontrar. Igualarlo al orden del perfil está en la lista de
+  pendientes.
 - **Extractor de comparación y extractor de presentación son el mismo.** Comparar la oferta con el CV
   exige bajar a minúsculas y quitar acentos, pero al lector hay que enseñarle las palabras tal como
   las escribió el anuncio. Cada coincidencia arrastra sus dos formas desde el mismo punto, de modo que
@@ -233,13 +254,15 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
 
 ## Estado y siguientes pasos
 
-Funciona de punta a punta y está verificado en navegador: las doce plantillas, las cuatro
-estructuras, el autoguardado, deshacer/rehacer, la reordenación arrastrando, el análisis de palabras
-clave, la exportación a Word (comprobada descomprimiendo el `.docx`) y la ventana de impresión. Las 13
-pruebas unitarias del analizador pasan con `npm test`.
+Funciona de punta a punta y está verificado en navegador: los ocho perfiles, las doce plantillas, las
+cuatro estructuras, el autoguardado, deshacer/rehacer, la reordenación arrastrando, las secciones que
+se encienden y se apagan, la foto opcional, el análisis de palabras clave y la exportación a Word
+(comprobada descomprimiendo el `.docx`, con foto, títulos y visibilidad del perfil). Las 13 pruebas
+unitarias del analizador pasan con `npm test`.
 
 Pendiente, por orden de valor:
 
+- [ ] Que Word y Markdown respeten también el orden de secciones del perfil.
 - [ ] Varios CV por perfil, con duplicar y archivar.
 - [ ] Generador de carta de presentación a partir de la misma oferta.
 - [ ] Pruebas de extremo a extremo (las unitarias ya cubren el analizador).
@@ -253,10 +276,10 @@ Nació de un análisis funcional exhaustivo de un generador de CV libre con lice
 ([destbreso/cv-generator](https://github.com/destbreso/cv-generator)), documentado en
 [`ANALISIS-CV-GENERATOR.md`](ANALISIS-CV-GENERATOR.md). Ese trabajo sirvió como investigación de
 requisitos; **este código es una implementación propia**, escrita desde cero, con decisiones de
-arquitectura distintas y funcionalidad que el original no tiene: exportación a `.docx` y Markdown,
-deshacer y rehacer (también para el orden de las secciones), reordenación arrastrando, análisis de
-palabras clave frente a una oferta, marca de agua opcional e IA con revisión previa e historial
-restaurable.
+arquitectura distintas y funcionalidad que el original no tiene: perfiles de CV, secciones que se
+encienden y se apagan, foto opcional con recorte, exportación a `.docx` y Markdown, deshacer y
+rehacer (también para el orden de las secciones), reordenación arrastrando, análisis de palabras
+clave frente a una oferta y marca de agua opcional.
 
 ---
 

@@ -26,10 +26,6 @@
       >
         ↷
       </button>
-      <span class="save-state">
-        <span class="dot" [class.dot--ok]="!store.dirty()"></span>
-        {{ saveLabel() }}
-      </span>
     </div>
 
     <span class="spacer"></span>
@@ -102,9 +98,6 @@
       </div>
       <div class="panel-slot" [class.is-hidden]="tab() !== 'design'">
         <app-design />
-      </div>
-      <div class="panel-slot" [class.is-hidden]="tab() !== 'ai'">
-        <app-ai />
       </div>
       <div class="panel-slot" [class.is-hidden]="tab() !== 'ats'">
         <app-ats />

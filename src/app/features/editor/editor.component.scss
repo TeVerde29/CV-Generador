@@ -53,21 +53,6 @@
   gap: 5px;
 }
 
-/* ── Banners ───────────────────────────────────────────────────────────── */
-
-.notice {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 14px 0;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--r-sm);
-  background: var(--accent-soft);
-  font-size: 12.5px;
-}
-
 /* ── Collapsible blocks ────────────────────────────────────────────────── */
 
 .block {
@@ -152,6 +137,69 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ── Foto (opcional) ───────────────────────────────────────────────────── */
+
+.photo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.photo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.photo-preview {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+.photo-preview--circle {
+  border-radius: 50%;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.seg-group {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+
+.seg {
+  padding: 3px 9px;
+  border: 0;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+.seg:hover {
+  color: var(--text);
+}
+.seg.is-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-1);
 }
 
 /* ── Item cards ────────────────────────────────────────────────────────── */
@@ -357,4 +405,21 @@
 
 .order-label {
   font-size: 13px;
+}
+
+.order-row.is-off .order-label,
+.order-row.is-off .order-number {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+.order-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.order-row.is-off .order-dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
 }

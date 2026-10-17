@@ -30,15 +30,6 @@
     </div>
   </header>
 
-  @if (isDraftPending()) {
-    <div class="notice notice--accent">
-      <span>Hay una <strong>propuesta de la IA</strong> esperando en la vista previa.</span>
-      <span class="spacer"></span>
-      <button type="button" class="btn btn--sm" (click)="discardDraft()">Descartar</button>
-      <button type="button" class="btn btn--sm btn--primary" (click)="applyDraft()">Aplicar</button>
-    </div>
-  }
-
   <!-- 1 · Datos personales -->
   <section class="block" [class.is-open]="isOpen('personal')">
     <button type="button" class="block-head" (click)="toggle('personal')">
@@ -76,6 +67,51 @@
               (input)="store.setPersonal({ title: $any($event.target).value })"
             />
           </label>
+        </div>
+
+        <div class="photo-field">
+          <span class="label">Foto (opcional)</span>
+          <div class="photo-row">
+            @if (data().personalInfo.photo) {
+              <img
+                class="photo-preview"
+                [class.photo-preview--circle]="store.photoShape() === 'circle'"
+                [src]="data().personalInfo.photo"
+                alt="Vista previa de la foto"
+              />
+            }
+            <div class="photo-actions">
+              <label class="btn btn--sm">
+                {{ data().personalInfo.photo ? 'Cambiar foto' : 'Añadir foto' }}
+                <input type="file" accept="image/*" hidden (change)="onPhotoFile($event)" />
+              </label>
+              @if (data().personalInfo.photo) {
+                <button type="button" class="btn btn--sm" (click)="removePhoto()">Quitar</button>
+                <span class="seg-group" role="group" aria-label="Forma de la foto">
+                  <button
+                    type="button"
+                    class="seg"
+                    [class.is-active]="store.photoShape() === 'square'"
+                    (click)="setPhotoShape('square')"
+                  >
+                    Cuadrada
+                  </button>
+                  <button
+                    type="button"
+                    class="seg"
+                    [class.is-active]="store.photoShape() === 'circle'"
+                    (click)="setPhotoShape('circle')"
+                  >
+                    Redonda
+                  </button>
+                </span>
+              }
+            </div>
+          </div>
+          <p class="block-hint">
+            Suma en España y Latinoamérica; en Estados Unidos y el Reino Unido muchos filtros la
+            penalizan. Se recorta en cuadrado y viaja dentro de tu CV.
+          </p>
         </div>
 
         <div class="fields fields--3">
@@ -1103,16 +1139,33 @@
     @if (isOpen('order')) {
       <div class="block-body">
         <p class="block-hint">
-          Define qué aparece primero. Con un diseño de barra lateral, Competencias, Idiomas,
+          Define qué aparece primero. El punto enciende y apaga una sección: apagada conserva sus
+          datos pero no se imprime. Con un diseño de barra lateral, Competencias, Idiomas,
           Certificaciones e Intereses se colocan en la columna lateral.
         </p>
 
         <ol class="order-list" appSortable="order" (moveTo)="sortMove($event)">
           @for (key of store.sectionOrder(); track key) {
-            <li class="order-row">
+            <li class="order-row" [class.is-off]="store.isSectionHidden(key)">
               <span class="mono order-number">{{ orderIndex(key) + 1 }}</span>
               <span class="order-label">{{ SECTION_LABELS[key] }}</span>
               <span class="spacer"></span>
+              <button
+                type="button"
+                class="icon-btn"
+                [attr.aria-pressed]="!store.isSectionHidden(key)"
+                [title]="
+                  store.isSectionHidden(key)
+                    ? 'Mostrar esta sección en el documento'
+                    : 'Ocultar esta sección en el documento'
+                "
+                [attr.aria-label]="
+                  store.isSectionHidden(key) ? 'Mostrar sección' : 'Ocultar sección'
+                "
+                (click)="store.toggleSection(key)"
+              >
+                <span class="order-dot" aria-hidden="true"></span>
+              </button>
               <button
                 type="button"
                 class="icon-btn handle"
@@ -1128,9 +1181,16 @@
           }
         </ol>
 
-        <button type="button" class="btn btn--sm" (click)="store.resetSectionOrder()">
-          Restablecer orden
-        </button>
+        <div class="row">
+          <button type="button" class="btn btn--sm" (click)="store.resetSectionOrder()">
+            Restablecer orden
+          </button>
+          @if (store.hiddenSections().length) {
+            <button type="button" class="btn btn--sm" (click)="store.showAllSections()">
+              Mostrar todas ({{ store.hiddenSections().length }} apagadas)
+            </button>
+          }
+        </div>
       </div>
     }
   </section>

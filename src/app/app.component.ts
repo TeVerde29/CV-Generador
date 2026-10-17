@@ -9,14 +9,13 @@ import {
 } from '@angular/core';
 import { CvStoreService } from './core/services/cv-store.service';
 import { ToastService } from './core/services/toast.service';
-import { AiComponent } from './features/ai/ai.component';
 import { AtsComponent } from './features/ats/ats.component';
 import { DesignComponent } from './features/design/design.component';
 import { EditorComponent } from './features/editor/editor.component';
 import { ExportComponent } from './features/export/export.component';
 import { PreviewComponent } from './features/preview/preview.component';
 
-type Tab = 'data' | 'design' | 'ai' | 'ats';
+type Tab = 'data' | 'design' | 'ats';
 type Theme = 'light' | 'dark';
 
 const THEME_KEY = 'cvgen.theme';
@@ -26,7 +25,6 @@ const THEME_KEY = 'cvgen.theme';
   imports: [
     EditorComponent,
     DesignComponent,
-    AiComponent,
     AtsComponent,
     PreviewComponent,
     ExportComponent,
@@ -47,11 +45,9 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'data', label: 'Datos', icon: '▤' },
     { id: 'design', label: 'Diseño', icon: '◧' },
-    { id: 'ai', label: 'IA', icon: '✦' },
     { id: 'ats', label: 'Análisis', icon: '◎' },
   ];
 
-  readonly saveLabel = computed(() => (this.store.dirty() ? 'Guardando…' : 'Guardado'));
   readonly themeLabel = computed(() => (this.theme() === 'light' ? 'Tema oscuro' : 'Tema claro'));
 
   private readonly onKeydown = (event: KeyboardEvent): void => this.handleShortcut(event);

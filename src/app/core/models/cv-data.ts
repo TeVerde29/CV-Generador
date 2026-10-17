@@ -1,7 +1,7 @@
 /**
  * Canonical CV data model.
  * This single structure is the source of truth for the editor, the live
- * preview, the AI optimisation step and every export format.
+ * preview and every export format.
  */
 
 export type Proficiency = 'native' | 'fluent' | 'advanced' | 'intermediate' | 'basic';
@@ -17,6 +17,8 @@ export const PROFICIENCIES: Proficiency[] = [
 export interface PersonalInfo {
   name: string;
   title?: string;
+  /** Optional photo, stored as a data URL. Off unless the user adds one. */
+  photo?: string;
   email: string;
   phone: string;
   location: string;
@@ -166,14 +168,3 @@ export interface SavedPalette {
 /* ── Export ────────────────────────────────────────────────────────────── */
 
 export type ExportFormat = 'docx' | 'pdf' | 'markdown';
-
-/** One AI optimisation run, kept for the local history list. */
-export interface GenerationRecord {
-  id: string;
-  timestamp: number;
-  jobContext: string;
-  templateId: string;
-  layoutId: LayoutOption['id'];
-  original: CVData;
-  optimized: CVData;
-}

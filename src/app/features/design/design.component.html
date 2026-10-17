@@ -1,9 +1,47 @@
 <div class="design">
   <section class="grp">
     <header class="grp-head">
+      <h2 class="grp-title">Tipo de plantilla</h2>
+      <p class="grp-hint">
+        El perfil decide qué secciones aparecen, en qué orden y con qué títulos. Se combina con
+        cualquier plantilla de abajo.
+      </p>
+    </header>
+
+    <label class="pick">
+      <span class="label">Perfil del currículum</span>
+      <select class="select" (change)="onProfileChange($event)">
+        @if (store.activeProfileId() === 'custom') {
+          <option value="custom" selected>Personalizado (orden propio)</option>
+        }
+        @for (p of profiles; track p.id) {
+          <option [value]="p.id" [selected]="store.activeProfileId() === p.id">{{ p.name }}</option>
+        }
+      </select>
+    </label>
+    <p class="pick-hint">
+      @if (store.profile(); as current) {
+        {{ current.description }}
+      } @else {
+        Tienes un orden propio: el documento usa tu combinación.
+      }
+    </p>
+  </section>
+
+  <section class="grp">
+    <header class="grp-head">
       <h2 class="grp-title">Plantillas</h2>
       <p class="grp-hint">Cambian la tipografía y el tratamiento de los títulos. El contenido no se toca.</p>
     </header>
+
+    <label class="pick">
+      <span class="label">Elegir por nombre</span>
+      <select class="select" (change)="onTemplateChange($event)">
+        @for (t of templates; track t.id) {
+          <option [value]="t.id" [selected]="store.templateId() === t.id">{{ t.name }}</option>
+        }
+      </select>
+    </label>
 
     @for (family of families; track family) {
       <div class="family">

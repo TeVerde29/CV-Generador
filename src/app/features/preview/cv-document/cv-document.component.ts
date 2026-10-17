@@ -43,15 +43,25 @@ export class CvDocumentComponent {
   readonly watermarkLabel = input('');
   /** User-controlled order; unknown/missing keys are normalised away. */
   readonly order = input<SectionKey[]>(DEFAULT_SECTION_ORDER);
+  /** Section titles; a CV profile may override the defaults. */
+  readonly titles = input<Record<SectionKey, string>>(SECTION_TITLES);
+  /** Frame of the optional photo. */
+  readonly photoShape = input<'square' | 'circle'>('square');
 
-  readonly T = SECTION_TITLES;
   readonly labels = PROFICIENCY_LABELS;
+
+  /** A getter so the templates keep reading the titles as `T.section`. */
+  get T(): Record<SectionKey, string> {
+    return this.titles();
+  }
 
   readonly sheetClass = computed(
     () => `cv-sheet tpl-${this.templateId()} layout-${this.layoutId()}`,
   );
 
   readonly profile = computed(() => this.data().personalInfo);
+
+  readonly photo = computed(() => this.data().personalInfo.photo ?? '');
 
   readonly contacts = computed(() => {
     const p = this.profile();

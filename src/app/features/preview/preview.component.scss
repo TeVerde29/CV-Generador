@@ -40,24 +40,6 @@
   color: var(--text);
 }
 
-.draft-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: none;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--accent-soft);
-}
-
-.draft-copy {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  font-size: 12.5px;
-}
-
 .preview-scroll {
   flex: 1 1 auto;
   min-height: 0;

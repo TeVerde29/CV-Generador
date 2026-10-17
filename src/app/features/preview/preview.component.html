@@ -38,21 +38,6 @@
     </div>
   </div>
 
-  @if (hasDraft()) {
-    <div class="draft-banner">
-      <div class="draft-copy">
-        <span class="badge badge--accent">Propuesta de la IA</span>
-        <span class="dim">Estás viendo el resultado optimizado. Todavía no se guardó nada.</span>
-      </div>
-      <div class="row">
-        <button type="button" class="btn btn--sm" (click)="discardDraft()">Descartar</button>
-        <button type="button" class="btn btn--sm btn--primary" (click)="acceptDraft()">
-          Aplicar cambios
-        </button>
-      </div>
-    </div>
-  }
-
   <div class="preview-scroll" #viewport>
     <div class="paper-holder" #holder [style.zoom]="zoom() / 100">
       <app-cv-document
@@ -61,6 +46,8 @@
         [layoutId]="layoutId()"
         [colors]="colors()"
         [order]="sectionOrder()"
+        [titles]="titles()"
+        [photoShape]="photoShape()"
         [showWatermark]="showWatermark()"
         [watermarkLabel]="watermarkText()"
       />

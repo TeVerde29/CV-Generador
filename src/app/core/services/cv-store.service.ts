@@ -15,7 +15,6 @@ import type {
   CertificationItem,
   EducationItem,
   ExperienceItem,
-  GenerationRecord,
   LanguageItem,
   LayoutOption,
   PaletteColors,
@@ -27,6 +26,8 @@ import type {
   SkillGroup,
   VolunteerItem,
 } from '../models/cv-data';
+import { SECTION_TITLES } from '../models/labels';
+import { PROFILES, findProfile, profileFullOrder, profileHidden } from '../models/profiles';
 import { ALL_SECTION_KEYS, DEFAULT_SECTION_ORDER, type SectionKey } from '../models/sections';
 
 /* ── Collection plumbing ───────────────────────────────────────────────── */
@@ -62,7 +63,6 @@ const KEY = {
   design: 'cvgen.design',
   presets: 'cvgen.presets',
   palettes: 'cvgen.palettes',
-  history: 'cvgen.history',
   offer: 'cvgen.offer',
 };
 
@@ -112,24 +112,6 @@ export function normalizeCVData(input: unknown): CVData {
   };
 }
 
-/** Removes markdown emphasis the AI sometimes adds; the CV renders as plain text. */
-export function stripInlineMarkdown(value: unknown): any {
-  if (typeof value === 'string') {
-    return value
-      .replace(/\*\*(.+?)\*\*/g, '$1')
-      .replace(/(^|\s)__(.+?)__(?=\s|$)/g, '$1$2')
-      .replace(/`([^`]+)`/g, '$1')
-      .replace(/\*\*/g, '');
-  }
-  if (Array.isArray(value)) return value.map(stripInlineMarkdown);
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, stripInlineMarkdown(v)]),
-    );
-  }
-  return value;
-}
-
 /* ── Service ───────────────────────────────────────────────────────────── */
 
 /**
@@ -139,6 +121,7 @@ export function stripInlineMarkdown(value: unknown): any {
 interface Snapshot {
   cv: CVData;
   order: SectionKey[];
+  hidden: SectionKey[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -151,9 +134,12 @@ export class CvStoreService {
   readonly customColors = signal<PaletteColors | null>(null);
   readonly presets = signal<Preset[]>([]);
   readonly savedPalettes = signal<SavedPalette[]>([]);
-  readonly history = signal<GenerationRecord[]>([]);
   /** Order of the sections in the rendered document. */
   readonly sectionOrder = signal<SectionKey[]>([...DEFAULT_SECTION_ORDER]);
+  /** Sections turned off: they keep their data but leave the document. */
+  readonly hiddenSections = signal<SectionKey[]>([]);
+  /** Frame of the photo when the CV carries one. */
+  readonly photoShape = signal<'square' | 'circle'>('square');
   /** Optional footer line on the exported documents (off by default). */
   readonly showWatermark = signal(false);
   readonly watermarkText = signal('');
@@ -162,9 +148,6 @@ export class CvStoreService {
   readonly lastSavedAt = signal<number | null>(null);
   /** Serialised state at the last successful save; `dirty` derives from it. */
   private readonly savedSnapshot = signal<string>('');
-
-  /** Set while the AI result is being previewed before it is applied. */
-  readonly draft = signal<CVData | null>(null);
 
   /* Derived */
   readonly template = computed(
@@ -186,8 +169,51 @@ export class CvStoreService {
   readonly colors = computed<PaletteColors>(
     () => this.palette()?.colors ?? PALETTES[0].colors,
   );
-  /** Data currently shown in the preview (draft overrides). */
-  readonly displayData = computed(() => this.draft() ?? this.cv());
+
+  /* ── CV profile (section layout) ─────────────────────────────────────── */
+
+  /**
+   * Which profile the current layout corresponds to. Derived rather than
+   * stored, so hand-tuning the order can never leave the selector lying: as
+   * soon as the order stops matching a profile, the selector says so.
+   */
+  readonly activeProfileId = computed<string>(() => {
+    const order = this.sectionOrder().join(',');
+    const hidden = [...this.hiddenSections()].sort().join(',');
+    for (const p of PROFILES) {
+      const sameOrder = profileFullOrder(p).join(',') === order;
+      const sameHidden = profileHidden(p).slice().sort().join(',') === hidden;
+      if (sameOrder && sameHidden) return p.id;
+    }
+    return 'custom';
+  });
+
+  /** The matched profile, or `null` when the layout is hand-made. */
+  readonly profile = computed(() => findProfile(this.activeProfileId()) ?? null);
+
+  /** Titles printed in the document; a profile may override the defaults. */
+  readonly sectionTitles = computed<Record<SectionKey, string>>(() => ({
+    ...SECTION_TITLES,
+    ...(this.profile()?.titles ?? {}),
+  }));
+
+  /**
+   * The CV exactly as the document sees it: sections the profile turned off
+   * are emptied out, so the preview, the PDF, the Word file and the Markdown
+   * all agree without each renderer having to know about the profile.
+   */
+  readonly documentData = computed<CVData>(() => {
+    const hidden = this.hiddenSections();
+    if (!hidden.length) return this.cv();
+    const d = structuredClone(this.cv());
+    const bag = d as unknown as Record<string, unknown>;
+    for (const key of hidden) {
+      if (key === 'summary') d.summary = '';
+      else bag[key] = [];
+    }
+    return d;
+  });
+
   readonly hasContent = computed(() => {
     const c = this.cv();
     return Boolean(
@@ -209,8 +235,9 @@ export class CvStoreService {
       customColors: this.customColors(),
       presets: this.presets(),
       savedPalettes: this.savedPalettes(),
-      history: this.history(),
       sectionOrder: this.sectionOrder(),
+      hiddenSections: this.hiddenSections(),
+      photoShape: this.photoShape(),
       showWatermark: this.showWatermark(),
       watermarkText: this.watermarkText(),
       jobOffer: this.jobOffer(),
@@ -243,7 +270,7 @@ export class CvStoreService {
 
   /** The current state, ready to be recorded. */
   private state(): Snapshot {
-    return { cv: this.cv(), order: this.sectionOrder() };
+    return { cv: this.cv(), order: this.sectionOrder(), hidden: this.hiddenSections() };
   }
 
   /**
@@ -270,19 +297,33 @@ export class CvStoreService {
   }
 
   /**
-   * Section order is not CV data, but it is still the user's work, so it goes
-   * through the same history. A no-op reorder records nothing.
+   * Section order and visibility are not CV data, but they are still the
+   * user's work, so they go through the same history. A no-op change records
+   * nothing.
    */
-  private commitSections(next: SectionKey[]): void {
-    const current = this.sectionOrder();
-    if (next.length === current.length && next.every((key, i) => key === current[i])) return;
+  private commitLayout(order: SectionKey[], hidden: SectionKey[]): void {
+    const curOrder = this.sectionOrder();
+    const curHidden = this.hiddenSections();
+    const unchanged =
+      order.length === curOrder.length &&
+      order.every((k, i) => k === curOrder[i]) &&
+      hidden.length === curHidden.length &&
+      hidden.every((k, i) => k === curHidden[i]);
+    if (unchanged) return;
     this.pushHistory(this.state());
-    this.sectionOrder.set(next);
+    this.sectionOrder.set(order);
+    this.hiddenSections.set(hidden);
+  }
+
+  /** Reorders the sections, leaving visibility alone. */
+  private commitSections(next: SectionKey[]): void {
+    this.commitLayout(next, this.hiddenSections());
   }
 
   private apply(snapshot: Snapshot): void {
     this.cv.set(snapshot.cv);
     this.sectionOrder.set([...snapshot.order]);
+    this.hiddenSections.set([...(snapshot.hidden ?? [])]);
   }
 
   undo(): void {
@@ -331,6 +372,15 @@ export class CvStoreService {
         const missing = ALL_SECTION_KEYS.filter((k) => !known.includes(k));
         this.sectionOrder.set([...known, ...missing]);
       }
+      const hs = design['hiddenSections'];
+      if (Array.isArray(hs)) {
+        this.hiddenSections.set(
+          hs.filter((k): k is SectionKey => ALL_SECTION_KEYS.includes(k as SectionKey)),
+        );
+      }
+      if (design['photoShape'] === 'circle' || design['photoShape'] === 'square') {
+        this.photoShape.set(design['photoShape']);
+      }
       this.showWatermark.set(design['showWatermark'] === true);
       if (typeof design['watermarkText'] === 'string') {
         this.watermarkText.set(design['watermarkText']);
@@ -338,7 +388,6 @@ export class CvStoreService {
     }
     this.presets.set(safeParse<Preset[]>(localStorage.getItem(KEY.presets), []));
     this.savedPalettes.set(safeParse<SavedPalette[]>(localStorage.getItem(KEY.palettes), []));
-    this.history.set(safeParse<GenerationRecord[]>(localStorage.getItem(KEY.history), []));
     this.jobOffer.set(localStorage.getItem(KEY.offer) ?? '');
     this.past = [];
     this.future = [];
@@ -358,6 +407,8 @@ export class CvStoreService {
           paletteId: this.paletteId(),
           customColors: this.customColors(),
           sectionOrder: this.sectionOrder(),
+          hiddenSections: this.hiddenSections(),
+          photoShape: this.photoShape(),
           showWatermark: this.showWatermark(),
           watermarkText: this.watermarkText(),
         }),
@@ -365,7 +416,6 @@ export class CvStoreService {
       localStorage.setItem(KEY.presets, JSON.stringify(this.presets()));
       localStorage.setItem(KEY.palettes, JSON.stringify(this.savedPalettes()));
       localStorage.setItem(KEY.offer, this.jobOffer());
-      localStorage.setItem(KEY.history, JSON.stringify(this.history()));
       this.lastSavedAt.set(Date.now());
       this.savedSnapshot.set(this.snapshot());
     } catch (err) {
@@ -387,7 +437,6 @@ export class CvStoreService {
 
   clearAll(): void {
     this.commit(emptyCVData());
-    this.draft.set(null);
   }
 
   loadSample(): void {
@@ -396,6 +445,18 @@ export class CvStoreService {
 
   setPersonal(patch: Partial<CVData['personalInfo']>): void {
     this.mutate((d) => Object.assign(d.personalInfo, patch));
+  }
+
+  /** Adds or removes the optional photo (a data URL, already cropped). */
+  setPhoto(photo: string | undefined): void {
+    this.mutate((d) => {
+      if (photo) d.personalInfo.photo = photo;
+      else delete d.personalInfo.photo;
+    });
+  }
+
+  setPhotoShape(shape: 'square' | 'circle'): void {
+    this.photoShape.set(shape);
   }
 
   setSummary(value: string): void {
@@ -517,6 +578,31 @@ export class CvStoreService {
     this.commitSections(copy);
   }
 
+  /* ── Perfiles y visibilidad ──────────────────────────────────────────── */
+
+  /** Applies a profile: its section order, its visibility and its titles. */
+  applyProfile(id: string): void {
+    const profile = findProfile(id);
+    if (!profile) return;
+    this.commitLayout(profileFullOrder(profile), profileHidden(profile));
+  }
+
+  isSectionHidden(key: SectionKey): boolean {
+    return this.hiddenSections().includes(key);
+  }
+
+  /** Shows or hides one section. Hiding never deletes the data behind it. */
+  toggleSection(key: SectionKey): void {
+    const hidden = this.hiddenSections();
+    const next = hidden.includes(key) ? hidden.filter((k) => k !== key) : [...hidden, key];
+    this.commitLayout(this.sectionOrder(), next);
+  }
+
+  /** Puts every section back, in the default order. */
+  showAllSections(): void {
+    this.commitLayout([...DEFAULT_SECTION_ORDER], []);
+  }
+
   savePalette(name: string): void {
     const colors = this.customColors() ?? this.colors();
     const entry: SavedPalette = {
@@ -563,28 +649,5 @@ export class CvStoreService {
       [copy[i], copy[j]] = [copy[j], copy[i]];
       return copy;
     });
-  }
-
-  /* ── AI draft / history ──────────────────────────────────────────────── */
-
-  applyDraft(): void {
-    const d = this.draft();
-    if (!d) return;
-    this.commit(normalizeCVData(d));
-    this.draft.set(null);
-  }
-  discardDraft(): void {
-    this.draft.set(null);
-  }
-
-  recordGeneration(record: Omit<GenerationRecord, 'id' | 'timestamp'>): void {
-    const entry: GenerationRecord = { ...record, id: uid('gen'), timestamp: Date.now() };
-    this.history.update((l) => [entry, ...l].slice(0, 30));
-  }
-  removeGeneration(id: string): void {
-    this.history.update((l) => l.filter((g) => g.id !== id));
-  }
-  restoreGeneration(record: GenerationRecord): void {
-    this.commit(normalizeCVData(record.optimized));
   }
 }

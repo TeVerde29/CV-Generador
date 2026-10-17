@@ -9,6 +9,7 @@ import {
   TEMPLATE_FAMILIES,
 } from '../../core/models/catalog';
 import type { LayoutOption, PaletteColors } from '../../core/models/cv-data';
+import { PROFILES } from '../../core/models/profiles';
 import { CvStoreService } from '../../core/services/cv-store.service';
 import { ToastService } from '../../core/services/toast.service';
 
@@ -27,6 +28,7 @@ export class DesignComponent {
   readonly families = TEMPLATE_FAMILIES;
   readonly layouts = LAYOUTS;
   readonly palettes = PALETTES;
+  readonly profiles = PROFILES;
 
   readonly custom = signal<PaletteColors>({
     primary: '#18181b',
@@ -42,6 +44,16 @@ export class DesignComponent {
 
   selectTemplate(id: string): void {
     this.store.setTemplate(id);
+  }
+
+  /** Combo entries: the profile decides the sections, not the looks. */
+  onProfileChange(event: Event): void {
+    const id = (event.target as HTMLSelectElement).value;
+    if (id !== 'custom') this.store.applyProfile(id);
+  }
+
+  onTemplateChange(event: Event): void {
+    this.store.setTemplate((event.target as HTMLSelectElement).value);
   }
 
   selectLayout(id: LayoutOption['id']): void {

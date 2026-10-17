@@ -33,8 +33,6 @@ export class EditorComponent {
   readonly proficiencyLabels = PROFICIENCY_LABELS;
   readonly collectionLabels = COLLECTION_LABELS;
 
-  readonly isDraftPending = computed(() => this.store.draft() !== null);
-
   /** Which collapsible blocks are expanded. */
   private readonly open = signal<ReadonlySet<string>>(
     new Set(['personal', 'summary', 'experience']),
@@ -293,13 +291,84 @@ export class EditorComponent {
     reader.readAsText(file);
   }
 
-  applyDraft(): void {
-    this.store.applyDraft();
-    this.toast.ok('Se aplicó la propuesta de la IA.');
+  /* ── Foto opcional ──────────────────────────────────────────────────── */
+
+  onPhotoFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.toast.err('Ese archivo no es una imagen.');
+      return;
+    }
+    this.cropToSquare(file)
+      .then((dataUrl) => {
+        this.store.setPhoto(dataUrl);
+        this.toast.ok('Foto añadida al currículum.');
+      })
+      .catch(() => this.toast.err('No se pudo leer la imagen.'));
   }
 
-  discardDraft(): void {
-    this.store.discardDraft();
-    this.toast.show('Propuesta descartada.');
+  removePhoto(): void {
+    this.store.setPhoto(undefined);
+    this.toast.show('Foto retirada del currículum.');
+  }
+
+  setPhotoShape(shape: 'square' | 'circle'): void {
+    this.store.setPhotoShape(shape);
+  }
+
+  /**
+   * Centre-crops the chosen image to a square and re-encodes it small.
+   *
+   * Storing the original file would blow past the localStorage budget (a 4 MB
+   * phone photo) and every layout expects a square anyway, so the crop happens
+   * here, once, in the browser. 512 px is crisp at print size (~250 dpi) and
+   * weighs around 60 kB.
+   */
+  private cropToSquare(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        try {
+          const size = 512;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('sin lienzo 2D'));
+            return;
+          }
+          const side = Math.min(image.naturalWidth, image.naturalHeight);
+          if (!side) {
+            reject(new Error('imagen vacía'));
+            return;
+          }
+          ctx.drawImage(
+            image,
+            (image.naturalWidth - side) / 2,
+            (image.naturalHeight - side) / 2,
+            side,
+            side,
+            0,
+            0,
+            size,
+            size,
+          );
+          resolve(canvas.toDataURL('image/jpeg', 0.86));
+        } catch {
+          reject(new Error('recorte'));
+        }
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('imagen ilegible'));
+      };
+      image.src = url;
+    });
   }
 }

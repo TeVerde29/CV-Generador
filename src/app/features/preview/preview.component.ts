@@ -4,7 +4,6 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  computed,
   inject,
   signal,
   viewChild,
@@ -26,7 +25,7 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
   private readonly store = inject(CvStoreService);
   private readonly registry = inject(PreviewRegistryService);
 
-  readonly data = this.store.displayData;
+  readonly data = this.store.documentData;
   readonly templateId = this.store.templateId;
   readonly layoutId = this.store.layoutId;
   readonly colors = this.store.colors;
@@ -35,7 +34,8 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
   readonly sectionOrder = this.store.sectionOrder;
   readonly showWatermark = this.store.showWatermark;
   readonly watermarkText = this.store.watermarkText;
-  readonly hasDraft = computed(() => this.store.draft() !== null);
+  readonly titles = this.store.sectionTitles;
+  readonly photoShape = this.store.photoShape;
 
   readonly zoom = signal(80);
 
@@ -81,12 +81,5 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
     const available = this.viewport().nativeElement.clientWidth - 56;
     if (available <= 0) return;
     this.setZoom((available / 793.7) * 100);
-  }
-
-  acceptDraft(): void {
-    this.store.applyDraft();
-  }
-  discardDraft(): void {
-    this.store.discardDraft();
   }
 }

@@ -5,12 +5,22 @@ import {
   Document,
   ExternalHyperlink,
   HeadingLevel,
+  HorizontalPositionAlign,
+  HorizontalPositionRelativeFrom,
+  ImageRun,
   Packer,
   Paragraph,
   TextRun,
+  TextWrappingType,
+  VerticalPositionRelativeFrom,
 } from 'docx';
 import type { CVData, ExportFormat, PaletteColors } from '../models/cv-data';
-import { PROFICIENCY_LABELS, SECTION_TITLES, safeFileName } from '../models/labels';
+import {
+  PROFICIENCY_LABELS,
+  SECTION_TITLES as BASE_SECTION_TITLES,
+  safeFileName,
+} from '../models/labels';
+import type { SectionKey } from '../models/sections';
 
 export interface ExportOptions {
   data: CVData;
@@ -18,6 +28,8 @@ export interface ExportOptions {
   /** Already-rendered CV sheet, used for the PDF (print) path. */
   paperEl?: HTMLElement | null;
   templateName?: string;
+  /** Section titles of the active profile; defaults to the neutral ones. */
+  titles?: Partial<Record<SectionKey, string>>;
   /** Optional footer line; off unless the user turns it on. */
   watermark?: { enabled: boolean; text: string };
 }
@@ -39,10 +51,10 @@ export class ExporterService {
     try {
       switch (format) {
         case 'markdown':
-          this.exportMarkdown(opts.data, name, opts.watermark);
+          this.exportMarkdown(opts.data, name, opts.watermark, opts.titles);
           return { format, ok: true, message: `Markdown descargado (${name}.md).` };
         case 'docx':
-          await this.exportDocx(opts.data, opts.colors, name, opts.watermark);
+          await this.exportDocx(opts.data, opts.colors, name, opts.watermark, opts.titles);
           return { format, ok: true, message: `Word descargado (${name}.docx).` };
         case 'pdf':
           this.exportPdf(opts.paperEl ?? null, name, opts.data.personalInfo.name);
@@ -65,7 +77,14 @@ export class ExporterService {
 
   /* ── Markdown ────────────────────────────────────────────────────────── */
 
-  buildMarkdown(cv: CVData, watermark?: { enabled: boolean; text: string }): string {
+  buildMarkdown(
+    cv: CVData,
+    watermark?: { enabled: boolean; text: string },
+    titles?: Partial<Record<SectionKey, string>>,
+  ): string {
+    // Local shadow: the body keeps reading `SECTION_TITLES.x`, so a profile can
+    // rename the sections without every line of this method changing.
+    const SECTION_TITLES = { ...BASE_SECTION_TITLES, ...(titles ?? {}) };
     const out: string[] = [];
     const p = cv.personalInfo;
 
@@ -182,8 +201,13 @@ export class ExporterService {
     return out.join('\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
   }
 
-  exportMarkdown(cv: CVData, name: string, watermark?: { enabled: boolean; text: string }): void {
-    const blob = new Blob([this.buildMarkdown(cv, watermark)], {
+  exportMarkdown(
+    cv: CVData,
+    name: string,
+    watermark?: { enabled: boolean; text: string },
+    titles?: Partial<Record<SectionKey, string>>,
+  ): void {
+    const blob = new Blob([this.buildMarkdown(cv, watermark, titles)], {
       type: 'text/markdown;charset=utf-8',
     });
     this.download(blob, `${name}.md`);
@@ -204,9 +228,10 @@ export class ExporterService {
     colors: PaletteColors,
     name: string,
     watermark?: { enabled: boolean; text: string },
+    titles?: Partial<Record<SectionKey, string>>,
   ): Promise<void> {
     const accent = hex(colors.primary);
-    const children = this.docxChildren(cv, accent);
+    const children = this.docxChildren(cv, accent, titles);
     if (watermark?.enabled && watermark.text.trim()) {
       children.push(
         new Paragraph({
@@ -254,9 +279,58 @@ export class ExporterService {
     });
   }
 
-  private docxChildren(cv: CVData, accent: string): Paragraph[] {
+  /** Decodes the base64 payload of a data URL into bytes for `docx`. */
+  private decodeBase64(payload: string): Uint8Array {
+    const binary = atob(payload);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  /**
+   * The optional portrait, floated to the right of the header so the name and
+   * the contact line keep their reading order for ATS parsers.
+   */
+  private photoRun(photo: string): ImageRun | null {
+    const match = /^data:image\/(png|jpeg|jpg|gif);base64,(.+)$/i.exec(photo.trim());
+    if (!match) return null;
+    const kind = match[1].toLowerCase();
+    const type = kind === 'png' ? 'png' : kind === 'gif' ? 'gif' : 'jpg';
+    try {
+      return new ImageRun({
+        type,
+        data: this.decodeBase64(match[2]),
+        transformation: { width: 96, height: 96 },
+        floating: {
+          horizontalPosition: {
+            relative: HorizontalPositionRelativeFrom.MARGIN,
+            align: HorizontalPositionAlign.RIGHT,
+          },
+          verticalPosition: { relative: VerticalPositionRelativeFrom.MARGIN, offset: 0 },
+          wrap: { type: TextWrappingType.SQUARE },
+          margins: { left: 190500 },
+        },
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  private docxChildren(
+    cv: CVData,
+    accent: string,
+    titles?: Partial<Record<SectionKey, string>>,
+  ): Paragraph[] {
+    // Same shadow trick as the Markdown builder: profiles rename sections
+    // without every line below having to change.
+    const SECTION_TITLES = { ...BASE_SECTION_TITLES, ...(titles ?? {}) };
     const nodes: Paragraph[] = [];
     const p = cv.personalInfo;
+
+    const photo = p.photo ? this.photoRun(p.photo) : null;
+    if (photo) {
+      nodes.push(new Paragraph({ spacing: { after: 0 }, children: [photo] }));
+    }
 
     if (p.name) {
       nodes.push(

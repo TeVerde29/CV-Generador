@@ -118,10 +118,13 @@ export class ExportComponent {
 
   private options(): ExportOptions {
     return {
-      data: this.store.cv(),
+      // Hidden sections are emptied out upstream, so every format agrees with
+      // the preview without each renderer knowing about profiles.
+      data: this.store.documentData(),
       colors: this.store.colors(),
       paperEl: this.registry.sheet(),
       templateName: this.store.template().name,
+      titles: this.store.sectionTitles(),
       watermark: {
         enabled: this.store.showWatermark(),
         text: this.store.watermarkText(),

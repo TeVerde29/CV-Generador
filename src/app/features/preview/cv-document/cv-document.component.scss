@@ -85,6 +85,31 @@
   margin-bottom: calc(var(--cv-section-gap) * 1.15);
 }
 
+/* With a photo the header becomes a row: the text keeps its own alignment and
+   the portrait sits on the right, whatever the template. */
+.cv-header--photo {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.cv-header--photo .cv-header-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.cv-photo {
+  flex: none;
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border: 1px solid var(--cv-rule);
+  border-radius: 4px;
+  background: #f4f4f5;
+}
+.cv-photo--circle {
+  border-radius: 50%;
+}
+
 .cv-name {
   margin: 0;
   font-size: var(--cv-name-size);

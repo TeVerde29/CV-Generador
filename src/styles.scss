@@ -1,4 +1,3 @@
-@use "./styles/fonts";
 @use "./styles/tokens";
 
 /* ============================================================================
@@ -256,11 +255,6 @@ a:hover {
   background: var(--warn-soft);
   color: var(--warn);
 }
-.badge--accent {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
 .card {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
@@ -272,17 +266,6 @@ a:hover {
   background: var(--border);
   border: 0;
   margin: 0;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--text-3);
-  flex: none;
-}
-.dot--ok {
-  background: var(--ok);
 }
 
 .stack {
@@ -357,7 +340,6 @@ a:hover {
   app-root .rail,
   app-root .panel,
   app-root .preview-toolbar,
-  app-root .draft-banner,
   app-root .toast-wrap,
   app-root .export-popover,
   app-root .backdrop {

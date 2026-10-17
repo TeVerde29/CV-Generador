@@ -4,24 +4,34 @@
   [style.--cv-secondary]="colors().secondary"
   [style.--cv-accent]="colors().accent"
 >
-  <header class="cv-header">
-    @if (profile().name; as name) {
-      <h1 class="cv-name">{{ name }}</h1>
-    }
-    @if (profile().title; as title) {
-      <p class="cv-title">{{ title }}</p>
-    }
-    @if (contacts().length) {
-      <p class="cv-contacts">
-        @for (c of contacts(); track c; let last = $last) {
-          <span class="cv-contact-item">
-            <span class="cv-contact">{{ c }}</span>
-            @if (!last) {
-              <span class="cv-sep" aria-hidden="true">·</span>
-            }
-          </span>
-        }
-      </p>
+  <header class="cv-header" [class.cv-header--photo]="photo().length > 0">
+    <div class="cv-header-text">
+      @if (profile().name; as name) {
+        <h1 class="cv-name">{{ name }}</h1>
+      }
+      @if (profile().title; as title) {
+        <p class="cv-title">{{ title }}</p>
+      }
+      @if (contacts().length) {
+        <p class="cv-contacts">
+          @for (c of contacts(); track c; let last = $last) {
+            <span class="cv-contact-item">
+              <span class="cv-contact">{{ c }}</span>
+              @if (!last) {
+                <span class="cv-sep" aria-hidden="true">·</span>
+              }
+            </span>
+          }
+        </p>
+      }
+    </div>
+    @if (photo(); as src) {
+      <img
+        class="cv-photo"
+        [class.cv-photo--circle]="photoShape() === 'circle'"
+        [src]="src"
+        alt=""
+      />
     }
   </header>
 

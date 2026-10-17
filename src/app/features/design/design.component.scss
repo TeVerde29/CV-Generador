@@ -30,6 +30,19 @@
   color: var(--text-3);
 }
 
+/* ── Combos ────────────────────────────────────────────────────────────── */
+
+.pick {
+  display: block;
+}
+
+.pick-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
 /* ── Templates ─────────────────────────────────────────────────────────── */
 
 .family {
