@@ -1,0 +1,173 @@
+.ai {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.grp {
+  padding: 15px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.grp--last {
+  border-bottom: 0;
+  padding-bottom: 44px;
+}
+
+.grp-head {
+  margin-bottom: 12px;
+}
+
+.grp-title {
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+.grp-hint {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.label--inline {
+  flex: none;
+  margin: 0;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.key-row {
+  display: flex;
+  gap: 6px;
+}
+
+.row-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.row-line .input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.run {
+  width: 100%;
+  height: 38px;
+  font-size: 13.5px;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 11px 0 0;
+}
+
+.spinner {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--text);
+  border-radius: 999px;
+  animation: spin 700ms linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alert {
+  margin: 11px 0 0;
+  padding: 9px 11px;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.alert--err {
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+}
+
+.history-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-date {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.history-summary {
+  font-size: 12px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.icon-btn {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.icon-btn:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.icon-btn--danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}

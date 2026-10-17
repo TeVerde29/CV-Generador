@@ -1,0 +1,502 @@
+/* ============================================================================
+   The CV sheet.
+
+   Every template variant only overrides CSS custom properties, so all twelve
+   share one DOM. Colours are fixed (a CV is printed on white) and never follow
+   the app theme, which also makes the printed PDF deterministic.
+   ========================================================================= */
+
+:host {
+  display: block;
+}
+
+.cv-sheet {
+  /* Palette — injected inline from the store (--cv-primary/secondary/accent) */
+  --cv-primary: #18181b;
+  --cv-secondary: #71717a;
+  --cv-accent: #3f3f46;
+
+  /* Fixed document colours */
+  --cv-ink: #1a1a1c;
+  --cv-muted: #6b7280;
+  --cv-rule: #e4e4e7;
+
+  /* Font stacks */
+  --cv-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --cv-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --cv-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --cv-heading-font: var(--cv-font);
+  --cv-meta-font: var(--cv-font);
+
+  /* Typographic knobs — overridden per template */
+  --cv-base: 12.6px;
+  --cv-body-lh: 1.55;
+  --cv-align: left;
+  --cv-contact-justify: flex-start;
+
+  --cv-name-size: 30px;
+  --cv-name-weight: 700;
+  --cv-name-tracking: -0.02em;
+  --cv-name-transform: none;
+  --cv-name-color: var(--cv-primary);
+
+  --cv-title-size: 13px;
+  --cv-title-weight: 500;
+  --cv-title-tracking: 0.01em;
+  --cv-title-transform: none;
+  --cv-title-style: normal;
+  --cv-title-color: var(--cv-secondary);
+
+  --cv-heading-size: 10.5px;
+  --cv-heading-weight: 700;
+  --cv-heading-tracking: 0.14em;
+  --cv-heading-transform: uppercase;
+  --cv-heading-color: var(--cv-primary);
+  --cv-heading-align: left;
+  --cv-heading-rule: 1px solid var(--cv-rule);
+  --cv-heading-edge: 0;
+  --cv-heading-pad: 0 0 4px;
+  --cv-heading-margin: 0 0 8px;
+
+  --cv-section-gap: 16px;
+  --cv-doc-pad: 42px 40px;
+  --cv-side-width: 32%;
+  --cv-item-gap: 11px;
+
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: var(--cv-doc-pad);
+  background: #ffffff;
+  color: var(--cv-ink);
+  font-family: var(--cv-font);
+  font-size: var(--cv-base);
+  line-height: var(--cv-body-lh);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  position: relative;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+
+.cv-header {
+  text-align: var(--cv-align);
+  margin-bottom: calc(var(--cv-section-gap) * 1.15);
+}
+
+.cv-name {
+  margin: 0;
+  font-size: var(--cv-name-size);
+  font-weight: var(--cv-name-weight);
+  letter-spacing: var(--cv-name-tracking);
+  text-transform: var(--cv-name-transform);
+  color: var(--cv-name-color);
+  line-height: 1.08;
+}
+
+.cv-title {
+  margin: 6px 0 0;
+  font-size: var(--cv-title-size);
+  font-weight: var(--cv-title-weight);
+  letter-spacing: var(--cv-title-tracking);
+  text-transform: var(--cv-title-transform);
+  font-style: var(--cv-title-style);
+  color: var(--cv-title-color);
+}
+
+.cv-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: var(--cv-contact-justify);
+  gap: 2px 0;
+  margin: 9px 0 0;
+  font-size: calc(var(--cv-base) * 0.9);
+  color: var(--cv-muted);
+}
+
+/* Each contact travels with its trailing separator so a line break never
+   leaves a lone "·" at the start of a line. */
+.cv-contact-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding-right: 7px;
+}
+
+.cv-sep {
+  color: var(--cv-rule);
+}
+
+/* ── Body layouts ──────────────────────────────────────────────────────── */
+
+.cv-body {
+  display: block;
+}
+
+.cv-body--columns {
+  columns: 2;
+  column-gap: 32px;
+}
+
+.cv-body--sidebar {
+  display: grid;
+  grid-template-columns: var(--cv-side-width) 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.cv-side {
+  border-right: 1px solid var(--cv-rule);
+  font-size: calc(var(--cv-base) * 0.95);
+}
+
+.layout-sidebar-right .cv-body--sidebar {
+  grid-template-columns: 1fr var(--cv-side-width);
+}
+.layout-sidebar-right .cv-main {
+  order: -1;
+}
+.layout-sidebar-right .cv-side {
+  border-right: 0;
+  border-left: 1px solid var(--cv-rule);
+}
+
+.cv-side .cv-item-gap,
+.cv-side .cv-item {
+  margin-bottom: calc(var(--cv-item-gap) * 0.9);
+}
+.cv-side .cv-section-title {
+  font-size: calc(var(--cv-heading-size) * 0.98);
+}
+.cv-side .cv-item-head {
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-start;
+}
+.cv-side .cv-item-period {
+  white-space: normal;
+}
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+
+.cv-section {
+  margin-bottom: var(--cv-section-gap);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-section:last-child {
+  margin-bottom: 0;
+}
+
+.cv-section-title {
+  margin: var(--cv-heading-margin);
+  padding: var(--cv-heading-pad);
+  border-bottom: var(--cv-heading-rule);
+  border-left: var(--cv-heading-edge);
+  font-family: var(--cv-heading-font);
+  font-size: var(--cv-heading-size);
+  font-weight: var(--cv-heading-weight);
+  letter-spacing: var(--cv-heading-tracking);
+  text-transform: var(--cv-heading-transform);
+  color: var(--cv-heading-color);
+  text-align: var(--cv-heading-align);
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+.cv-body--columns .cv-section {
+  break-inside: avoid;
+}
+
+/* ── Items ─────────────────────────────────────────────────────────────── */
+
+.cv-item {
+  margin-bottom: var(--cv-item-gap);
+  break-inside: avoid;
+}
+.cv-item:last-child {
+  margin-bottom: 0;
+}
+
+.cv-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.cv-item-title {
+  margin: 0;
+  font-size: calc(var(--cv-base) * 1.08);
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.cv-item-period {
+  flex: none;
+  font-family: var(--cv-meta-font);
+  font-size: calc(var(--cv-base) * 0.86);
+  color: var(--cv-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-item-sub {
+  margin: 1px 0 0;
+  font-size: calc(var(--cv-base) * 0.98);
+  color: var(--cv-secondary);
+  font-weight: 500;
+}
+
+.cv-item-text {
+  margin: 4px 0 0;
+}
+
+.cv-item-meta {
+  font-family: var(--cv-meta-font);
+  font-size: calc(var(--cv-base) * 0.88);
+  color: var(--cv-muted);
+}
+
+.cv-summary {
+  margin: 0;
+}
+
+.cv-strong {
+  font-weight: 650;
+}
+
+.cv-list {
+  margin: 5px 0 0;
+  padding-left: 15px;
+}
+.cv-list li {
+  margin-bottom: 2px;
+}
+.cv-list li::marker {
+  color: var(--cv-accent);
+}
+
+.cv-list--plain {
+  list-style: none;
+  padding-left: 0;
+}
+.cv-list--plain li {
+  margin-bottom: 3px;
+}
+
+.cv-skills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cv-skill {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.cv-side .cv-skill {
+  display: block;
+}
+.cv-skill-cat {
+  font-weight: 650;
+  color: var(--cv-primary);
+}
+.cv-side .cv-skill-cat {
+  display: block;
+}
+.cv-skill-items {
+  color: var(--cv-ink);
+}
+.cv-side .cv-skill-items {
+  color: var(--cv-secondary);
+}
+
+.cv-interests {
+  margin: 0;
+}
+
+.cv-watermark {
+  margin-top: 20px;
+  padding-top: 6px;
+  border-top: 1px solid var(--cv-rule);
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
+  color: var(--cv-muted);
+  text-align: center;
+}
+
+/* ============================================================================
+   Templates — each one only re-declares custom properties
+   ========================================================================= */
+
+/* 1 · Folha — neutral sans with hairline rules */
+.tpl-folha {
+  --cv-heading-rule: 1px solid var(--cv-rule);
+}
+
+/* 2 · Linha — letterspaced uppercase name, strong rule */
+.tpl-linha {
+  --cv-name-size: 26px;
+  --cv-name-weight: 600;
+  --cv-name-transform: uppercase;
+  --cv-name-tracking: 0.16em;
+  --cv-heading-size: 10px;
+  --cv-heading-tracking: 0.2em;
+  --cv-heading-color: var(--cv-ink);
+  --cv-heading-rule: 2px solid var(--cv-primary);
+}
+
+/* 3 · Manuscrito — warm serif, italic subtitle */
+.tpl-manuscrito {
+  --cv-font: var(--cv-serif);
+  --cv-base: 13px;
+  --cv-name-size: 34px;
+  --cv-name-weight: 600;
+  --cv-name-tracking: -0.005em;
+  --cv-title-size: 14.5px;
+  --cv-title-style: italic;
+  --cv-heading-size: 13px;
+  --cv-heading-weight: 700;
+  --cv-heading-transform: none;
+  --cv-heading-tracking: 0.01em;
+  --cv-heading-rule: 1px solid var(--cv-rule);
+}
+
+/* 4 · Corporativo — ATS-safe classic */
+.tpl-corporativo {
+  --cv-name-size: 27px;
+  --cv-name-weight: 700;
+  --cv-name-transform: uppercase;
+  --cv-name-tracking: 0.05em;
+  --cv-heading-size: 11px;
+  --cv-heading-rule: 0;
+  --cv-heading-margin: 0 0 6px;
+  --cv-heading-color: var(--cv-primary);
+}
+
+/* 5 · Executivo — serif with wide small-caps headings */
+.tpl-executivo {
+  --cv-font: var(--cv-serif);
+  --cv-name-size: 32px;
+  --cv-name-weight: 500;
+  --cv-name-tracking: 0.015em;
+  --cv-heading-size: 9.5px;
+  --cv-heading-weight: 600;
+  --cv-heading-tracking: 0.26em;
+  --cv-heading-color: var(--cv-secondary);
+  --cv-heading-rule: 0;
+  --cv-heading-margin: 0 0 7px;
+}
+
+/* 6 · Consultoría — dense serif, headings with a colour bar */
+.tpl-consultoria {
+  --cv-font: var(--cv-serif);
+  --cv-base: 12.4px;
+  --cv-body-lh: 1.48;
+  --cv-section-gap: 14px;
+  --cv-name-size: 26px;
+  --cv-heading-size: 14px;
+  --cv-heading-weight: 700;
+  --cv-heading-transform: none;
+  --cv-heading-tracking: 0;
+  --cv-heading-color: var(--cv-ink);
+  --cv-heading-rule: 0;
+  --cv-heading-edge: 3px solid var(--cv-accent);
+  --cv-heading-pad: 0 0 0 9px;
+  --cv-heading-margin: 0 0 7px;
+}
+
+/* 7 · Técnico — monospaced accents, dashed rules */
+.tpl-tecnico {
+  --cv-name-size: 24px;
+  --cv-name-tracking: -0.01em;
+  --cv-heading-font: var(--cv-mono);
+  --cv-meta-font: var(--cv-mono);
+  --cv-heading-size: 10px;
+  --cv-heading-tracking: 0.06em;
+  --cv-heading-color: var(--cv-accent);
+  --cv-heading-rule: 1px dashed var(--cv-rule);
+  --cv-item-title: 650;
+}
+
+/* 8 · Revista — big editorial name, accent labels */
+.tpl-revista {
+  --cv-name-size: 38px;
+  --cv-name-weight: 800;
+  --cv-name-tracking: -0.03em;
+  --cv-title-size: 13.5px;
+  --cv-title-transform: uppercase;
+  --cv-title-tracking: 0.18em;
+  --cv-heading-size: 11px;
+  --cv-heading-color: var(--cv-accent);
+  --cv-heading-rule: 0;
+  --cv-heading-margin: 0 0 6px;
+}
+
+/* 9 · Compacto — fits more lines per page */
+.tpl-compacto {
+  --cv-base: 11.8px;
+  --cv-body-lh: 1.42;
+  --cv-section-gap: 11px;
+  --cv-item-gap: 8px;
+  --cv-doc-pad: 30px 32px;
+  --cv-name-size: 23px;
+  --cv-heading-size: 9.5px;
+  --cv-heading-margin: 0 0 5px;
+}
+
+/* 10 · Académico — centred serif header */
+.tpl-academico {
+  --cv-font: var(--cv-serif);
+  --cv-align: center;
+  --cv-contact-justify: center;
+  --cv-heading-align: center;
+  --cv-name-size: 28px;
+  --cv-name-weight: 600;
+  --cv-title-style: italic;
+  --cv-heading-size: 13.5px;
+  --cv-heading-weight: 600;
+  --cv-heading-transform: none;
+  --cv-heading-tracking: 0;
+  --cv-heading-rule: 1px solid var(--cv-rule);
+}
+
+/* 11 · Universidad — centred caps name with a rule */
+.tpl-universidad {
+  --cv-font: var(--cv-serif);
+  --cv-align: center;
+  --cv-contact-justify: center;
+  --cv-heading-align: center;
+  --cv-name-size: 24px;
+  --cv-name-transform: uppercase;
+  --cv-name-tracking: 0.14em;
+  --cv-heading-size: 11px;
+  --cv-heading-tracking: 0.18em;
+  --cv-heading-rule: 1px solid var(--cv-primary);
+}
+
+/* 12 · Tesis — numbered sections via CSS counters */
+.tpl-tesis {
+  --cv-font: var(--cv-serif);
+  --cv-heading-size: 12.5px;
+  --cv-heading-transform: none;
+  --cv-heading-tracking: 0;
+  --cv-heading-rule: 0;
+  --cv-heading-margin: 0 0 6px;
+  counter-reset: cvsec;
+}
+.tpl-tesis .cv-section-title {
+  counter-increment: cvsec;
+}
+.tpl-tesis .cv-section-title::before {
+  content: counter(cvsec) ". ";
+  font-weight: 700;
+  color: var(--cv-primary);
+}
+/* Keep the sidebar out of the numbering flow confusion: it numbers too, which
+   reads fine, but titles there stay compact. */
+.tpl-tesis .cv-side .cv-section-title::before {
+  content: "";
+}

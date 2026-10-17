@@ -1,0 +1,147 @@
+/* ============================================================================
+   Design tokens — sistema "Tea Green" (Design Ricra)
+   Estética natural, editorial y tecnológica: verde té, matcha, salvia y crema.
+   Los nombres de token se mantienen estables; solo cambian los valores, de modo
+   que los componentes no necesitan saber de qué paleta se trata.
+
+   Nota: el documento del CV no usa estos tokens. Define los suyos (--cv-*) y se
+   imprime siempre sobre blanco, con la paleta que elija el usuario. Así el tema
+   claro/oscuro de la aplicación no altera el currículum.
+   ========================================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* ── Marca ───────────────────────────────────────────────────────────── */
+  --tea-green: #afc49a;
+  --forest-green: #294635;
+  --deep-leaf: #4f7256;
+  --sage-green: #829b78;
+  --light-matcha: #dde8c8;
+
+  /* ── Neutros / superficies (tema claro) ─────────────────────────────── */
+  --bg: #f7f8f1;
+  --surface: #ffffff;
+  --surface-2: #eef2e8;
+  --surface-3: #e3ead9;
+  --border: #d9e2d5;
+  --border-strong: #c2d0bb;
+  --border-ink: #294635;
+
+  --text: #1e2a21;
+  --text-2: #5e6e5f;
+  --text-3: #6a7a67; /* ≥ 4.5:1 sobre --bg: cumple AA en etiquetas pequeñas */
+  --text-inverse: #f7f8f1;
+
+  /* ── Acción principal (verde bosque) ────────────────────────────────── */
+  --ink: #294635;
+  --ink-hover: #1e3527;
+  --ink-soft: rgba(41, 70, 53, 0.08);
+
+  /* ── Acento: foco y selección ───────────────────────────────────────── */
+  --accent: #567b3b;
+  --accent-soft: rgba(86, 123, 59, 0.1);
+  --accent-ring: rgba(86, 123, 59, 0.42);
+
+  /* ── Estados ────────────────────────────────────────────────────────── */
+  --ok: #337652;
+  --ok-soft: rgba(51, 118, 82, 0.12);
+  --warn: #976719;
+  --warn-soft: rgba(151, 103, 25, 0.12);
+  --danger: #b44743;
+  --danger-soft: rgba(180, 71, 67, 0.1);
+  --info: #3f7082;
+  --info-soft: rgba(63, 112, 130, 0.12);
+
+  /* ── Tipografía ─────────────────────────────────────────────────────────
+     Space Grotesk para titulares, Inter para texto y UI. Ambas se sirven
+     desde el propio dominio (ver _fonts.scss), así que la app funciona sin
+     conexión y no filtra visitas a un CDN.                                    */
+  --font-heading: "Space Grotesk", "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Inter", "Manrope", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* ── Fuentes del documento del CV ───────────────────────────────────────
+     El currículum no usa la tipografía de la aplicación: se imprime siempre
+     con pilas del sistema, disponibles en cualquier equipo y dentro del PDF.
+     Estos tokens existen para que la interfaz pueda previsualizarlas con
+     fidelidad (las muestras de voz del panel de diseño).                      */
+  --doc-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --doc-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --doc-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* ── Radios (referencia del sistema: 8–16 px) ───────────────────────── */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-full: 999px;
+
+  /* ── Sombras: discretas, teñidas de verde ───────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(30, 42, 33, 0.05);
+  --shadow-2: 0 2px 8px rgba(30, 42, 33, 0.07);
+  --shadow-3: 0 12px 32px rgba(30, 42, 33, 0.11);
+  --shadow-paper: 0 1px 3px rgba(30, 42, 33, 0.08),
+    0 12px 28px rgba(30, 42, 33, 0.07);
+
+  /* ── Fondo especial ─────────────────────────────────────────────────── */
+  --hero-gradient: linear-gradient(180deg, #f7f8f1, #e8efdf);
+
+  /* ── Estructura ─────────────────────────────────────────────────────── */
+  --rail-w: 76px;
+  --panel-w: 420px;
+  --topbar-h: 56px;
+  --statusbar-h: 28px;
+
+  /* ── Movimiento ─────────────────────────────────────────────────────── */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 160ms;
+}
+
+/* ============================================================================
+   Tema oscuro — fondo verde muy profundo, nunca negro puro.
+   Los botones primarios se invierten (fondo matcha, texto verde oscuro), tal
+   como indica el sistema para conservar el contraste.
+   ========================================================================= */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --border-ink: #c2d7a3;
+
+  --bg: #111a13;
+  --surface: #19241b;
+  --surface-2: #222f24;
+  --surface-3: #2a3a2c;
+  --border: #334436;
+  --border-strong: #445847;
+
+  --text: #f1f5eb;
+  --text-2: #b5c0b2;
+  --text-3: #8fa08c;
+  --text-inverse: #1e2a21;
+
+  --ink: #c2d7a3;
+  --ink-hover: #d2e2b5;
+  --ink-soft: rgba(194, 215, 163, 0.14);
+
+  --accent: #c2d7a3;
+  --accent-soft: rgba(194, 215, 163, 0.16);
+  --accent-ring: rgba(194, 215, 163, 0.45);
+
+  --ok: #6fbf92;
+  --ok-soft: rgba(111, 191, 146, 0.16);
+  --warn: #d9a94e;
+  --warn-soft: rgba(217, 169, 78, 0.16);
+  --danger: #e28d89;
+  --danger-soft: rgba(226, 141, 137, 0.16);
+  --info: #7fb6c9;
+  --info-soft: rgba(127, 182, 201, 0.16);
+
+  --shadow-paper: 0 1px 3px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.45);
+}

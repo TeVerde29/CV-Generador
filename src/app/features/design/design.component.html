@@ -1,0 +1,214 @@
+<div class="design">
+  <section class="grp">
+    <header class="grp-head">
+      <h2 class="grp-title">Plantillas</h2>
+      <p class="grp-hint">Cambian la tipografía y el tratamiento de los títulos. El contenido no se toca.</p>
+    </header>
+
+    @for (family of families; track family) {
+      <div class="family">
+        <span class="eyebrow">{{ family }}</span>
+        <div class="tpl-grid">
+          @for (t of templatesOf(family); track t.id) {
+            <button
+              type="button"
+              [class]="'tpl-card voice-' + t.voice"
+              [class.is-active]="store.templateId() === t.id"
+              (click)="selectTemplate(t.id)"
+            >
+              <span class="tpl-swatch" aria-hidden="true">Aa</span>
+              <span class="tpl-meta">
+                <span class="tpl-name">{{ t.name }}</span>
+                <span class="tpl-desc">{{ t.description }}</span>
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="grp">
+    <header class="grp-head">
+      <h2 class="grp-title">Estructura del documento</h2>
+      <p class="grp-hint">Cómo se reparte el contenido en la página.</p>
+    </header>
+
+    <div class="layout-grid">
+      @for (l of layouts; track l.id) {
+        <button
+          type="button"
+          class="layout-card"
+          [class.is-active]="store.layoutId() === l.id"
+          (click)="selectLayout(l.id)"
+        >
+          <span class="layout-diagram" [attr.data-layout]="l.id" aria-hidden="true">
+            <span class="ld-a"></span>
+            <span class="ld-b"></span>
+          </span>
+          <span class="layout-meta">
+            <span class="layout-name">{{ l.name }}</span>
+            <span class="layout-hint">{{ l.hint }}</span>
+          </span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="grp">
+    <header class="grp-head">
+      <h2 class="grp-title">Paleta de color</h2>
+      <p class="grp-hint">Afecta a los títulos, la línea de reglas y los elementos de apoyo.</p>
+    </header>
+
+    <div class="palette-grid">
+      @for (p of palettes; track p.id) {
+        <button
+          type="button"
+          class="palette-card"
+          [class.is-active]="store.paletteId() === p.id"
+          (click)="selectPalette(p.id)"
+          [title]="p.name"
+        >
+          <span class="swatches">
+            <span class="sw" [style.background]="p.colors.primary"></span>
+            <span class="sw" [style.background]="p.colors.secondary"></span>
+            <span class="sw" [style.background]="p.colors.accent"></span>
+          </span>
+          <span class="palette-name">{{ p.name }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="custom">
+      <span class="eyebrow">Color personalizado</span>
+      <div class="color-grid">
+        @for (channel of ['primary', 'secondary', 'accent']; track channel) {
+          <label class="color-field">
+            <span class="label">
+              @switch (channel) {
+                @case ('primary') { Principal }
+                @case ('secondary') { Secundario }
+                @case ('accent') { Acento }
+              }
+            </span>
+            <span class="color-row">
+              <input
+                type="color"
+                class="color-swatch"
+                [value]="$any(custom())[channel]"
+                (input)="onColorInput($any(channel), $event)"
+              />
+              <span class="mono color-hex">{{ $any(custom())[channel] }}</span>
+            </span>
+          </label>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="grp">
+    <header class="grp-head">
+      <h2 class="grp-title">Tu biblioteca</h2>
+      <p class="grp-hint">Guarda paletas y combinaciones completas para reutilizarlas.</p>
+    </header>
+
+    @if (store.savedPalettes().length) {
+      <div class="palette-grid">
+        @for (p of store.savedPalettes(); track p.id) {
+          <div class="palette-card palette-card--saved" [class.is-active]="store.paletteId() === p.id">
+            <button type="button" class="palette-pick" (click)="selectPalette(p.id)" [title]="p.name">
+              <span class="swatches">
+                <span class="sw" [style.background]="p.colors.primary"></span>
+                <span class="sw" [style.background]="p.colors.secondary"></span>
+                <span class="sw" [style.background]="p.colors.accent"></span>
+              </span>
+              <span class="palette-name">{{ p.name }}</span>
+            </button>
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger"
+              title="Eliminar"
+              (click)="removePalette(p.id)"
+            >
+              &times;
+            </button>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="empty">Todavía no guardaste ninguna paleta.</p>
+    }
+
+    <div class="row-line">
+      <input
+        class="input"
+        type="text"
+        placeholder="Nombre de la paleta"
+        [value]="paletteName()"
+        (input)="onNameInput('palette', $event)"
+      />
+      <button type="button" class="btn btn--sm" (click)="savePalette()">Guardar paleta</button>
+    </div>
+
+    <hr class="sep" />
+
+    @if (store.presets().length) {
+      <ul class="preset-list">
+        @for (p of store.presets(); track p.id) {
+          <li class="preset-row">
+            <button type="button" class="preset-apply" (click)="store.applyPreset(p)" title="Aplicar">
+              {{ p.name }}
+            </button>
+            <span class="spacer"></span>
+            <button
+              type="button"
+              class="icon-btn"
+              title="Subir"
+              (click)="store.movePreset(p.id, -1)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="icon-btn"
+              title="Bajar"
+              (click)="store.movePreset(p.id, 1)"
+            >
+              ↓
+            </button>
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger"
+              title="Eliminar"
+              (click)="store.removePreset(p.id)"
+            >
+              &times;
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">Sin combinaciones guardadas.</p>
+    }
+
+    <div class="row-line">
+      <input
+        class="input"
+        type="text"
+        placeholder="Nombre de la combinación"
+        [value]="presetName()"
+        (input)="onNameInput('preset', $event)"
+      />
+      <button type="button" class="btn btn--sm btn--primary" (click)="savePreset()">
+        Guardar actual
+      </button>
+    </div>
+  </section>
+
+  <section class="grp grp--last">
+    <button type="button" class="btn btn--sm" (click)="resetDesign()">
+      Restablecer diseño original
+    </button>
+  </section>
+</div>

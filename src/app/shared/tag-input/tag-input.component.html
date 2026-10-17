@@ -1,0 +1,33 @@
+@if (values().length) {
+  <ul class="chips">
+    @for (value of values(); track $index) {
+      <li class="chip">
+        <span class="chip-text">{{ value }}</span>
+        <button
+          type="button"
+          class="chip-x"
+          (click)="remove($index)"
+          [attr.aria-label]="'Quitar ' + value"
+          title="Quitar"
+        >
+          &times;
+        </button>
+      </li>
+    }
+  </ul>
+}
+
+<div class="entry">
+  <input
+    class="entry-input"
+    type="text"
+    [value]="draft()"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+    [placeholder]="placeholder()"
+    [attr.aria-label]="placeholder()"
+  />
+  <button type="button" class="btn btn--sm" (click)="add()" [disabled]="!canAdd()">
+    Añadir
+  </button>
+</div>

@@ -1,0 +1,269 @@
+<article
+  [class]="sheetClass()"
+  [style.--cv-primary]="colors().primary"
+  [style.--cv-secondary]="colors().secondary"
+  [style.--cv-accent]="colors().accent"
+>
+  <header class="cv-header">
+    @if (profile().name; as name) {
+      <h1 class="cv-name">{{ name }}</h1>
+    }
+    @if (profile().title; as title) {
+      <p class="cv-title">{{ title }}</p>
+    }
+    @if (contacts().length) {
+      <p class="cv-contacts">
+        @for (c of contacts(); track c; let last = $last) {
+          <span class="cv-contact-item">
+            <span class="cv-contact">{{ c }}</span>
+            @if (!last) {
+              <span class="cv-sep" aria-hidden="true">·</span>
+            }
+          </span>
+        }
+      </p>
+    }
+  </header>
+
+  @if (isTwoColumn()) {
+    <div class="cv-body cv-body--columns">
+      @for (k of singleOrder(); track k) {
+        <ng-container
+          [ngTemplateOutlet]="sectionTpl"
+          [ngTemplateOutletContext]="{ $implicit: k }"
+        ></ng-container>
+      }
+    </div>
+  } @else if (hasSidebar()) {
+    <div class="cv-body cv-body--sidebar">
+      <aside class="cv-side">
+        @for (k of sideOrder(); track k) {
+          <ng-container
+            [ngTemplateOutlet]="sectionTpl"
+            [ngTemplateOutletContext]="{ $implicit: k }"
+          ></ng-container>
+        }
+      </aside>
+      <div class="cv-main">
+        @for (k of mainOrder(); track k) {
+          <ng-container
+            [ngTemplateOutlet]="sectionTpl"
+            [ngTemplateOutletContext]="{ $implicit: k }"
+          ></ng-container>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="cv-body">
+      @for (k of singleOrder(); track k) {
+        <ng-container
+          [ngTemplateOutlet]="sectionTpl"
+          [ngTemplateOutletContext]="{ $implicit: k }"
+        ></ng-container>
+      }
+    </div>
+  }
+
+  @if (showWatermark() && watermarkLabel()) {
+    <footer class="cv-watermark">{{ watermarkLabel() }}</footer>
+  }
+</article>
+
+<ng-template #sectionTpl let-k>
+  @let d = data();
+  @if (has(k)) {
+    @switch (k) {
+      @case ('summary') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.summary }}</h2>
+          <p class="cv-summary">{{ d.summary }}</p>
+        </section>
+      }
+
+      @case ('experience') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.experience }}</h2>
+          @for (e of d.experience; track e.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ e.position }}</h3>
+                @if (period(e.startDate, e.endDate); as per) {
+                  <span class="cv-item-period">{{ per }}</span>
+                }
+              </div>
+              @if (e.company) {
+                <p class="cv-item-sub">{{ e.company }}</p>
+              }
+              @if (e.description) {
+                <p class="cv-item-text">{{ e.description }}</p>
+              }
+              @if (e.achievements.length) {
+                <ul class="cv-list">
+                  @for (a of e.achievements; track $index) {
+                    <li>{{ a }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('education') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.education }}</h2>
+          @for (ed of d.education; track ed.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ degreeLine(ed) }}</h3>
+                @if (period(ed.startDate, ed.endDate); as per) {
+                  <span class="cv-item-period">{{ per }}</span>
+                }
+              </div>
+              @if (ed.institution) {
+                <p class="cv-item-sub">{{ ed.institution }}</p>
+              }
+              @if (ed.gpa) {
+                <p class="cv-item-meta">Nota: {{ ed.gpa }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('skills') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.skills }}</h2>
+          <ul class="cv-skills">
+            @for (s of d.skills; track s.id) {
+              <li class="cv-skill">
+                @if (s.category) {
+                  <span class="cv-skill-cat">{{ s.category }}</span>
+                }
+                @if (s.items.length) {
+                  <span class="cv-skill-items">{{ s.items.join(' · ') }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('languages') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.languages }}</h2>
+          <ul class="cv-list cv-list--plain">
+            @for (l of d.languages; track l.id) {
+              <li>
+                <span class="cv-strong">{{ l.language }}</span>
+                <span class="cv-item-meta"> — {{ labels[l.proficiency] }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('projects') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.projects }}</h2>
+          @for (pr of d.projects; track pr.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ pr.name }}</h3>
+                @if (pr.url) {
+                  <span class="cv-item-period">{{ pr.url }}</span>
+                }
+              </div>
+              @if (pr.description) {
+                <p class="cv-item-text">{{ pr.description }}</p>
+              }
+              @if (pr.technologies.length) {
+                <p class="cv-item-meta">{{ pr.technologies.join(' · ') }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('certifications') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.certifications }}</h2>
+          <ul class="cv-list cv-list--plain">
+            @for (c of d.certifications; track c.id) {
+              <li>
+                <span class="cv-strong">{{ c.name }}</span>
+                @if (joinComma(c.issuer, c.date); as meta) {
+                  <span class="cv-item-meta"> — {{ meta }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('publications') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.publications }}</h2>
+          @for (pub of d.publications; track pub.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ pub.title }}</h3>
+                @if (joinComma(pub.publisher, pub.date); as meta) {
+                  <span class="cv-item-period">{{ meta }}</span>
+                }
+              </div>
+              @if (pub.description) {
+                <p class="cv-item-text">{{ pub.description }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('volunteerWork') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.volunteerWork }}</h2>
+          @for (v of d.volunteerWork; track v.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ v.role }}</h3>
+                @if (period(v.startDate, v.endDate); as per) {
+                  <span class="cv-item-period">{{ per }}</span>
+                }
+              </div>
+              @if (v.organization) {
+                <p class="cv-item-sub">{{ v.organization }}</p>
+              }
+              @if (v.description) {
+                <p class="cv-item-text">{{ v.description }}</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @case ('awards') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.awards }}</h2>
+          <ul class="cv-list cv-list--plain">
+            @for (a of d.awards; track a.id) {
+              <li>
+                <span class="cv-strong">{{ a.title }}</span>
+                @if (joinComma(a.issuer, a.date); as meta) {
+                  <span class="cv-item-meta"> — {{ meta }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('interests') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.interests }}</h2>
+          <p class="cv-interests">{{ d.interests.join(' · ') }}</p>
+        </section>
+      }
+    }
+  }
+</ng-template>

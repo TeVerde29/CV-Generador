@@ -1,0 +1,74 @@
+<div class="export-panel" role="dialog" aria-label="Exportar el CV">
+  <header class="panel-head">
+    <h2 class="panel-title">Exportar</h2>
+    <p class="panel-sub mono">{{ fileName() }}</p>
+  </header>
+
+  <ul class="format-list">
+    @for (f of formats; track f.id) {
+      <li class="format">
+        <label class="format-row">
+          <input
+            type="checkbox"
+            class="check"
+            [checked]="isSelected(f.id)"
+            (change)="toggle(f.id)"
+          />
+          <span class="format-copy">
+            <span class="format-label">{{ f.label }}</span>
+            <span class="format-hint">{{ f.hint }}</span>
+          </span>
+        </label>
+        <button
+          type="button"
+          class="btn btn--sm"
+          (click)="exportOne(f.id)"
+          [disabled]="running() || !store.hasContent()"
+        >
+          Solo este
+        </button>
+      </li>
+    }
+  </ul>
+
+  <hr class="sep" />
+
+  <div class="watermark">
+    <label class="wm-toggle">
+      <input
+        type="checkbox"
+        class="check"
+        [checked]="store.showWatermark()"
+        (change)="toggleWatermark()"
+      />
+      <span>Añadir una línea al pie</span>
+    </label>
+    @if (store.showWatermark()) {
+      <input
+        class="input"
+        type="text"
+        placeholder="Generado con mi CV"
+        [value]="store.watermarkText()"
+        (input)="onWatermarkInput($event)"
+      />
+    }
+  </div>
+
+  <button
+    type="button"
+    class="btn btn--primary export-run"
+    (click)="exportSelected()"
+    [disabled]="!canExport()"
+  >
+    @if (running()) {
+      Exportando…
+    } @else {
+      Exportar {{ chosen().length }}
+      {{ chosen().length === 1 ? 'formato' : 'formatos' }}
+    }
+  </button>
+
+  @if (!store.hasContent()) {
+    <p class="dim small">Añade datos al CV para poder exportar.</p>
+  }
+</div>

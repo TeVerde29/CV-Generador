@@ -1,0 +1,69 @@
+<div class="preview">
+  <div class="preview-toolbar">
+    <span class="eyebrow">Vista previa</span>
+    <span class="badge">{{ template().name }} · {{ layout().name }}</span>
+
+    <span class="spacer"></span>
+
+    <div class="zoom">
+      <button
+        type="button"
+        class="btn btn--sm btn--icon"
+        (click)="zoomOut()"
+        [disabled]="zoom() <= 30"
+        title="Alejar"
+        aria-label="Alejar"
+      >
+        &minus;
+      </button>
+      <button
+        type="button"
+        class="zoom-value mono"
+        (click)="resetZoom()"
+        title="Restablecer al 80 %"
+      >
+        {{ zoom() }}%
+      </button>
+      <button
+        type="button"
+        class="btn btn--sm btn--icon"
+        (click)="zoomIn()"
+        [disabled]="zoom() >= 150"
+        title="Acercar"
+        aria-label="Acercar"
+      >
+        +
+      </button>
+      <button type="button" class="btn btn--sm" (click)="fitWidth()">Ajustar ancho</button>
+    </div>
+  </div>
+
+  @if (hasDraft()) {
+    <div class="draft-banner">
+      <div class="draft-copy">
+        <span class="badge badge--accent">Propuesta de la IA</span>
+        <span class="dim">Estás viendo el resultado optimizado. Todavía no se guardó nada.</span>
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn--sm" (click)="discardDraft()">Descartar</button>
+        <button type="button" class="btn btn--sm btn--primary" (click)="acceptDraft()">
+          Aplicar cambios
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="preview-scroll" #viewport>
+    <div class="paper-holder" #holder [style.zoom]="zoom() / 100">
+      <app-cv-document
+        [data]="data()"
+        [templateId]="templateId()"
+        [layoutId]="layoutId()"
+        [colors]="colors()"
+        [order]="sectionOrder()"
+        [showWatermark]="showWatermark()"
+        [watermarkLabel]="watermarkText()"
+      />
+    </div>
+  </div>
+</div>

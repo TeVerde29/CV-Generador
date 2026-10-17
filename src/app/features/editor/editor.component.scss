@@ -1,0 +1,325 @@
+.editor {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ── Sticky header ─────────────────────────────────────────────────────── */
+
+.editor-head {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.progress-track {
+  flex: 1 1 auto;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  /* Acento de selección: --ink está reservado para botones y navegación. */
+  background: var(--accent);
+  transition: width 260ms var(--ease);
+}
+
+.progress-label {
+  flex: none;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Banners ───────────────────────────────────────────────────────────── */
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 14px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  font-size: 12.5px;
+}
+
+/* ── Collapsible blocks ────────────────────────────────────────────────── */
+
+.block {
+  margin: 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.block:last-child {
+  border-bottom: 0;
+  padding-bottom: 44px;
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 2px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-xs);
+}
+.block-head:hover .block-title {
+  color: var(--accent);
+}
+
+.caret {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--text-3);
+  transition: transform var(--dur) var(--ease);
+}
+.block.is-open .caret {
+  transform: rotate(90deg);
+}
+
+.block-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition: color var(--dur) var(--ease);
+}
+
+.block-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 2px 16px;
+}
+
+.block-hint {
+  margin: 0 0 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3);
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────── */
+
+.fields {
+  display: grid;
+  gap: 10px;
+}
+.fields--2 {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.fields--3 {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Item cards ────────────────────────────────────────────────────────── */
+
+.item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.item-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 6px 6px 9px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  min-width: 0;
+}
+
+.item-index {
+  flex: none;
+  width: 14px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.item-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-company {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-actions {
+  display: flex;
+  gap: 1px;
+  flex: none;
+}
+
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+.empty {
+  margin: 0;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.btn--add {
+  width: 100%;
+  border-style: dashed;
+  color: var(--text-2);
+}
+
+/* ── Icon buttons ──────────────────────────────────────────────────────── */
+
+.icon-btn {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.icon-btn--danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ── Interests chips ───────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 3px 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.chip-x {
+  width: 17px;
+  height: 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.chip-x:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ── Section order list ────────────────────────────────────────────────── */
+
+.order-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 5px;
+  border-radius: var(--r-xs);
+}
+.order-row:hover {
+  background: var(--surface);
+}
+
+.order-number {
+  flex: none;
+  width: 16px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.order-label {
+  font-size: 13px;
+}

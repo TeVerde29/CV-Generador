@@ -1,0 +1,1198 @@
+<div class="editor">
+  <header class="editor-head">
+    <div class="progress">
+      <div class="progress-track">
+        <span class="progress-fill" [style.width.%]="completion().percent"></span>
+      </div>
+      <span class="progress-label mono">{{ completion().done }}/{{ completion().total }}</span>
+    </div>
+
+    <div class="head-actions">
+      <button type="button" class="btn btn--sm" (click)="expandAll()">Expandir todo</button>
+      <button type="button" class="btn btn--sm" (click)="collapseAll()">Contraer</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn--sm" (click)="loadSample()" title="Cargar un CV de ejemplo">
+        Ejemplo
+      </button>
+      <button type="button" class="btn btn--sm" (click)="exportJson()" title="Descargar copia de seguridad">
+        Copia .json
+      </button>
+      <label class="btn btn--sm" title="Restaurar desde un .json">
+        Importar
+        <input
+          type="file"
+          accept="application/json,.json"
+          hidden
+          (change)="onImportFile($event)"
+        />
+      </label>
+      <button type="button" class="btn btn--sm btn--danger" (click)="clearAll()">Vaciar</button>
+    </div>
+  </header>
+
+  @if (isDraftPending()) {
+    <div class="notice notice--accent">
+      <span>Hay una <strong>propuesta de la IA</strong> esperando en la vista previa.</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn--sm" (click)="discardDraft()">Descartar</button>
+      <button type="button" class="btn btn--sm btn--primary" (click)="applyDraft()">Aplicar</button>
+    </div>
+  }
+
+  <!-- 1 · Datos personales -->
+  <section class="block" [class.is-open]="isOpen('personal')">
+    <button type="button" class="block-head" (click)="toggle('personal')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">Datos personales</span>
+      <span class="spacer"></span>
+      @if (data().personalInfo.name) {
+        <span class="badge badge--ok">listo</span>
+      } @else {
+        <span class="badge badge--warn">pendiente</span>
+      }
+    </button>
+
+    @if (isOpen('personal')) {
+      <div class="block-body">
+        <p class="block-hint">Es lo primero que ve quien lee el CV. El nombre y el email son obligatorios.</p>
+        <div class="fields fields--2">
+          <label class="field">
+            <span class="label">Nombre completo</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="Ana Pérez Gil"
+              [value]="data().personalInfo.name"
+              (input)="store.setPersonal({ name: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">Titular profesional</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="Ingeniera de datos"
+              [value]="data().personalInfo.title"
+              (input)="store.setPersonal({ title: $any($event.target).value })"
+            />
+          </label>
+        </div>
+
+        <div class="fields fields--3">
+          <label class="field">
+            <span class="label">Email</span>
+            <input
+              class="input"
+              type="email"
+              placeholder="ana@correo.com"
+              [value]="data().personalInfo.email"
+              (input)="store.setPersonal({ email: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">Teléfono</span>
+            <input
+              class="input"
+              type="tel"
+              placeholder="+34 600 000 000"
+              [value]="data().personalInfo.phone"
+              (input)="store.setPersonal({ phone: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">Ubicación</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="Valencia, España"
+              [value]="data().personalInfo.location"
+              (input)="store.setPersonal({ location: $any($event.target).value })"
+            />
+          </label>
+        </div>
+
+        <div class="fields fields--2">
+          <label class="field">
+            <span class="label">Sitio web</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="https://tudominio.dev"
+              [value]="data().personalInfo.website"
+              (input)="store.setPersonal({ website: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">LinkedIn</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="linkedin.com/in/tu-perfil"
+              [value]="data().personalInfo.linkedin"
+              (input)="store.setPersonal({ linkedin: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">GitHub</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="github.com/tu-usuario"
+              [value]="data().personalInfo.github"
+              (input)="store.setPersonal({ github: $any($event.target).value })"
+            />
+          </label>
+          <label class="field">
+            <span class="label">Portafolio</span>
+            <input
+              class="input"
+              type="text"
+              placeholder="Enlace a tu portafolio"
+              [value]="data().personalInfo.portfolio"
+              (input)="store.setPersonal({ portfolio: $any($event.target).value })"
+            />
+          </label>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- 2 · Perfil profesional -->
+  <section class="block" [class.is-open]="isOpen('summary')">
+    <button type="button" class="block-head" (click)="toggle('summary')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.summary }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().summary.trim().length }} car.</span>
+    </button>
+
+    @if (isOpen('summary')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.summary }}</p>
+        <textarea
+          class="textarea"
+          rows="5"
+          placeholder="Ingeniera de datos con ocho años construyendo plataformas analíticas…"
+          [value]="data().summary"
+          (input)="store.setSummary($any($event.target).value)"
+        ></textarea>
+      </div>
+    }
+  </section>
+
+  <!-- 3 · Experiencia -->
+  <section class="block" [class.is-open]="isOpen('experience')">
+    <button type="button" class="block-head" (click)="toggle('experience')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.experience }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().experience.length }}</span>
+    </button>
+
+    @if (isOpen('experience')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.experience }}</p>
+
+        @for (e of data().experience; track e.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ e.position || 'Nuevo puesto' }}</span>
+              @if (e.company) {
+                <span class="dim item-company">· {{ e.company }}</span>
+              }
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('experience', e.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().experience.length - 1"
+                  (click)="store.moveItem('experience', e.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('experience', e.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Puesto</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="e.position"
+                    (input)="store.patchItem('experience', e.id, { position: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Empresa</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="e.company"
+                    (input)="store.patchItem('experience', e.id, { company: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Desde</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="mar 2021"
+                    [value]="e.startDate"
+                    (input)="store.patchItem('experience', e.id, { startDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Hasta</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="Actualidad"
+                    [value]="e.endDate"
+                    (input)="store.patchItem('experience', e.id, { endDate: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+
+              <label class="field">
+                <span class="label">Descripción del puesto</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  placeholder="Una frase sobre el alcance del rol."
+                  [value]="e.description"
+                  (input)="store.patchItem('experience', e.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
+
+              <div class="field">
+                <span class="label">Logros</span>
+                <app-tag-input
+                  [values]="e.achievements"
+                  placeholder="Reduje el tiempo de consulta un 62 %…"
+                  (changed)="setAchievements(e.id, $event)"
+                />
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay puestos.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addExperience()">
+          + Añadir {{ collectionLabels.experience.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 4 · Formación -->
+  <section class="block" [class.is-open]="isOpen('education')">
+    <button type="button" class="block-head" (click)="toggle('education')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.education }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().education.length }}</span>
+    </button>
+
+    @if (isOpen('education')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.education }}</p>
+
+        @for (ed of data().education; track ed.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ ed.degree || 'Nuevo estudio' }}</span>
+              @if (ed.institution) {
+                <span class="dim item-company">· {{ ed.institution }}</span>
+              }
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('education', ed.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().education.length - 1"
+                  (click)="store.moveItem('education', ed.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('education', ed.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Titulación</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="ed.degree"
+                    (input)="store.patchItem('education', ed.id, { degree: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Área o especialidad</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="ed.field"
+                    (input)="store.patchItem('education', ed.id, { field: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span class="label">Institución</span>
+                <input
+                  class="input"
+                  type="text"
+                  [value]="ed.institution"
+                  (input)="store.patchItem('education', ed.id, { institution: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--3">
+                <label class="field">
+                  <span class="label">Desde</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="2013"
+                    [value]="ed.startDate"
+                    (input)="store.patchItem('education', ed.id, { startDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Hasta</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="2017"
+                    [value]="ed.endDate"
+                    (input)="store.patchItem('education', ed.id, { endDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Nota media</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="8,4 / 10"
+                    [value]="ed.gpa"
+                    (input)="store.patchItem('education', ed.id, { gpa: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay estudios.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addEducation()">
+          + Añadir {{ collectionLabels.education.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 5 · Competencias -->
+  <section class="block" [class.is-open]="isOpen('skills')">
+    <button type="button" class="block-head" (click)="toggle('skills')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.skills }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().skills.length }}</span>
+    </button>
+
+    @if (isOpen('skills')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.skills }}</p>
+
+        @for (s of data().skills; track s.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ s.category || 'Nuevo grupo' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('skills', s.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().skills.length - 1"
+                  (click)="store.moveItem('skills', s.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('skills', s.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Categoría</span>
+                <input
+                  class="input"
+                  type="text"
+                  placeholder="Datos, Plataforma, Transversales…"
+                  [value]="s.category"
+                  (input)="store.patchItem('skills', s.id, { category: $any($event.target).value })"
+                />
+              </label>
+              <div class="field">
+                <span class="label">Competencias</span>
+                <app-tag-input
+                  [values]="s.items"
+                  placeholder="SQL, Python, Docker…"
+                  (changed)="setSkillItems(s.id, $event)"
+                />
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay grupos de competencias.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addSkillGroup()">
+          + Añadir {{ collectionLabels.skills.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 6 · Idiomas -->
+  <section class="block" [class.is-open]="isOpen('languages')">
+    <button type="button" class="block-head" (click)="toggle('languages')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.languages }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().languages.length }}</span>
+    </button>
+
+    @if (isOpen('languages')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.languages }}</p>
+
+        @for (l of data().languages; track l.id; let i = $index) {
+          <div class="row-line">
+            <input
+              class="input"
+              type="text"
+              placeholder="Idioma"
+              [value]="l.language"
+              (input)="store.patchItem('languages', l.id, { language: $any($event.target).value })"
+            />
+            <select
+              class="select"
+              [value]="l.proficiency"
+              (change)="store.patchItem('languages', l.id, { proficiency: $any($event.target).value })"
+            >
+              @for (p of PROFICIENCIES; track p) {
+                <option [value]="p">{{ proficiencyLabels[p] }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="icon-btn"
+              title="Subir"
+              [disabled]="i === 0"
+              (click)="store.moveItem('languages', l.id, -1)"
+            >
+              ↑
+            </button>
+            <button
+              type="button"
+              class="icon-btn"
+              title="Bajar"
+              [disabled]="i === data().languages.length - 1"
+              (click)="store.moveItem('languages', l.id, 1)"
+            >
+              ↓
+            </button>
+            <button
+              type="button"
+              class="icon-btn icon-btn--danger"
+              title="Eliminar"
+              (click)="store.removeItem('languages', l.id)"
+            >
+              &times;
+            </button>
+          </div>
+        } @empty {
+          <p class="empty">Todavía no hay idiomas.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addLanguage()">
+          + Añadir {{ collectionLabels.languages.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 7 · Proyectos -->
+  <section class="block" [class.is-open]="isOpen('projects')">
+    <button type="button" class="block-head" (click)="toggle('projects')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.projects }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().projects.length }}</span>
+    </button>
+
+    @if (isOpen('projects')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.projects }}</p>
+
+        @for (pr of data().projects; track pr.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ pr.name || 'Nuevo proyecto' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('projects', pr.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().projects.length - 1"
+                  (click)="store.moveItem('projects', pr.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('projects', pr.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Nombre</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="pr.name"
+                    (input)="store.patchItem('projects', pr.id, { name: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Enlace</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="https://github.com/…"
+                    [value]="pr.url"
+                    (input)="store.patchItem('projects', pr.id, { url: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span class="label">Descripción</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  [value]="pr.description"
+                  (input)="store.patchItem('projects', pr.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
+              <div class="field">
+                <span class="label">Tecnologías</span>
+                <app-tag-input
+                  [values]="pr.technologies"
+                  placeholder="TypeScript, Postgres…"
+                  (changed)="setTechnologies(pr.id, $event)"
+                />
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay proyectos.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addProject()">
+          + Añadir {{ collectionLabels.projects.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 8 · Certificaciones -->
+  <section class="block" [class.is-open]="isOpen('certifications')">
+    <button type="button" class="block-head" (click)="toggle('certifications')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.certifications }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().certifications.length }}</span>
+    </button>
+
+    @if (isOpen('certifications')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.certifications }}</p>
+
+        @for (c of data().certifications; track c.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ c.name || 'Nueva certificación' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('certifications', c.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().certifications.length - 1"
+                  (click)="store.moveItem('certifications', c.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('certifications', c.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Nombre</span>
+                <input
+                  class="input"
+                  type="text"
+                  [value]="c.name"
+                  (input)="store.patchItem('certifications', c.id, { name: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--3">
+                <label class="field">
+                  <span class="label">Emisor</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="c.issuer"
+                    (input)="store.patchItem('certifications', c.id, { issuer: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Fecha</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="jun 2023"
+                    [value]="c.date"
+                    (input)="store.patchItem('certifications', c.id, { date: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Enlace</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="c.url"
+                    (input)="store.patchItem('certifications', c.id, { url: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay certificaciones.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addCertification()">
+          + Añadir {{ collectionLabels.certifications.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 9 · Publicaciones -->
+  <section class="block" [class.is-open]="isOpen('publications')">
+    <button type="button" class="block-head" (click)="toggle('publications')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.publications }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().publications.length }}</span>
+    </button>
+
+    @if (isOpen('publications')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.publications }}</p>
+
+        @for (pub of data().publications; track pub.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ pub.title || 'Nueva publicación' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('publications', pub.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().publications.length - 1"
+                  (click)="store.moveItem('publications', pub.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('publications', pub.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Título</span>
+                <input
+                  class="input"
+                  type="text"
+                  [value]="pub.title"
+                  (input)="store.patchItem('publications', pub.id, { title: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--3">
+                <label class="field">
+                  <span class="label">Medio o editorial</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="pub.publisher"
+                    (input)="store.patchItem('publications', pub.id, { publisher: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Fecha</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="pub.date"
+                    (input)="store.patchItem('publications', pub.id, { date: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Enlace</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="pub.url"
+                    (input)="store.patchItem('publications', pub.id, { url: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span class="label">Resumen</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  [value]="pub.description"
+                  (input)="store.patchItem('publications', pub.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay publicaciones.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addPublication()">
+          + Añadir {{ collectionLabels.publications.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 10 · Voluntariado -->
+  <section class="block" [class.is-open]="isOpen('volunteerWork')">
+    <button type="button" class="block-head" (click)="toggle('volunteerWork')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.volunteerWork }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().volunteerWork.length }}</span>
+    </button>
+
+    @if (isOpen('volunteerWork')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.volunteerWork }}</p>
+
+        @for (v of data().volunteerWork; track v.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ v.role || 'Nuevo voluntariado' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('volunteerWork', v.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().volunteerWork.length - 1"
+                  (click)="store.moveItem('volunteerWork', v.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('volunteerWork', v.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Rol</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="v.role"
+                    (input)="store.patchItem('volunteerWork', v.id, { role: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Organización</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="v.organization"
+                    (input)="store.patchItem('volunteerWork', v.id, { organization: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Desde</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="v.startDate"
+                    (input)="store.patchItem('volunteerWork', v.id, { startDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Hasta</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="v.endDate"
+                    (input)="store.patchItem('volunteerWork', v.id, { endDate: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span class="label">Descripción</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  [value]="v.description"
+                  (input)="store.patchItem('volunteerWork', v.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay voluntariados.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addVolunteer()">
+          + Añadir {{ collectionLabels.volunteerWork.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 11 · Reconocimientos -->
+  <section class="block" [class.is-open]="isOpen('awards')">
+    <button type="button" class="block-head" (click)="toggle('awards')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.awards }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().awards.length }}</span>
+    </button>
+
+    @if (isOpen('awards')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.awards }}</p>
+
+        @for (a of data().awards; track a.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ a.title || 'Nuevo reconocimiento' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Subir"
+                  [disabled]="i === 0"
+                  (click)="store.moveItem('awards', a.id, -1)"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  title="Bajar"
+                  [disabled]="i === data().awards.length - 1"
+                  (click)="store.moveItem('awards', a.id, 1)"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('awards', a.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Título</span>
+                <input
+                  class="input"
+                  type="text"
+                  [value]="a.title"
+                  (input)="store.patchItem('awards', a.id, { title: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Quién lo otorga</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="a.issuer"
+                    (input)="store.patchItem('awards', a.id, { issuer: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Fecha</span>
+                  <input
+                    class="input"
+                    type="text"
+                    [value]="a.date"
+                    (input)="store.patchItem('awards', a.id, { date: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay reconocimientos.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addAward()">
+          + Añadir {{ collectionLabels.awards.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 12 · Intereses -->
+  <section class="block" [class.is-open]="isOpen('interests')">
+    <button type="button" class="block-head" (click)="toggle('interests')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.interests }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().interests.length }}</span>
+    </button>
+
+    @if (isOpen('interests')) {
+      <div class="block-body">
+        <p class="block-hint">{{ SECTION_HINTS.interests }}</p>
+
+        @if (data().interests.length) {
+          <ul class="chips">
+            @for (item of data().interests; track $index) {
+              <li class="chip">
+                <span>{{ item }}</span>
+                <button
+                  type="button"
+                  class="chip-x"
+                  (click)="removeInterest($index)"
+                  [attr.aria-label]="'Quitar ' + item"
+                  title="Quitar"
+                >
+                  &times;
+                </button>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="row-line">
+          <input
+            class="input"
+            type="text"
+            placeholder="Cerámica, senderismo…"
+            [value]="interestDraft()"
+            (input)="onInterestInput($event)"
+            (keydown.enter)="addInterest()"
+          />
+          <button type="button" class="btn btn--sm" (click)="addInterest()">Añadir</button>
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- 13 · Orden de las secciones -->
+  <section class="block" [class.is-open]="isOpen('order')">
+    <button type="button" class="block-head" (click)="toggle('order')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">Orden de las secciones</span>
+      <span class="spacer"></span>
+      <span class="badge">en el documento</span>
+    </button>
+
+    @if (isOpen('order')) {
+      <div class="block-body">
+        <p class="block-hint">
+          Define qué aparece primero. Con un diseño de barra lateral, Competencias, Idiomas,
+          Certificaciones e Intereses se colocan en la columna lateral.
+        </p>
+
+        <ol class="order-list">
+          @for (key of store.sectionOrder(); track key) {
+            <li class="order-row">
+              <span class="mono order-number">{{ orderIndex(key) + 1 }}</span>
+              <span class="order-label">{{ SECTION_LABELS[key] }}</span>
+              <span class="spacer"></span>
+              <button
+                type="button"
+                class="icon-btn"
+                title="Subir"
+                [disabled]="isFirst(key)"
+                (click)="store.moveSection(key, -1)"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                class="icon-btn"
+                title="Bajar"
+                [disabled]="isLast(key)"
+                (click)="store.moveSection(key, 1)"
+              >
+                ↓
+              </button>
+            </li>
+          }
+        </ol>
+
+        <button type="button" class="btn btn--sm" (click)="store.resetSectionOrder()">
+          Restablecer orden
+        </button>
+      </div>
+    }
+  </section>
+</div>
