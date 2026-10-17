@@ -8,14 +8,15 @@ import {
 import { PROFICIENCIES, type Proficiency } from '../../core/models/cv-data';
 import { PROFICIENCY_LABELS, safeFileName } from '../../core/models/labels';
 import { SECTION_HINTS, SECTION_LABELS, type SectionKey } from '../../core/models/sections';
-import { COLLECTION_LABELS, CvStoreService } from '../../core/services/cv-store.service';
+import { COLLECTION_LABELS, CvStoreService, type CollectionKey } from '../../core/services/cv-store.service';
 import { ExporterService } from '../../core/services/exporter.service';
 import { ToastService } from '../../core/services/toast.service';
+import { SortableDirective, type SortMove } from '../../shared/sortable/sortable.directive';
 import { TagInputComponent } from '../../shared/tag-input/tag-input.component';
 
 @Component({
   selector: 'app-editor',
-  imports: [TagInputComponent],
+  imports: [TagInputComponent, SortableDirective],
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -241,6 +242,18 @@ export class EditorComponent {
 
   isLast(key: SectionKey): boolean {
     return this.orderIndex(key) === this.store.sectionOrder().length - 1;
+  }
+
+  /**
+   * Single entry point for every sortable list. `key` is either a collection
+   * name or the literal `order` for the document's section order.
+   */
+  sortMove(event: SortMove): void {
+    if (event.key === 'order') {
+      this.store.moveSectionTo(event.from, event.to);
+      return;
+    }
+    this.store.moveItemTo(event.key as CollectionKey, event.from, event.to);
   }
 
   /* ── Whole-document actions ─────────────────────────────────────────── */

@@ -1,0 +1,152 @@
+<div class="ats">
+  <section class="grp">
+    <header class="grp-head">
+      <h2 class="grp-title">Palabras clave de la oferta</h2>
+      <p class="grp-hint">
+        Pega el anuncio y comparo su vocabulario con tu currículum. Ocurre
+        <strong>en tu navegador</strong>: no se envía nada y no gasta tokens.
+      </p>
+    </header>
+
+    <div class="field">
+      <span class="label">Oferta de empleo</span>
+      <textarea
+        class="textarea"
+        rows="8"
+        placeholder="Pega el anuncio completo: puesto, requisitos y funciones…"
+        [value]="store.jobOffer()"
+        (input)="onOfferInput($event)"
+      ></textarea>
+    </div>
+
+    <div class="row-line">
+      <span class="small dim">{{ words() }} palabras</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn--sm" [disabled]="!hasOffer()" (click)="clearOffer()">
+        Borrar
+      </button>
+    </div>
+  </section>
+
+  @if (report(); as r) {
+    <section class="grp">
+      <div class="score">
+        <div class="score-value">
+          <span class="score-number">{{ r.score }}</span>
+          <span class="score-max">/100</span>
+        </div>
+        <div class="score-meta">
+          <span class="chip chip--{{ r.verdict.tone }}">{{ r.verdict.label }}</span>
+          <span class="small dim">
+            {{ r.missing.length }} de {{ r.keywords.length }} términos de la oferta no aparecen
+            en tu CV
+          </span>
+        </div>
+      </div>
+
+      <div class="meter">
+        <div class="meter-head">
+          <span class="label">Vocabulario de la oferta</span>
+          <span class="small dim">{{ r.keywordScore }}%</span>
+        </div>
+        <div class="track">
+          <span class="fill" [style.width.%]="r.keywordScore"></span>
+        </div>
+      </div>
+
+      <div class="meter">
+        <div class="meter-head">
+          <span class="label">Estructura del documento</span>
+          <span class="small dim">{{ r.structureScore }}%</span>
+        </div>
+        <div class="track">
+          <span class="fill fill--alt" [style.width.%]="r.structureScore"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grp">
+      <header class="grp-head grp-head--row">
+        <div>
+          <h2 class="grp-title">Faltan en tu CV</h2>
+          <p class="grp-hint">
+            Los términos que la oferta repite más y que no aparecen en ninguna parte del
+            documento.
+          </p>
+        </div>
+        @if (r.missing.length) {
+          <button type="button" class="btn btn--sm" (click)="copyMissing()">Copiar</button>
+        }
+      </header>
+
+      @if (r.missing.length) {
+        <ul class="kw-list">
+          @for (keyword of r.missing; track keyword.term) {
+            <li class="kw kw--missing">
+              <span class="kw-term">{{ keyword.label }}</span>
+              @if (keyword.occurrences > 1) {
+                <span class="kw-count">×{{ keyword.occurrences }}</span>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="empty">Cubres todos los términos relevantes de la oferta.</p>
+      }
+    </section>
+
+    <section class="grp">
+      <header class="grp-head">
+        <h2 class="grp-title">Ya cubiertos</h2>
+        <p class="grp-hint">Estos ya están en tu currículum; no los toques sin motivo.</p>
+      </header>
+
+      @if (r.matched.length) {
+        <ul class="kw-list">
+          @for (keyword of r.matched; track keyword.term) {
+            <li class="kw kw--found">{{ keyword.label }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="empty">Todavía no coincide ningún término.</p>
+      }
+    </section>
+
+    <section class="grp grp--last">
+      <header class="grp-head">
+        <h2 class="grp-title">Revisión del documento</h2>
+        <p class="grp-hint">
+          {{ passedCount() }} de {{ r.checks.length }} comprobaciones superadas. Cuentan un 40 %
+          de la nota; el vocabulario, el 60 %.
+        </p>
+      </header>
+
+      <ul class="checks">
+        @for (check of r.checks; track check.id) {
+          <li class="check" [class.check--fail]="!check.passed">
+            <span class="check-mark" aria-hidden="true">{{ check.passed ? '✓' : '!' }}</span>
+            <div class="check-body">
+              <span class="check-label">{{ check.label }}</span>
+              @if (!check.passed) {
+                <span class="check-detail">{{ check.detail }}</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  } @else if (hasOffer()) {
+    <section class="grp grp--last">
+      <p class="empty">
+        Pega algo más de texto para poder analizarlo. Con unas pocas líneas del anuncio ya
+        funciona.
+      </p>
+    </section>
+  } @else {
+    <section class="grp grp--last">
+      <p class="empty">
+        Todavía no hay ninguna oferta. Pega una arriba y verás la puntuación al instante.
+      </p>
+    </section>
+  }
+</div>

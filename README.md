@@ -10,6 +10,8 @@ ni tus datos ni tu clave de API salen del navegador.
 
 ![Plantilla Folha con estructura de una columna](docs/capturas/02-cv-folha.png)
 
+![Análisis del CV frente a una oferta](docs/capturas/05-analisis.png)
+
 Interfaz con el sistema de diseño propio **Tea Green**: fondo crema, verdes de té y matcha, y
 tipografía editorial (Space Grotesk + Inter).
 
@@ -38,14 +40,17 @@ la vista previa y el PDF impreso sean **exactamente el mismo documento**.
 
 ### Edición
 
-- Editor estructurado de once bloques: datos personales, perfil, experiencia, formación,
+- Editor estructurado de doce bloques: datos personales, perfil, experiencia, formación,
   competencias, idiomas, proyectos, certificaciones, publicaciones, voluntariado, reconocimientos e
   intereses.
 - Listas de etiquetas para logros, competencias y tecnologías (Enter para añadir, Retroceso para
   quitar).
+- **Reordenar arrastrando**: cada elemento y cada sección tienen un tirador; el documento se reordena
+  mientras arrastras. Con el tirador enfocado, las flechas ↑ y ↓ mueven una posición.
 - **Orden de secciones configurable** desde el propio editor.
 - **Deshacer y rehacer de verdad** (`Ctrl+Z` / `Ctrl+Shift+Z`), con las pulsaciones agrupadas para no
-  retroceder carácter a carácter.
+  retroceder carácter a carácter. Un arrastre entero se deshace de una vez, y el orden de las
+  secciones entra en el historial como cualquier otra edición.
 - **Autoguardado** en `localStorage` con indicador *Guardando… / Guardado*.
 - **Copia de seguridad en JSON**: exportar e importar el CV completo.
 
@@ -65,6 +70,19 @@ la vista previa y el PDF impreso sean **exactamente el mismo documento**.
 - La propuesta **no se aplica sola**: aparece en la vista previa con un aviso y botones de
   *Aplicar* o *Descartar*.
 - **Historial** de generaciones guardado en el navegador, con restauración en un clic.
+
+### Análisis frente a la oferta
+
+- Pega el anuncio y obtienes una **nota de 0 a 100** con dos componentes visibles: cuánto del
+  vocabulario de la oferta cubre tu CV (60 %) y cuánto cumple la revisión estructural (40 %).
+- Separa los **términos que faltan** de los que ya cubres, y los ordena por peso. Los que la oferta
+  repite aparecen primero, porque son los que un filtro busca.
+- Un botón **copia las palabras clave que faltan** para pegarlas donde las necesites.
+- **Nueve comprobaciones** sobre el documento (contacto, ubicación, enlace, perfil, fechas, logros con
+  cifras, competencias, formación e idiomas), cada una diciendo por qué importa.
+- Todo ocurre **en tu navegador**: no se envía nada y **no gasta tokens**. La nota se recalcula
+  mientras escribes, así que puedes ver el efecto de una edición al instante. La oferta se guarda
+  junto al CV, con el resto de tu trabajo.
 
 ### Exportación
 
@@ -93,11 +111,16 @@ Otros comandos:
 
 ```bash
 npm run build      # compila a dist/cv-generador (sitio estático)
-npm test           # Karma + Jasmine (configurado; todavía sin especificaciones)
+npm test           # pruebas unitarias: Karma + Jasmine en Chrome headless
 ```
 
 `npm run build` produce un sitio **completamente estático**: se puede publicar en cualquier CDN,
 en GitHub Pages, en Netlify o en un bucket S3 sin necesidad de servidor de aplicaciones.
+
+`npm test` usa el lanzador `ChromeHeadlessCI` definido en `karma.conf.js`, porque el lanzador
+estándar de Karma pasa el flag `--headless` antiguo, que las versiones recientes de Chrome ya no
+aceptan. Con `ChromeHeadlessCI` la tarea funciona sin configurar nada más (y sin chocar con otra
+sesión de DevTools por el puerto 9222).
 
 ---
 
@@ -127,6 +150,7 @@ sistema para garantizar que el `.docx` y el PDF se vean igual en cualquier equip
 ## Estructura
 
 ```
+karma.conf.js                     # lanzador de Chrome para las pruebas
 src/
 ├── styles/
 │   ├── _tokens.scss              # sistema Tea Green: color, tipografía, radios, sombras, temas
@@ -140,6 +164,8 @@ src/
     │   │   ├── cv-data.ts        # contrato CVData + normalizador tolerante
     │   │   ├── catalog.ts        # 12 plantillas, 4 estructuras, 15 paletas, datos de ejemplo
     │   │   ├── sections.ts       # claves, orden por defecto y etiquetas de sección
+    │   │   ├── ats.ts            # analizador de palabras clave: extracción, revisión y nota
+    │   │   ├── ats.spec.ts       # pruebas del analizador (lógica pura, sin DOM)
     │   │   └── labels.ts         # títulos de sección, niveles de idioma, nombres de archivo
     │   └── services/
     │       ├── cv-store.service.ts        # estado con signals, persistencia, CRUD, undo/redo
@@ -151,11 +177,14 @@ src/
     │   ├── editor/               # panel de datos
     │   ├── design/               # panel de diseño
     │   ├── ai/                   # panel de IA
+    │   ├── ats/                  # panel de análisis frente a la oferta
     │   ├── export/               # panel de exportación (popover)
     │   └── preview/
     │       ├── preview.component.*        # zoom, ajuste de ancho, aviso de propuesta
     │       └── cv-document/               # el A4: plantillas × estructuras × paletas
-    └── shared/tag-input/         # editor de listas de etiquetas
+    └── shared/
+        ├── tag-input/            # editor de listas de etiquetas
+        └── sortable/             # directiva de reordenación con puntero y teclado
 ```
 
 ### Modelo de datos
@@ -173,6 +202,7 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
 | `cvgen.palettes` | Paletas guardadas |
 | `cvgen.presets` | Combinaciones guardadas |
 | `cvgen.history` | Historial de generaciones (original y optimizado) |
+| `cvgen.offer` | La oferta pegada para el análisis de palabras clave |
 | `cvgen.theme` | Tema claro u oscuro |
 
 **La clave de API no está en esta tabla a propósito**: nunca se persiste.
@@ -191,22 +221,28 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
   tokens. Añadir una plantilla nueva son unas pocas líneas de CSS.
 - **La IA propone, no escribe.** El resultado se revisa antes de aplicarse y el parser valida el JSON
   contra el CV original para que no pueda colarse contenido inventado.
+- **Lo que se puede calcular no se pregunta a un modelo.** El análisis de palabras clave es aritmética
+  sobre texto: es instantáneo, reproducible, no gasta tokens y no depende de que un modelo «vea» bien
+  la oferta. Por eso vive aparte de la IA, en su propia pestaña.
+- **Extractor de comparación y extractor de presentación son el mismo.** Comparar la oferta con el CV
+  exige bajar a minúsculas y quitar acentos, pero al lector hay que enseñarle las palabras tal como
+  las escribió el anuncio. Cada coincidencia arrastra sus dos formas desde el mismo punto, de modo que
+  no puedan desincronizarse.
 
 ---
 
 ## Estado y siguientes pasos
 
 Funciona de punta a punta y está verificado en navegador: las doce plantillas, las cuatro
-estructuras, el autoguardado, deshacer/rehacer, la exportación a Word (comprobada descomprimiendo el
-`.docx`) y la ventana de impresión.
+estructuras, el autoguardado, deshacer/rehacer, la reordenación arrastrando, el análisis de palabras
+clave, la exportación a Word (comprobada descomprimiendo el `.docx`) y la ventana de impresión. Las 13
+pruebas unitarias del analizador pasan con `npm test`.
 
 Pendiente, por orden de valor:
 
-- [ ] Reordenar arrastrando en lugar de con flechas (secciones y elementos de cada lista).
 - [ ] Varios CV por perfil, con duplicar y archivar.
 - [ ] Generador de carta de presentación a partir de la misma oferta.
-- [ ] Analizador de palabras clave: puntuar el CV contra una oferta y señalar lo que falta.
-- [ ] Pruebas unitarias y de extremo a extremo.
+- [ ] Pruebas de extremo a extremo (las unitarias ya cubren el analizador).
 - [ ] Convertirlo en PWA instalable con trabajo sin conexión.
 
 ---
@@ -218,8 +254,9 @@ Nació de un análisis funcional exhaustivo de un generador de CV libre con lice
 [`ANALISIS-CV-GENERATOR.md`](ANALISIS-CV-GENERATOR.md). Ese trabajo sirvió como investigación de
 requisitos; **este código es una implementación propia**, escrita desde cero, con decisiones de
 arquitectura distintas y funcionalidad que el original no tiene: exportación a `.docx` y Markdown,
-deshacer y rehacer, orden de secciones editable, marca de agua opcional, IA con revisión previa e
-historial restaurable.
+deshacer y rehacer (también para el orden de las secciones), reordenación arrastrando, análisis de
+palabras clave frente a una oferta, marca de agua opcional e IA con revisión previa e historial
+restaurable.
 
 ---
 

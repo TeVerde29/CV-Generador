@@ -190,7 +190,7 @@
     </button>
 
     @if (isOpen('experience')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="experience" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.experience }}</p>
 
         @for (e of data().experience; track e.id; let i = $index) {
@@ -205,21 +205,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('experience', e.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().experience.length < 2"
+                  (keydown.arrowup)="store.moveItem('experience', e.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('experience', e.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().experience.length - 1"
-                  (click)="store.moveItem('experience', e.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -316,7 +310,7 @@
     </button>
 
     @if (isOpen('education')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="education" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.education }}</p>
 
         @for (ed of data().education; track ed.id; let i = $index) {
@@ -331,21 +325,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('education', ed.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().education.length < 2"
+                  (keydown.arrowup)="store.moveItem('education', ed.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('education', ed.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().education.length - 1"
-                  (click)="store.moveItem('education', ed.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -443,7 +431,7 @@
     </button>
 
     @if (isOpen('skills')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="skills" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.skills }}</p>
 
         @for (s of data().skills; track s.id; let i = $index) {
@@ -455,21 +443,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('skills', s.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().skills.length < 2"
+                  (keydown.arrowup)="store.moveItem('skills', s.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('skills', s.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().skills.length - 1"
-                  (click)="store.moveItem('skills', s.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -524,7 +506,7 @@
     </button>
 
     @if (isOpen('languages')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="languages" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.languages }}</p>
 
         @for (l of data().languages; track l.id; let i = $index) {
@@ -547,21 +529,15 @@
             </select>
             <button
               type="button"
-              class="icon-btn"
-              title="Subir"
-              [disabled]="i === 0"
-              (click)="store.moveItem('languages', l.id, -1)"
+              class="icon-btn handle"
+              data-drag-handle
+              title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+              aria-label="Reordenar elemento"
+              [disabled]="data().languages.length < 2"
+              (keydown.arrowup)="store.moveItem('languages', l.id, -1); $event.preventDefault()"
+              (keydown.arrowdown)="store.moveItem('languages', l.id, 1); $event.preventDefault()"
             >
-              ↑
-            </button>
-            <button
-              type="button"
-              class="icon-btn"
-              title="Bajar"
-              [disabled]="i === data().languages.length - 1"
-              (click)="store.moveItem('languages', l.id, 1)"
-            >
-              ↓
+              <span class="grip" aria-hidden="true"></span>
             </button>
             <button
               type="button"
@@ -593,7 +569,7 @@
     </button>
 
     @if (isOpen('projects')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="projects" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.projects }}</p>
 
         @for (pr of data().projects; track pr.id; let i = $index) {
@@ -605,21 +581,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('projects', pr.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().projects.length < 2"
+                  (keydown.arrowup)="store.moveItem('projects', pr.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('projects', pr.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().projects.length - 1"
-                  (click)="store.moveItem('projects', pr.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -694,7 +664,7 @@
     </button>
 
     @if (isOpen('certifications')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="certifications" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.certifications }}</p>
 
         @for (c of data().certifications; track c.id; let i = $index) {
@@ -706,21 +676,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('certifications', c.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().certifications.length < 2"
+                  (keydown.arrowup)="store.moveItem('certifications', c.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('certifications', c.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().certifications.length - 1"
-                  (click)="store.moveItem('certifications', c.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -796,7 +760,7 @@
     </button>
 
     @if (isOpen('publications')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="publications" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.publications }}</p>
 
         @for (pub of data().publications; track pub.id; let i = $index) {
@@ -808,21 +772,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('publications', pub.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().publications.length < 2"
+                  (keydown.arrowup)="store.moveItem('publications', pub.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('publications', pub.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().publications.length - 1"
-                  (click)="store.moveItem('publications', pub.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -906,7 +864,7 @@
     </button>
 
     @if (isOpen('volunteerWork')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="volunteerWork" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.volunteerWork }}</p>
 
         @for (v of data().volunteerWork; track v.id; let i = $index) {
@@ -918,21 +876,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('volunteerWork', v.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().volunteerWork.length < 2"
+                  (keydown.arrowup)="store.moveItem('volunteerWork', v.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('volunteerWork', v.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().volunteerWork.length - 1"
-                  (click)="store.moveItem('volunteerWork', v.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -1016,7 +968,7 @@
     </button>
 
     @if (isOpen('awards')) {
-      <div class="block-body">
+      <div class="block-body" appSortable="awards" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.awards }}</p>
 
         @for (a of data().awards; track a.id; let i = $index) {
@@ -1028,21 +980,15 @@
               <span class="item-actions">
                 <button
                   type="button"
-                  class="icon-btn"
-                  title="Subir"
-                  [disabled]="i === 0"
-                  (click)="store.moveItem('awards', a.id, -1)"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().awards.length < 2"
+                  (keydown.arrowup)="store.moveItem('awards', a.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('awards', a.id, 1); $event.preventDefault()"
                 >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn"
-                  title="Bajar"
-                  [disabled]="i === data().awards.length - 1"
-                  (click)="store.moveItem('awards', a.id, 1)"
-                >
-                  ↓
+                  <span class="grip" aria-hidden="true"></span>
                 </button>
                 <button
                   type="button"
@@ -1161,7 +1107,7 @@
           Certificaciones e Intereses se colocan en la columna lateral.
         </p>
 
-        <ol class="order-list">
+        <ol class="order-list" appSortable="order" (moveTo)="sortMove($event)">
           @for (key of store.sectionOrder(); track key) {
             <li class="order-row">
               <span class="mono order-number">{{ orderIndex(key) + 1 }}</span>
@@ -1169,21 +1115,14 @@
               <span class="spacer"></span>
               <button
                 type="button"
-                class="icon-btn"
-                title="Subir"
-                [disabled]="isFirst(key)"
-                (click)="store.moveSection(key, -1)"
+                class="icon-btn handle"
+                data-drag-handle
+                title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                aria-label="Reordenar sección"
+                (keydown.arrowup)="store.moveSection(key, -1); $event.preventDefault()"
+                (keydown.arrowdown)="store.moveSection(key, 1); $event.preventDefault()"
               >
-                ↑
-              </button>
-              <button
-                type="button"
-                class="icon-btn"
-                title="Bajar"
-                [disabled]="isLast(key)"
-                (click)="store.moveSection(key, 1)"
-              >
-                ↓
+                <span class="grip" aria-hidden="true"></span>
               </button>
             </li>
           }

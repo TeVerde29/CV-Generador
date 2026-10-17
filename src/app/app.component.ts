@@ -10,19 +10,27 @@ import {
 import { CvStoreService } from './core/services/cv-store.service';
 import { ToastService } from './core/services/toast.service';
 import { AiComponent } from './features/ai/ai.component';
+import { AtsComponent } from './features/ats/ats.component';
 import { DesignComponent } from './features/design/design.component';
 import { EditorComponent } from './features/editor/editor.component';
 import { ExportComponent } from './features/export/export.component';
 import { PreviewComponent } from './features/preview/preview.component';
 
-type Tab = 'data' | 'design' | 'ai';
+type Tab = 'data' | 'design' | 'ai' | 'ats';
 type Theme = 'light' | 'dark';
 
 const THEME_KEY = 'cvgen.theme';
 
 @Component({
   selector: 'app-root',
-  imports: [EditorComponent, DesignComponent, AiComponent, PreviewComponent, ExportComponent],
+  imports: [
+    EditorComponent,
+    DesignComponent,
+    AiComponent,
+    AtsComponent,
+    PreviewComponent,
+    ExportComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +48,7 @@ export class AppComponent implements OnInit, OnDestroy {
     { id: 'data', label: 'Datos', icon: '▤' },
     { id: 'design', label: 'Diseño', icon: '◧' },
     { id: 'ai', label: 'IA', icon: '✦' },
+    { id: 'ats', label: 'Análisis', icon: '◎' },
   ];
 
   readonly saveLabel = computed(() => (this.store.dirty() ? 'Guardando…' : 'Guardado'));

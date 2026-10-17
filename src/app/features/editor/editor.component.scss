@@ -250,6 +250,41 @@
   color: var(--danger);
 }
 
+/* ── Drag reordering ───────────────────────────────────────────────────── */
+
+/*
+ * The handle is a button, so it is focusable and reachable with Tab; the
+ * template maps ArrowUp/ArrowDown onto the same moves the item already had.
+ * `touch-action: none` is what lets a finger drag it instead of scrolling.
+ */
+.handle {
+  cursor: grab;
+  touch-action: none;
+}
+.handle:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+/* Six dots, drawn rather than typed, so the glyph never depends on a font. */
+.grip {
+  width: 8px;
+  height: 12px;
+  background-image: radial-gradient(circle, currentColor 1.05px, transparent 1.6px);
+  background-size: 4px 4px;
+  opacity: 0.55;
+}
+.handle:hover:not(:disabled) .grip,
+.handle:focus-visible .grip {
+  opacity: 1;
+}
+
+/* The row being carried follows the pointer as a translucent ghost. */
+.is-dragging {
+  opacity: 0.45;
+  outline: 1px dashed var(--accent);
+  outline-offset: 1px;
+}
+
 /* ── Interests chips ───────────────────────────────────────────────────── */
 
 .chips {

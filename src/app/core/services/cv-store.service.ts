@@ -63,6 +63,7 @@ const KEY = {
   presets: 'cvgen.presets',
   palettes: 'cvgen.palettes',
   history: 'cvgen.history',
+  offer: 'cvgen.offer',
 };
 
 let seq = 0;
@@ -131,6 +132,15 @@ export function stripInlineMarkdown(value: unknown): any {
 
 /* ── Service ───────────────────────────────────────────────────────────── */
 
+/**
+ * Everything a single undo step has to restore. The layout of the document is
+ * part of the user's work, so the section order travels with the data.
+ */
+interface Snapshot {
+  cv: CVData;
+  order: SectionKey[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class CvStoreService {
   /* State */
@@ -147,6 +157,8 @@ export class CvStoreService {
   /** Optional footer line on the exported documents (off by default). */
   readonly showWatermark = signal(false);
   readonly watermarkText = signal('');
+  /** Text of the job offer used for the keyword analysis. */
+  readonly jobOffer = signal('');
   readonly lastSavedAt = signal<number | null>(null);
   /** Serialised state at the last successful save; `dirty` derives from it. */
   private readonly savedSnapshot = signal<string>('');
@@ -201,6 +213,7 @@ export class CvStoreService {
       sectionOrder: this.sectionOrder(),
       showWatermark: this.showWatermark(),
       watermarkText: this.watermarkText(),
+      jobOffer: this.jobOffer(),
     }),
   );
 
@@ -222,17 +235,23 @@ export class CvStoreService {
 
   /* ── Undo / redo ─────────────────────────────────────────────────────── */
 
-  private past: CVData[] = [];
-  private future: CVData[] = [];
+  private past: Snapshot[] = [];
+  private future: Snapshot[] = [];
   private lastPushAt = 0;
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
 
+  /** The current state, ready to be recorded. */
+  private state(): Snapshot {
+    return { cv: this.cv(), order: this.sectionOrder() };
+  }
+
   /**
-   * Records the state before a change. Rapid edits (typing) coalesce into a
-   * single step so one undo does not walk back character by character.
+   * Records the state before a change. Rapid edits (typing, or the many small
+   * moves a drag emits) coalesce into a single step, so one undo does not walk
+   * back character by character or swap by swap.
    */
-  private pushHistory(before: CVData): void {
+  private pushHistory(before: Snapshot): void {
     const now = Date.now();
     const isBurst = now - this.lastPushAt < 700 && this.past.length > 0;
     if (!isBurst) {
@@ -246,15 +265,31 @@ export class CvStoreService {
   }
 
   private commit(next: CVData): void {
-    this.pushHistory(this.cv());
+    this.pushHistory(this.state());
     this.cv.set(next);
+  }
+
+  /**
+   * Section order is not CV data, but it is still the user's work, so it goes
+   * through the same history. A no-op reorder records nothing.
+   */
+  private commitSections(next: SectionKey[]): void {
+    const current = this.sectionOrder();
+    if (next.length === current.length && next.every((key, i) => key === current[i])) return;
+    this.pushHistory(this.state());
+    this.sectionOrder.set(next);
+  }
+
+  private apply(snapshot: Snapshot): void {
+    this.cv.set(snapshot.cv);
+    this.sectionOrder.set([...snapshot.order]);
   }
 
   undo(): void {
     const previous = this.past.pop();
     if (!previous) return;
-    this.future.push(structuredClone(this.cv()));
-    this.cv.set(previous);
+    this.future.push(structuredClone(this.state()));
+    this.apply(previous);
     this.lastPushAt = 0;
     this.canUndo.set(this.past.length > 0);
     this.canRedo.set(this.future.length > 0);
@@ -263,8 +298,8 @@ export class CvStoreService {
   redo(): void {
     const next = this.future.pop();
     if (!next) return;
-    this.past.push(structuredClone(this.cv()));
-    this.cv.set(next);
+    this.past.push(structuredClone(this.state()));
+    this.apply(next);
     this.lastPushAt = 0;
     this.canUndo.set(this.past.length > 0);
     this.canRedo.set(this.future.length > 0);
@@ -304,6 +339,7 @@ export class CvStoreService {
     this.presets.set(safeParse<Preset[]>(localStorage.getItem(KEY.presets), []));
     this.savedPalettes.set(safeParse<SavedPalette[]>(localStorage.getItem(KEY.palettes), []));
     this.history.set(safeParse<GenerationRecord[]>(localStorage.getItem(KEY.history), []));
+    this.jobOffer.set(localStorage.getItem(KEY.offer) ?? '');
     this.past = [];
     this.future = [];
     this.canUndo.set(false);
@@ -328,6 +364,7 @@ export class CvStoreService {
       );
       localStorage.setItem(KEY.presets, JSON.stringify(this.presets()));
       localStorage.setItem(KEY.palettes, JSON.stringify(this.savedPalettes()));
+      localStorage.setItem(KEY.offer, this.jobOffer());
       localStorage.setItem(KEY.history, JSON.stringify(this.history()));
       this.lastSavedAt.set(Date.now());
       this.savedSnapshot.set(this.snapshot());
@@ -373,6 +410,16 @@ export class CvStoreService {
     });
   }
 
+  /* ── Job offer (keyword analysis) ────────────────────────────────────── */
+
+  /**
+   * The offer the CV is being compared against. It sits outside the CV and
+   * outside the undo history: it is reference material, not document content.
+   */
+  setJobOffer(value: string): void {
+    this.jobOffer.set(value);
+  }
+
   addItem<K extends CollectionKey>(key: K, factory: (id: string) => CollectionMap[K]): string {
     const id = uid(key);
     const item = factory(id);
@@ -413,6 +460,19 @@ export class CvStoreService {
     });
   }
 
+  /**
+   * Moves an item to an absolute index. Drag & drop works in positions rather
+   * than steps, so it needs a direct move instead of repeated swaps.
+   */
+  moveItemTo<K extends CollectionKey>(key: K, from: number, to: number): void {
+    this.mutate((d) => {
+      const list = d[key] as unknown as CollectionMap[K][];
+      if (from === to || from < 0 || from >= list.length || to < 0 || to >= list.length) return;
+      const [moved] = list.splice(from, 1);
+      list.splice(to, 0, moved);
+    });
+  }
+
   /* ── Design ──────────────────────────────────────────────────────────── */
 
   setTemplate(id: string): void {
@@ -434,18 +494,27 @@ export class CvStoreService {
 
   /** Moves a section up (-1) or down (+1) in the document. */
   moveSection(key: SectionKey, delta: number): void {
-    this.sectionOrder.update((list) => {
-      const copy = [...list];
-      const i = copy.indexOf(key);
-      const j = i + delta;
-      if (i < 0 || j < 0 || j >= copy.length) return list;
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-      return copy;
-    });
+    const list = this.sectionOrder();
+    const i = list.indexOf(key);
+    const j = i + delta;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    const copy = [...list];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+    this.commitSections(copy);
   }
 
   resetSectionOrder(): void {
-    this.sectionOrder.set([...DEFAULT_SECTION_ORDER]);
+    this.commitSections([...DEFAULT_SECTION_ORDER]);
+  }
+
+  /** Moves a section to an absolute position. Used by drag & drop. */
+  moveSectionTo(from: number, to: number): void {
+    const list = this.sectionOrder();
+    if (from === to || from < 0 || from >= list.length || to < 0 || to >= list.length) return;
+    const copy = [...list];
+    const [moved] = copy.splice(from, 1);
+    copy.splice(to, 0, moved);
+    this.commitSections(copy);
   }
 
   savePalette(name: string): void {
