@@ -201,6 +201,16 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
     return file.async('string');
   };
 
+  /** The `<w:p>` block that holds a text, so its own properties can be read. */
+  const paragraphOf = (xml: string, needle: string): string => {
+    const at = xml.indexOf(needle);
+    if (at < 0) throw new Error(`No se encontró «${needle}» en el documento`);
+    const open = xml.lastIndexOf('<w:p>', at);
+    const close = xml.indexOf('</w:p>', at);
+    if (open < 0 || close < 0) throw new Error(`No se pudo aislar el párrafo de «${needle}»`);
+    return xml.slice(open, close);
+  };
+
   it('usa la serif de la plantilla (Académico)', async () => {
     const xml = await documentXml({ templateId: 'academico', layoutId: 'single', sectionOrder: [] });
     expect(xml).toContain('w:ascii="Georgia"');
@@ -216,6 +226,17 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
       .toUpperCase();
     expect(xml).toContain('294635');
     expect(xml).not.toContain('2F5496');
+  });
+
+  it('centra la cabecera y los títulos, y deja el cuerpo a la izquierda', async () => {
+    const xml = await documentXml({ templateId: 'academico', layoutId: 'single', sectionOrder: [] });
+    // El otro extremo del fallo: centrar el documento entero porque Académico
+    // centra su cabecera. En la vista previa solo se centran la cabecera y los
+    // títulos; el resumen y las fichas siguen a la izquierda.
+    expect(paragraphOf(xml, 'Pedro')).toContain('w:val="center"');
+    expect(paragraphOf(xml, 'Resumen de perfil.')).not.toContain('w:val="center"');
+    expect(paragraphOf(xml, 'Practicante')).not.toContain('w:val="center"');
+    expect(paragraphOf(xml, 'Lenguajes:')).not.toContain('w:val="center"');
   });
 
   it('escribe las secciones en el orden del preview', async () => {

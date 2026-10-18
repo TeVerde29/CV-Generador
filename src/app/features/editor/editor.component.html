@@ -8,25 +8,24 @@
     </div>
 
     <div class="head-actions">
-      <button type="button" class="btn btn--sm" (click)="expandAll()">Expandir todo</button>
-      <button type="button" class="btn btn--sm" (click)="collapseAll()">Contraer</button>
-      <span class="spacer"></span>
-      <button type="button" class="btn btn--sm" (click)="loadSample()" title="Cargar un CV de ejemplo">
-        Ejemplo
-      </button>
-      <button type="button" class="btn btn--sm" (click)="exportJson()" title="Descargar copia de seguridad">
-        Copia .json
-      </button>
-      <label class="btn btn--sm" title="Restaurar desde un .json">
-        Importar
-        <input
-          type="file"
-          accept="application/json,.json"
-          hidden
-          (change)="onImportFile($event)"
-        />
-      </label>
-      <button type="button" class="btn btn--sm btn--danger" (click)="clearAll()">Vaciar</button>
+      <!-- Vista: abrir o cerrar todos los bloques de una vez. -->
+      <div class="head-group">
+        <button type="button" class="btn btn--sm" (click)="expandAll()">Expandir todo</button>
+        <button type="button" class="btn btn--sm" (click)="collapseAll()">Contraer</button>
+      </div>
+
+      <!-- Documento: rellenar con el ejemplo o empezar de cero. -->
+      <div class="head-group">
+        <button
+          type="button"
+          class="btn btn--sm"
+          (click)="loadSample()"
+          title="Cargar un CV de ejemplo"
+        >
+          Ejemplo
+        </button>
+        <button type="button" class="btn btn--sm btn--danger" (click)="clearAll()">Vaciar</button>
+      </div>
     </div>
   </header>
 
@@ -37,7 +36,7 @@
       <span class="block-title">Datos personales</span>
       <span class="spacer"></span>
       @if (data().personalInfo.name) {
-        <span class="badge badge--ok">listo</span>
+        <span class="badge badge--info">listo</span>
       } @else {
         <span class="badge badge--warn">pendiente</span>
       }

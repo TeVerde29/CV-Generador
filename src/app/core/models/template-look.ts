@@ -1,7 +1,7 @@
 /**
  * Each template's design, once, in the stylesheet's own units.
  *
- * The preview and the print/PDF path get their looks straight from CSS custom
+ * The preview and the PDF get their looks straight from CSS custom
  * properties. A .docx has no CSS, so the same knobs have to exist as data if
  * the Word file is going to look like what the user picked. This file is the
  * mirror of the `.tpl-*` blocks in `cv-document.component.scss`: keep the two

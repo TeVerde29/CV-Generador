@@ -50,6 +50,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px 5px;
+}
+
+/* Las dos parejas se mantienen juntas al pasar a una segunda línea. */
+.head-group {
+  display: flex;
+  align-items: center;
   gap: 5px;
 }
 

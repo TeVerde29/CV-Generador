@@ -34,12 +34,7 @@ export class ExportComponent {
     {
       id: 'pdf',
       label: 'PDF (.pdf)',
-      hint: 'Se descarga al instante con el diseño exacto que ves. Es una imagen: el texto no se puede seleccionar.',
-    },
-    {
-      id: 'pdf-print',
-      label: 'PDF con texto (.pdf)',
-      hint: 'Abre el diálogo del navegador: elige «Guardar como PDF». El texto sí se puede copiar y leer.',
+      hint: 'Se descarga al instante con el diseño exacto que ves, y los enlaces siguen funcionando.',
     },
     {
       id: 'markdown',
@@ -51,7 +46,6 @@ export class ExportComponent {
   readonly selected = signal<Record<ExportFormat, boolean>>({
     docx: true,
     pdf: true,
-    'pdf-print': false,
     markdown: false,
   });
 
@@ -82,9 +76,7 @@ export class ExportComponent {
   /* ── Export ──────────────────────────────────────────────────────────── */
 
   async exportSelected(): Promise<void> {
-    // The print window needs to open while the click is still "fresh", so it
-    // goes first; the rest are downloads and can wait their turn.
-    const order: ExportFormat[] = ['pdf-print', 'pdf', 'docx', 'markdown'];
+    const order: ExportFormat[] = ['pdf', 'docx', 'markdown'];
     const ids = order.filter((id) => this.selected()[id]);
     await this.runAll(ids);
   }

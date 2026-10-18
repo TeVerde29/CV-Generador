@@ -247,9 +247,9 @@ a:hover {
   font-weight: 550;
   white-space: nowrap;
 }
-.badge--ok {
-  background: var(--ok-soft);
-  color: var(--ok);
+.badge--info {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 .badge--warn {
   background: var(--warn-soft);

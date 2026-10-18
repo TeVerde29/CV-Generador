@@ -58,7 +58,7 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
     this.registry.clear();
   }
 
-  /** The rendered A4 sheet, handed to the exporter for the print/PDF path. */
+  /** The rendered A4 sheet, handed to the exporter for the PDF. */
   getSheetElement(): HTMLElement | null {
     return this.holder().nativeElement.querySelector<HTMLElement>('.cv-sheet');
   }

@@ -245,27 +245,6 @@
   box-shadow: 0 0 0 1px var(--ink);
 }
 
-.palette-card--saved {
-  flex-direction: row;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 4px 4px 5px;
-  cursor: default;
-}
-
-.palette-pick {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 2px;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-}
-
 .swatches {
   display: flex;
   gap: 2px;
@@ -330,80 +309,4 @@
   color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* ── Library ───────────────────────────────────────────────────────────── */
-
-.row-line {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.empty {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-3);
-}
-
-.preset-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.preset-row {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.preset-apply {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 5px 7px;
-  border: 1px solid transparent;
-  border-radius: var(--r-xs);
-  background: transparent;
-  text-align: left;
-  font-size: 12.5px;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
-}
-.preset-apply:hover {
-  background: var(--surface);
-  border-color: var(--border);
-}
-
-/* ── Icon buttons ──────────────────────────────────────────────────────── */
-
-.icon-btn {
-  flex: none;
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
-  border-radius: var(--r-xs);
-  background: transparent;
-  color: var(--text-2);
-  font-size: 12px;
-  line-height: 1;
-  cursor: pointer;
-}
-.icon-btn:hover {
-  background: var(--surface-3);
-  color: var(--text);
-}
-.icon-btn--danger:hover {
-  background: var(--danger-soft);
-  color: var(--danger);
 }

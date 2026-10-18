@@ -35,8 +35,6 @@ export class DesignComponent {
     secondary: '#71717a',
     accent: '#3f3f46',
   });
-  readonly paletteName = signal('');
-  readonly presetName = signal('');
 
   templatesOf(family: string): typeof TEMPLATES {
     return this.templates.filter((t) => t.family === family);
@@ -50,10 +48,6 @@ export class DesignComponent {
   onProfileChange(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
     if (id !== 'custom') this.store.applyProfile(id);
-  }
-
-  onTemplateChange(event: Event): void {
-    this.store.setTemplate((event.target as HTMLSelectElement).value);
   }
 
   selectLayout(id: LayoutOption['id']): void {
@@ -78,33 +72,11 @@ export class DesignComponent {
     this.setColor(channel, (event.target as HTMLInputElement).value);
   }
 
-  savePalette(): void {
-    this.store.savePalette(this.paletteName());
-    this.paletteName.set('');
-    this.toast.ok('Paleta guardada en tu biblioteca.');
-  }
-
-  removePalette(id: string): void {
-    this.store.removePalette(id);
-  }
-
-  savePreset(): void {
-    this.store.savePreset(this.presetName());
-    this.presetName.set('');
-    this.toast.ok('Combinación guardada.');
-  }
-
   resetDesign(): void {
     this.store.setTemplate(DEFAULT_TEMPLATE_ID);
     this.store.setLayout(DEFAULT_LAYOUT_ID);
     this.store.setPalette(DEFAULT_PALETTE_ID);
     this.store.resetSectionOrder();
     this.toast.show('Diseño restablecido al original.');
-  }
-
-  onNameInput(target: 'palette' | 'preset', event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (target === 'palette') this.paletteName.set(value);
-    else this.presetName.set(value);
   }
 }

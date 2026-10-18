@@ -127,7 +127,7 @@ export interface TemplateOption {
   name: string;
   description: string;
   /** Group used to render the gallery sections. */
-  family: 'Essencial' | 'Corporativo' | 'Criativo' | 'Académico';
+  family: 'Esencial' | 'Corporativo' | 'Creativo' | 'Académico';
   /** Typographic voice of the template. */
   voice: 'sans' | 'serif' | 'mixed' | 'mono';
 }
@@ -170,9 +170,4 @@ export interface SavedPalette {
 
 /* ── Export ────────────────────────────────────────────────────────────── */
 
-/**
- * `pdf` is the file the app builds and downloads on the spot; `pdf-print` is
- * the browser's print dialog, which is the only way to get a PDF whose text can
- * still be selected — handy when a job portal parses the file.
- */
-export type ExportFormat = 'docx' | 'pdf' | 'pdf-print' | 'markdown';
+export type ExportFormat = 'docx' | 'pdf' | 'markdown';

@@ -6,10 +6,9 @@ import {
   signal,
 } from '@angular/core';
 import { PROFICIENCIES, type Proficiency } from '../../core/models/cv-data';
-import { PROFICIENCY_LABELS, safeFileName } from '../../core/models/labels';
+import { PROFICIENCY_LABELS } from '../../core/models/labels';
 import { SECTION_HINTS, SECTION_LABELS, type SectionKey } from '../../core/models/sections';
 import { COLLECTION_LABELS, CvStoreService, type CollectionKey } from '../../core/services/cv-store.service';
-import { ExporterService } from '../../core/services/exporter.service';
 import { ToastService } from '../../core/services/toast.service';
 import { SortableDirective, type SortMove } from '../../shared/sortable/sortable.directive';
 import { TagInputComponent } from '../../shared/tag-input/tag-input.component';
@@ -23,7 +22,6 @@ import { TagInputComponent } from '../../shared/tag-input/tag-input.component';
 })
 export class EditorComponent {
   readonly store = inject(CvStoreService);
-  private readonly exporter = inject(ExporterService);
   private readonly toast = inject(ToastService);
 
   readonly data = this.store.cv;
@@ -266,30 +264,6 @@ export class EditorComponent {
     if (!confirm('¿Vaciar todo el contenido del CV? Esta acción no se puede deshacer.')) return;
     this.store.clearAll();
     this.toast.show('CV vaciado.');
-  }
-
-  exportJson(): void {
-    this.exporter.exportJson(this.data(), safeFileName(this.data().personalInfo.name, 'cv'));
-    this.toast.ok('Copia de seguridad descargada (.json).');
-  }
-
-  onImportFile(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        this.store.setData(JSON.parse(String(reader.result)));
-        this.store.save();
-        this.toast.ok('Datos importados correctamente.');
-      } catch {
-        this.toast.err('El archivo no contiene un JSON válido.');
-      }
-      input.value = '';
-    };
-    reader.onerror = () => this.toast.err('No se pudo leer el archivo.');
-    reader.readAsText(file);
   }
 
   /* ── Foto opcional ──────────────────────────────────────────────────── */

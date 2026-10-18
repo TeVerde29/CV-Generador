@@ -35,10 +35,19 @@ export interface ExportDesign {
   sectionOrder: SectionKey[];
 }
 
+/** A link of the rendered sheet, measured in raster pixels. */
+interface RasterLink {
+  url: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
 export interface ExportOptions {
   data: CVData;
   colors: PaletteColors;
-  /** Already-rendered CV sheet, used for the PDF (print) path. */
+  /** The rendered CV sheet, which is what the PDF is built from. */
   paperEl?: HTMLElement | null;
   templateName?: string;
   /** Section titles of the active profile; defaults to the neutral ones. */
@@ -79,13 +88,6 @@ export class ExporterService {
         case 'pdf':
           await this.exportPdf(opts.paperEl ?? null, name);
           return { format, ok: true, message: `PDF descargado (${name}.pdf).` };
-        case 'pdf-print':
-          this.exportPdfPrint(opts.paperEl ?? null, name, opts.data.personalInfo.name);
-          return {
-            format,
-            ok: true,
-            message: 'Se abrió el diálogo de impresión: elige «Guardar como PDF».',
-          };
         default:
           return { format, ok: false, message: 'Formato no soportado.' };
       }
@@ -234,14 +236,6 @@ export class ExporterService {
       type: 'text/markdown;charset=utf-8',
     });
     this.download(blob, `${name}.md`);
-  }
-
-  /** Round-trip format: lets the user back up and restore the whole CV. */
-  exportJson(cv: CVData, name: string): void {
-    const blob = new Blob([JSON.stringify(cv, null, 2)], {
-      type: 'application/json;charset=utf-8',
-    });
-    this.download(blob, `${name}.json`);
   }
 
   /* ── Word (.docx) ────────────────────────────────────────────────────── */
@@ -403,7 +397,11 @@ export class ExporterService {
     const SECTION_TITLES = { ...BASE_SECTION_TITLES, ...(titles ?? {}) };
     const nodes: Paragraph[] = [];
     const p = cv.personalInfo;
-    const align = look.align === 'center' ? AlignmentType.CENTER : AlignmentType.LEFT;
+    // Only the header follows the template's alignment. In the preview the
+    // section titles are the other centred piece (`--cv-heading-align`), so the
+    // body — summary, entries, bullets — stays left even in Académico and
+    // Universidad: that is the "ordered" look, not a page of centred text.
+    const headerAlign = look.align === 'center' ? AlignmentType.CENTER : AlignmentType.LEFT;
     const body = look.bodySize;
     const meta = Math.round(body * 0.86); // dates, technologies, small print
     const entry = Math.round(body * 1.08); // job titles, degrees, project names
@@ -418,7 +416,7 @@ export class ExporterService {
     if (p.name) {
       nodes.push(
         new Paragraph({
-          alignment: align,
+          alignment: headerAlign,
           spacing: { after: 40 },
           children: [
             new TextRun({
@@ -437,7 +435,7 @@ export class ExporterService {
     if (p.title) {
       nodes.push(
         new Paragraph({
-          alignment: align,
+          alignment: headerAlign,
           spacing: { after: 80 },
           children: [
             new TextRun({
@@ -478,7 +476,9 @@ export class ExporterService {
       );
     }
     if (contactRuns.length) {
-      nodes.push(new Paragraph({ alignment: align, spacing: { after: 60 }, children: contactRuns }));
+      nodes.push(
+        new Paragraph({ alignment: headerAlign, spacing: { after: 60 }, children: contactRuns }),
+      );
     }
 
     /**
@@ -512,7 +512,7 @@ export class ExporterService {
         case 'summary': {
           if (!cv.summary) break;
           nodes.push(this.sectionHeading(SECTION_TITLES.summary, look, ++number));
-          nodes.push(new Paragraph({ alignment: align, children: [text(cv.summary)] }));
+          nodes.push(new Paragraph({ children: [text(cv.summary)] }));
           break;
         }
 
@@ -532,7 +532,6 @@ export class ExporterService {
             if (e.description) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   spacing: { after: 40 },
                   children: [text(e.description)],
                 }),
@@ -541,7 +540,6 @@ export class ExporterService {
             for (const a of e.achievements.filter(Boolean)) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   bullet: { level: 0 },
                   spacing: { after: 20 },
                   children: [text(a)],
@@ -586,7 +584,6 @@ export class ExporterService {
             if (!items) continue;
             nodes.push(
               new Paragraph({
-                alignment: align,
                 spacing: { after: 40 },
                 children: [text(`${s.category}: `, body, look.ink, true), text(items)],
               }),
@@ -601,7 +598,6 @@ export class ExporterService {
           for (const l of cv.languages) {
             nodes.push(
               new Paragraph({
-                alignment: align,
                 bullet: { level: 0 },
                 spacing: { after: 20 },
                 children: [
@@ -619,7 +615,6 @@ export class ExporterService {
           for (const pr of cv.projects) {
             nodes.push(
               new Paragraph({
-                alignment: align,
                 spacing: { before: 120, after: 0 },
                 children: [text(pr.name || '', entry, look.ink, true)],
               }),
@@ -627,7 +622,6 @@ export class ExporterService {
             if (pr.description) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   spacing: { after: 40 },
                   children: [text(pr.description)],
                 }),
@@ -637,7 +631,6 @@ export class ExporterService {
             if (tech) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   spacing: { after: 40 },
                   children: [
                     text('Tecnologías: ', meta, look.ink, true),
@@ -668,7 +661,7 @@ export class ExporterService {
                   }),
                 );
               }
-              nodes.push(new Paragraph({ alignment: align, spacing: { after: 40 }, children: runs }));
+              nodes.push(new Paragraph({ spacing: { after: 40 }, children: runs }));
             }
           }
           break;
@@ -681,7 +674,6 @@ export class ExporterService {
             const metaLine = [c.issuer, c.date].filter(Boolean).join(', ');
             nodes.push(
               new Paragraph({
-                alignment: align,
                 spacing: { after: 20 },
                 children: [
                   text(c.name, body, look.ink, true),
@@ -700,7 +692,6 @@ export class ExporterService {
             const metaLine = [pub.publisher, pub.date].filter(Boolean).join(', ');
             nodes.push(
               new Paragraph({
-                alignment: align,
                 spacing: { after: 20 },
                 children: [
                   text(pub.title, body, look.ink, true),
@@ -711,7 +702,6 @@ export class ExporterService {
             if (pub.description) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   spacing: { after: 40 },
                   children: [text(pub.description, meta, look.muted)],
                 }),
@@ -739,7 +729,6 @@ export class ExporterService {
             if (v.description) {
               nodes.push(
                 new Paragraph({
-                  alignment: align,
                   spacing: { after: 40 },
                   children: [text(v.description)],
                 }),
@@ -756,7 +745,6 @@ export class ExporterService {
             const metaLine = [a.issuer, a.date].filter(Boolean).join(', ');
             nodes.push(
               new Paragraph({
-                alignment: align,
                 spacing: { after: 20 },
                 children: [
                   text(a.title, body, look.ink, true),
@@ -772,7 +760,7 @@ export class ExporterService {
           if (!cv.interests.length) break;
           nodes.push(this.sectionHeading(SECTION_TITLES.interests, look, ++number));
           nodes.push(
-            new Paragraph({ alignment: align, children: [text(cv.interests.join('  ·  '))] }),
+            new Paragraph({ children: [text(cv.interests.join('  ·  '))] }),
           );
           break;
         }
@@ -835,12 +823,12 @@ export class ExporterService {
    *
    * The sheet is rasterised with `html2canvas` and sliced into A4 pages, so the
    * file carries the design exactly as the preview shows it: template, palette,
-   * rules, photo and all.
+   * rules, photo and all. A JPEG cannot hold links, so each one comes back as an
+   * invisible annotation over its own text: that is what makes the header and the
+   * project links clickable in the PDF.
    *
-   * One honest trade-off, and the reason `pdf-print` still exists: the result is
-   * an image, so a portal that extracts the text (most ATS) reads nothing. Use
-   * the Word file — or the print path, which produces a text PDF — when the text
-   * has to be machine-readable.
+   * The trade-off is the text itself: being an image, a portal that extracts the
+   * text (most ATS) reads nothing, so the Word file is the one to send there.
    */
   async exportPdf(paperEl: HTMLElement | null, name: string): Promise<void> {
     if (!paperEl) throw new Error('El lienzo del CV todavía no está listo.');
@@ -864,6 +852,8 @@ export class ExporterService {
     // the paper edge.
     const inset = raster.padTop;
     const insetMm = (inset * pageWidth) / canvas.width;
+    // Canvas pixels → millimetres, shared by the bands and the links.
+    const mm = pageWidth / canvas.width;
 
     let offset = 0;
     let page = 0;
@@ -871,21 +861,39 @@ export class ExporterService {
       const limit = page === 0 ? pagePixels : pagePixels - inset;
       const end = this.endOfPage(raster, offset, offset + limit, canvas.height);
       const height = Math.max(1, Math.round(end - offset));
+      const top = page > 0 ? insetMm : 0;
       if (page > 0) pdf.addPage();
-      pdf.addImage(
-        this.slice(canvas, offset, height),
-        'JPEG',
-        0,
-        page > 0 ? insetMm : 0,
-        pageWidth,
-        (height * pageWidth) / canvas.width,
-      );
+      pdf.addImage(this.slice(canvas, offset, height), 'JPEG', 0, top, pageWidth, height * mm);
+      for (const link of raster.links) this.addLink(pdf, link, offset, end, top, mm);
       offset += height;
       page += 1;
     }
 
     pdf.setProperties({ title: `CV — ${name}`, creator: 'CV-Generador' });
     pdf.save(`${name}.pdf`);
+  }
+
+  /**
+   * Puts one clickable link back where the raster shows it.
+   *
+   * `bandTop`/`bandBottom` are the pixels of the page being built and `pageTop`
+   * is where that band landed on the paper, so a link that the page break cuts in
+   * two only becomes an annotation on the page that shows most of it.
+   */
+  private addLink(
+    pdf: import('jspdf').jsPDF,
+    link: RasterLink,
+    bandTop: number,
+    bandBottom: number,
+    pageTop: number,
+    mm: number,
+  ): void {
+    const top = Math.max(link.top, bandTop);
+    const bottom = Math.min(link.top + link.height, bandBottom);
+    if (bottom - top < link.height * 0.4) return;
+    pdf.link(link.left * mm, pageTop + (top - bandTop) * mm, link.width * mm, (bottom - top) * mm, {
+      url: link.url,
+    });
   }
 
   /**
@@ -937,6 +945,7 @@ export class ExporterService {
     sections: number[];
     items: number[];
     padTop: number;
+    links: RasterLink[];
   }> {
     const host = document.createElement('div');
     host.setAttribute(
@@ -956,10 +965,33 @@ export class ExporterService {
         logging: false,
       });
       const offsets = this.blockOffsets(clone, canvas);
-      return { canvas, ...offsets };
+      return { canvas, ...offsets, links: this.linkRects(clone, canvas) };
     } finally {
       host.remove();
     }
+  }
+
+  /** Every outgoing link of the sheet, in canvas pixels. */
+  private linkRects(clone: HTMLElement, canvas: HTMLCanvasElement): RasterLink[] {
+    const rect = clone.getBoundingClientRect();
+    const height = clone.offsetHeight || rect.height;
+    if (!height) return [];
+    const factor = canvas.height / height;
+    const out: RasterLink[] = [];
+    clone.querySelectorAll('a[href]').forEach((node) => {
+      const anchor = node as HTMLAnchorElement;
+      const box = anchor.getBoundingClientRect();
+      // `href` is already absolute; an in-page anchor would be a dead annotation.
+      if (!box.width || !box.height || !anchor.href.startsWith('http')) return;
+      out.push({
+        url: anchor.href,
+        left: (box.left - rect.left) * factor,
+        top: (box.top - rect.top) * factor,
+        width: box.width * factor,
+        height: box.height * factor,
+      });
+    });
+    return out;
   }
 
   /** Canvas-pixel heights at which a section or an item begins, and the sheet's
@@ -995,92 +1027,6 @@ export class ExporterService {
     ctx.fillRect(0, 0, band.width, band.height);
     ctx.drawImage(canvas, 0, offset, canvas.width, height, 0, 0, canvas.width, height);
     return band.toDataURL('image/jpeg', 0.92);
-  }
-
-  /**
-   * Opens the rendered sheet in a clean window and triggers the print dialog.
-   * The browser produces a vector PDF with selectable text, which is what a
-   * parser-based application form wants.
-   */
-  exportPdfPrint(paperEl: HTMLElement | null, name: string, personName: string): void {
-    if (!paperEl) throw new Error('El lienzo del CV todavía no está listo.');
-
-    const win = window.open('', '_blank', 'width=920,height=1180');
-    if (!win) {
-      throw new Error('El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes.');
-    }
-
-    const styles = this.collectStyles();
-    const title = safeFileName(personName, 'cv');
-    // The new window starts at about:blank, so relative URLs (the self-hosted
-    // fonts, for instance) would not resolve. Mirroring the current base URI
-    // keeps every referenced asset reachable.
-    const base = document.baseURI;
-
-    win.document.open();
-    win.document.write(`<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8" />
-<base href="${base}" />
-<title>${title}</title>
-${styles}
-<style>
-  html, body { margin: 0 !important; padding: 0 !important; background: #ffffff !important; }
-  body { display: block !important; }
-  .print-root { margin: 0 auto; }
-  .cv-sheet, .cv-sheet * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .cv-sheet { box-shadow: none !important; border: 0 !important; margin: 0 !important; }
-  .cv-section, .cv-item, .cv-entry { break-inside: avoid; page-break-inside: avoid; }
-  .cv-section-heading { break-after: avoid; page-break-after: avoid; }
-  @page { size: A4; margin: 0; }
-</style>
-</head>
-<body><div class="print-root">${paperEl.outerHTML}</div>
-<script>
-  /* Print from inside the document so we can wait for fonts to settle: firing
-     too early would bake a fallback typeface into the PDF. There is a safety
-     timeout and a latch, so the dialog always opens exactly once. */
-  (function () {
-    var fired = false;
-    function go() {
-      if (fired) return;
-      fired = true;
-      setTimeout(function () {
-        try { window.focus(); window.print(); } catch (e) { /* the user can print from the window */ }
-      }, 100);
-    }
-    function whenLoadedAndReady(fn) {
-      var pending = 2;
-      function one() { if (--pending <= 0) fn(); }
-      if (document.readyState === 'complete') one();
-      else window.addEventListener('load', one, { once: true });
-      if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
-        document.fonts.ready.then(one, one);
-      } else { one(); }
-    }
-    whenLoadedAndReady(go);
-    setTimeout(go, 2500);
-  })();
-</script>
-</body>
-</html>`);
-    win.document.close();
-  }
-
-  /** Copies every stylesheet currently applied so the print window matches. */
-  private collectStyles(): string {
-    const parts: string[] = [];
-    document.querySelectorAll('style').forEach((el) => {
-      parts.push(`<style>${el.textContent ?? ''}</style>`);
-    });
-    document.querySelectorAll('link[rel="stylesheet"]').forEach((el) => {
-      parts.push(el.outerHTML);
-    });
-    return parts.join('\n');
   }
 
   /* ── Helpers ─────────────────────────────────────────────────────────── */

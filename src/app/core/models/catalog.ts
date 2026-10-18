@@ -8,24 +8,24 @@ import type {
 /* ── Templates ─────────────────────────────────────────────────────────── */
 
 export const TEMPLATES: TemplateOption[] = [
-  { id: 'folha', name: 'Folha', family: 'Essencial', voice: 'sans', description: 'Sóbrio, aireado, sin adornos. El más neutro.' },
-  { id: 'linha', name: 'Linha', family: 'Essencial', voice: 'sans', description: 'Reglas finas y jerarquía estricta.' },
-  { id: 'manuscrito', name: 'Manuscrito', family: 'Essencial', voice: 'serif', description: 'Serif cálida, ritmo de imprenta.' },
+  { id: 'folha', name: 'Folha', family: 'Esencial', voice: 'sans', description: 'Sóbrio, aireado, sin adornos. El más neutro.' },
+  { id: 'linha', name: 'Linha', family: 'Esencial', voice: 'sans', description: 'Reglas finas y jerarquía estricta.' },
+  { id: 'manuscrito', name: 'Manuscrito', family: 'Esencial', voice: 'serif', description: 'Serif cálida, ritmo de imprenta.' },
   { id: 'corporativo', name: 'Corporativo', family: 'Corporativo', voice: 'sans', description: 'Formato clásico de reclutamiento.' },
   { id: 'executivo', name: 'Executivo', family: 'Corporativo', voice: 'serif', description: 'Mayúsculas espaciadas y peso bajo el título.' },
   { id: 'consultoria', name: 'Consultoría', family: 'Corporativo', voice: 'serif', description: 'Bloque denso, orientado a resultados.' },
-  { id: 'tecnico', name: 'Técnico', family: 'Criativo', voice: 'mono', description: 'Monoespaciada, aire de especificación.' },
-  { id: 'revista', name: 'Revista', family: 'Criativo', voice: 'mixed', description: 'Editorial, con acentos de color.' },
-  { id: 'compacto', name: 'Compacto', family: 'Criativo', voice: 'sans', description: 'Aprovecha cada línea de la página.' },
+  { id: 'tecnico', name: 'Técnico', family: 'Creativo', voice: 'mono', description: 'Monoespaciada, aire de especificación.' },
+  { id: 'revista', name: 'Revista', family: 'Creativo', voice: 'mixed', description: 'Editorial, con acentos de color.' },
+  { id: 'compacto', name: 'Compacto', family: 'Creativo', voice: 'sans', description: 'Aprovecha cada línea de la página.' },
   { id: 'academico', name: 'Académico', family: 'Académico', voice: 'serif', description: 'Cursivas y estructura de publicación.' },
   { id: 'universidad', name: 'Universidad', family: 'Académico', voice: 'serif', description: 'Estilo de servicio de carreras.' },
   { id: 'tesis', name: 'Tesis', family: 'Académico', voice: 'serif', description: 'Formal, con numeración sobria.' },
 ];
 
 export const TEMPLATE_FAMILIES: TemplateOption['family'][] = [
-  'Essencial',
+  'Esencial',
   'Corporativo',
-  'Criativo',
+  'Creativo',
   'Académico',
 ];
 

@@ -444,10 +444,6 @@ export class CvStoreService {
     this.commit(next);
   }
 
-  setData(data: unknown): void {
-    this.commit(normalizeCVData(data));
-  }
-
   clearAll(): void {
     this.commit(emptyCVData());
   }
