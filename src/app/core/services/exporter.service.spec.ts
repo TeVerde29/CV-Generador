@@ -1,4 +1,4 @@
-import { emptyCVData } from '../models/catalog';
+import { emptyCVData, PALETTES } from '../models/catalog';
 import type { CVData } from '../models/cv-data';
 import { ExporterService } from './exporter.service';
 
@@ -98,5 +98,58 @@ describe('buildMarkdown — proyectos', () => {
     expect(md).toContain('### Proyecto');
     expect(md).not.toContain('[Demo]');
     expect(md).not.toContain('[GitHub]');
+  });
+});
+
+/**
+ * The Word file is built by `docx`, which throws when a hyperlink is not
+ * well-formed. Generating one for real is the only way to know the run succeeds
+ * — and it catches the scheme-less links, which Word rejects.
+ */
+describe('run — Word', () => {
+  const full = cv({
+    personalInfo: {
+      name: 'Pedro',
+      email: 'pedro@ejemplo.com',
+      phone: '+51 900 000 000',
+      location: 'Pucallpa, Perú',
+      linkedin: 'linkedin.com/in/pedro',
+      github: 'github.com/TeVerde29',
+      portfolio: 'teverde29.github.io/Portafolio/',
+    },
+    projects: [
+      {
+        id: 'p1',
+        name: 'Proyecto',
+        description: 'Una descripción.',
+        technologies: ['Angular'],
+        demoUrl: 'demo.dev',
+        repoUrl: 'https://github.com/x/y',
+      },
+    ],
+  });
+
+  const run = () =>
+    service.run('docx', {
+      data: full,
+      colors: PALETTES[0].colors,
+      templateName: 'Folha',
+    });
+
+  it('genera el documento con enlaces de contacto y de proyecto', async () => {
+    const result = await run();
+    expect(result.ok).withContext(result.message).toBe(true);
+    expect(result.message).toContain('.docx');
+  });
+
+  it('acepta un CV sin ningún enlace', async () => {
+    const result = await service.run('docx', {
+      data: cv({
+        personalInfo: { name: 'Pedro', email: 'a@b.co', phone: '', location: '' },
+      }),
+      colors: PALETTES[0].colors,
+      templateName: 'Folha',
+    });
+    expect(result.ok).withContext(result.message).toBe(true);
   });
 });
