@@ -29,12 +29,17 @@ export class ExportComponent {
     {
       id: 'docx',
       label: 'Word (.docx)',
-      hint: 'Documento editable con estilos reales. El formato que piden la mayoría de filtros.',
+      hint: 'Documento editable que ya lleva tu plantilla, tu paleta y tus colores. El formato que leen mejor los filtros.',
     },
     {
       id: 'pdf',
       label: 'PDF (.pdf)',
-      hint: 'Se abre el diálogo de impresión: elige «Guardar como PDF». Mantiene el diseño exacto.',
+      hint: 'Se descarga al instante con el diseño exacto que ves. Es una imagen: el texto no se puede seleccionar.',
+    },
+    {
+      id: 'pdf-print',
+      label: 'PDF con texto (.pdf)',
+      hint: 'Abre el diálogo del navegador: elige «Guardar como PDF». El texto sí se puede copiar y leer.',
     },
     {
       id: 'markdown',
@@ -46,6 +51,7 @@ export class ExportComponent {
   readonly selected = signal<Record<ExportFormat, boolean>>({
     docx: true,
     pdf: true,
+    'pdf-print': false,
     markdown: false,
   });
 
@@ -76,8 +82,9 @@ export class ExportComponent {
   /* ── Export ──────────────────────────────────────────────────────────── */
 
   async exportSelected(): Promise<void> {
-    // PDF first: the print window needs to open while the click is still "fresh".
-    const order: ExportFormat[] = ['pdf', 'docx', 'markdown'];
+    // The print window needs to open while the click is still "fresh", so it
+    // goes first; the rest are downloads and can wait their turn.
+    const order: ExportFormat[] = ['pdf-print', 'pdf', 'docx', 'markdown'];
     const ids = order.filter((id) => this.selected()[id]);
     await this.runAll(ids);
   }
@@ -125,6 +132,11 @@ export class ExportComponent {
       paperEl: this.registry.sheet(),
       templateName: this.store.template().name,
       titles: this.store.sectionTitles(),
+      design: {
+        templateId: this.store.templateId(),
+        layoutId: this.store.layoutId(),
+        sectionOrder: this.store.sectionOrder(),
+      },
       watermark: {
         enabled: this.store.showWatermark(),
         text: this.store.watermarkText(),

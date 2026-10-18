@@ -1,6 +1,8 @@
+import JSZip from 'jszip';
 import { emptyCVData, PALETTES } from '../models/catalog';
 import type { CVData } from '../models/cv-data';
-import { ExporterService } from './exporter.service';
+import { docxLook } from './docx-look';
+import { ExporterService, type ExportDesign } from './exporter.service';
 
 /**
  * The Markdown export is the one that can be asserted without a DOM, and it is
@@ -151,5 +153,123 @@ describe('run — Word', () => {
       templateName: 'Folha',
     });
     expect(result.ok).withContext(result.message).toBe(true);
+  });
+});
+
+/**
+ * The bug this covers: the Word file came out in Calibri with Word's own blue
+ * headings whatever the user had picked, so the downloaded document looked
+ * nothing like the preview. The package is opened here and searched for the
+ * design that went in — the only way to catch a regression the preview hides.
+ */
+describe('buildDocx — el diseño elegido llega al Word', () => {
+  const colors = PALETTES[0].colors; // Té verde: primario #294635
+  const data = cv({
+    personalInfo: { name: 'Pedro', email: 'a@b.co', phone: '', location: '' },
+    summary: 'Resumen de perfil.',
+    experience: [
+      {
+        id: 'x1',
+        position: 'Practicante',
+        company: 'OTI',
+        startDate: '2025',
+        endDate: '2026',
+        description: '',
+        achievements: ['Una tarea'],
+      },
+    ],
+    education: [
+      {
+        id: 'e1',
+        degree: 'Ingeniería',
+        field: 'de Sistemas',
+        institution: 'UNU',
+        startDate: '2021',
+        endDate: '2026',
+      },
+    ],
+    skills: [{ id: 's1', category: 'Lenguajes', items: ['TypeScript', 'Java'] }],
+    interests: ['Ajedrez', 'Cine'],
+  });
+
+  /** Word splits the file into a zip; the body lives in `document.xml`. */
+  const documentXml = async (design?: ExportDesign): Promise<string> => {
+    const blob = await service.buildDocx(data, colors, undefined, undefined, design);
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+    const file = zip.file('word/document.xml');
+    if (!file) throw new Error('El paquete no trae word/document.xml');
+    return file.async('string');
+  };
+
+  it('usa la serif de la plantilla (Académico)', async () => {
+    const xml = await documentXml({ templateId: 'academico', layoutId: 'single', sectionOrder: [] });
+    expect(xml).toContain('w:ascii="Georgia"');
+  });
+
+  it('usa la monoespaciada de la plantilla Técnico', async () => {
+    const xml = await documentXml({ templateId: 'tecnico', layoutId: 'single', sectionOrder: [] });
+    expect(xml).toContain('w:ascii="Consolas"');
+  });
+
+  it('pinta con la paleta elegida y no con el azul de Word', async () => {
+    const xml = (await documentXml({ templateId: 'folha', layoutId: 'single', sectionOrder: [] }))
+      .toUpperCase();
+    expect(xml).toContain('294635');
+    expect(xml).not.toContain('2F5496');
+  });
+
+  it('escribe las secciones en el orden del preview', async () => {
+    const xml = await documentXml({
+      templateId: 'tesis',
+      layoutId: 'single',
+      sectionOrder: ['education', 'interests', 'summary', 'experience', 'skills'],
+    });
+    const education = xml.indexOf('Formación académica');
+    const interests = xml.indexOf('Intereses');
+    const summary = xml.indexOf('Perfil profesional');
+    expect(education).toBeGreaterThan(-1);
+    expect(education).toBeLessThan(interests);
+    expect(interests).toBeLessThan(summary);
+  });
+
+  it('numera las secciones solo en la plantilla Tesis', async () => {
+    const numbered = await documentXml({ templateId: 'tesis', layoutId: 'single', sectionOrder: [] });
+    // Solo cuentan las secciones con contenido: perfil, experiencia, formación,
+    // competencias e intereses.
+    expect(numbered).toContain('1. Perfil profesional');
+    expect(numbered).toContain('5. Intereses');
+
+    const plain = await documentXml({ templateId: 'folha', layoutId: 'single', sectionOrder: [] });
+    expect(plain).not.toContain('1. PERFIL PROFESIONAL');
+  });
+
+  it('pone la barra lateral primero, como en la pantalla', async () => {
+    const xml = (
+      await documentXml({ templateId: 'folha', layoutId: 'sidebar-left', sectionOrder: [] })
+    ).toUpperCase();
+    expect(xml.indexOf('COMPETENCIAS')).toBeLessThan(xml.indexOf('PERFIL PROFESIONAL'));
+  });
+});
+
+describe('docxLook — de CSS a unidades de Word', () => {
+  const colors = PALETTES.find((p) => p.id === 'pizarra')!.colors;
+
+  it('convierte px a medios puntos, twips y múltiplos de línea', () => {
+    const look = docxLook('folha', colors);
+    expect(look.bodySize).toBe(19); // 12,6 px → 9,45 pt → 19 medios puntos
+    expect(look.padX).toBe(600); // 40 px → 30 pt → 600 twips
+    expect(look.line).toBe(372); // 1,55 × 240
+  });
+
+  it('la plantilla decide la tipografía, la caja y el color del título', () => {
+    expect(docxLook('manuscrito', colors).bodyFont).toBe('Georgia');
+    expect(docxLook('tecnico', colors).accentFont).toBe('Consolas');
+    expect(docxLook('linha', colors).heading.color).toBe(docxLook('linha', colors).ink);
+    expect(docxLook('tecnico', colors).heading.color).toBe('0EA5E9');
+  });
+
+  it('Tesis numera las secciones y Consultoría lleva barra de acento', () => {
+    expect(docxLook('tesis', colors).heading.numbered).toBe(true);
+    expect(docxLook('consultoria', colors).heading.edge).toBe(true);
   });
 });

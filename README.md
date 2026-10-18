@@ -46,8 +46,9 @@ Compacto, Académico, Universidad y Tesis. Se eligen de la rejilla por familias 
 nombre.
 
 Las doce comparten el mismo marcado y se diferencian solo por variables CSS. Eso hace que la vista
-previa y el PDF impreso sean **exactamente el mismo documento**, y que añadir una plantilla nueva
-sean unas pocas líneas de CSS.
+previa y el PDF descargable sean **exactamente el mismo documento**, que el `.docx` pueda heredar el
+mismo diseño (`core/models/template-look.ts` es el espejo en datos de esos bloques CSS) y que añadir
+una plantilla nueva sean unas pocas líneas.
 
 Además:
 
@@ -109,14 +110,22 @@ Además:
 ### Exportación
 
 - **Word (`.docx`)** generado en el navegador con `docx`: documento real, editable, con estilos,
-  viñetas e hipervínculos, y pensado para que los filtros ATS lo lean en orden.
-- **PDF** abriendo una ventana de impresión que clona el lienzo ya renderizado: es el diseño exacto
-  de la vista previa, en vectorial. Eliges «Guardar como PDF» en el diálogo.
+  viñetas e hipervínculos, y pensado para que los filtros ATS lo lean en orden. **Lleva el diseño que
+  elegiste**: tipografía (serif, sans o monoespaciada), cuerpo, colores de la paleta, reglas de los
+  títulos, mayúsculas y espaciado, más el **orden de las secciones**. La maquetación es lineal, una
+  sola columna, aunque elijas barra lateral: así ningún ATS se pierde entre cuadros de texto.
+- **PDF (`.pdf`)** descargado al instante, sin diálogo de impresión de por medio. Se rasteriza el
+  lienzo ya renderizado y se corta en páginas A4, así que trae el diseño exacto que ves en pantalla.
+  El corte busca el principio de una sección y no parte un título por la mitad; las páginas de
+  continuación conservan el margen superior del documento. A cambio es una imagen: el texto no se
+  puede seleccionar y un filtro no lo lee.
+- **PDF con texto (`.pdf`)** abre el diálogo del navegador: elige «Guardar como PDF» y obtienes un
+  vectorial con el texto seleccionable, que es lo que pide un portal cuando va a leer el archivo.
 - **Markdown (`.md`)**: estructura limpia en texto plano, útil para portales de empleo y perfiles
   técnicos.
-- Los tres formatos se pueden **seleccionar** y exportar juntos, o uno a uno con *Solo este*.
+- Los cuatro formatos se pueden **seleccionar** y exportar juntos, o uno a uno con *Solo este*.
 - **Marca al pie opcional**, desactivada por defecto. Si la activas, eliges el texto y se aplica a
-  los tres formatos.
+  todos los formatos.
 
 ---
 
@@ -155,7 +164,8 @@ sesión de DevTools por el puerto 9222).
 | Diseño | Sistema propio: blanco + azul `#296cd8` | Colores, radios y sombras definidos como tokens en un único archivo |
 | Tipografía | Pilas del sistema | Cero descargas, mismo aspecto sin conexión, nada que fijar |
 | Word | [`docx`](https://www.npmjs.com/package/docx) 9 | Genera OOXML real en el navegador, con imágenes y estilos |
-| PDF | Diálogo de impresión del navegador | Vectorial, sin dependencias y con fidelidad total al diseño |
+| PDF descargable | [`html2canvas`](https://www.npmjs.com/package/html2canvas) + [`jspdf`](https://www.npmjs.com/package/jspdf) | Rasteriza el lienzo y lo corta en A4: el diseño exacto, sin backend. Se cargan solo al pulsar «PDF» |
+| PDF con texto | Diálogo de impresión del navegador | Vectorial y con texto seleccionable, sin dependencias |
 | Backend | Ninguno | Los datos nunca salen del navegador |
 
 Angular 19 se instaló con el CLI oficial. Sin Tailwind ni librerías de componentes: el sistema de
@@ -184,12 +194,14 @@ src/
     │   │   ├── catalog.ts        # 12 plantillas, 4 estructuras, 15 paletas, datos de ejemplo
     │   │   ├── profiles.ts       # 8 perfiles de CV: secciones, orden y títulos
     │   │   ├── sections.ts       # claves, orden por defecto y etiquetas de sección
+    │   │   ├── template-look.ts  # el diseño de cada plantilla como datos (lo que lee el .docx)
     │   │   ├── ats.ts            # analizador de palabras clave: extracción, revisión y nota
     │   │   ├── ats.spec.ts       # pruebas del analizador (lógica pura, sin DOM)
     │   │   └── labels.ts         # títulos de sección, niveles de idioma, nombres de archivo
     │   └── services/
     │       ├── cv-store.service.ts        # estado con signals, persistencia, CRUD, undo/redo
-    │       ├── exporter.service.ts        # Markdown, .docx (con foto) y ventana de impresión
+    │       ├── exporter.service.ts        # Markdown, .docx (con foto), PDF descargable e impresión
+    │       ├── docx-look.ts               # traduce ese diseño a medios puntos, twips y fuentes de Word
     │       ├── preview-registry.service.ts# expone el lienzo renderizado al exportador
     │       └── toast.service.ts
     ├── features/
@@ -235,9 +247,15 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
 - **Sin IA.** El análisis de palabras clave es aritmética sobre texto: instantáneo, reproducible y
   sin depender de ningún servicio externo ni de ninguna clave. Por eso se recalcula en cada pulsación
   y no sale nada del navegador.
-- **El PDF no usa una librería.** Se clona el lienzo ya renderizado junto con las hojas de estilo
-  aplicadas y se imprime. Una librería de PDF obligaría a mantener un segundo motor de maquetación y
-  el resultado nunca sería idéntico a lo que el usuario ve.
+- **El PDF descargable sí usa librerías, y es a propósito.** `html2canvas` + `jspdf` rasterizan el
+  lienzo y lo cortan en A4: es la única forma de entregar un archivo con el diseño exacto sin backend,
+  a cambio de que el texto deje de ser seleccionable. Por eso el PDF con texto sigue existiendo: son
+  dos necesidades distintas, no dos intentos de lo mismo. Ambos paquetes se cargan **solo** al pulsar
+  «PDF», así que la primera visita no los paga.
+- **El diseño de una plantilla está declarado una sola vez.** Las plantillas son variables CSS, y
+  `template-look.ts` es su espejo en datos; `docx-look.ts` traduce esos números a medios puntos, twips
+  y nombres de fuente. Word no tiene CSS: sin ese espejo el `.docx` salía siempre con la tipografía y
+  el azul por defecto de Word, ignorando lo que el usuario había elegido.
 - **Las plantillas son variables, no plantillas de HTML.** Un solo árbol de marcado, doce juegos de
   tokens.
 - **La foto se recorta antes de guardarla.** Guardar el archivo original reventaría el presupuesto de
@@ -245,10 +263,9 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
   el recorte ocurre una vez, en el navegador, y se guarda un JPEG pequeño.
 - **El perfil vacía, no borra.** Las secciones apagadas conservan sus datos y solo se vacían en la
   copia que ven el documento y los exportadores. Encender una sección la devuelve completa.
-- **El orden de las secciones se respeta en la vista previa y en el PDF.** Word y Markdown conservan
-  los títulos y la visibilidad del perfil, pero escriben las secciones en el orden convencional del
-  documento, que es el que un ATS espera encontrar. Igualarlo al orden del perfil está en la lista de
-  pendientes.
+- **El orden de las secciones se respeta en la vista previa, el Word y el PDF.** Con barra lateral
+  manda la columna lateral, que es el orden en que el ojo las lee. Markdown sigue escribiendo las
+  secciones en el orden convencional del documento, que es lo que un ATS espera encontrar en un `.md`.
 - **Extractor de comparación y extractor de presentación son el mismo.** Comparar la oferta con el CV
   exige bajar a minúsculas y quitar acentos, pero al lector hay que enseñarle las palabras tal como
   las escribió el anuncio. Cada coincidencia arrastra sus dos formas desde el mismo punto, de modo que
@@ -261,12 +278,12 @@ Claves de almacenamiento (todas con prefijo `cvgen.`):
 Funciona de punta a punta y está verificado en navegador: los ocho perfiles, las doce plantillas, las
 cuatro estructuras, el autoguardado, deshacer/rehacer, la reordenación arrastrando, las secciones que
 se encienden y se apagan, la foto opcional, el análisis de palabras clave y la exportación a Word
-(comprobada descomprimiendo el `.docx`, con foto, títulos y visibilidad del perfil). Las 13 pruebas
-unitarias del analizador pasan con `npm test`.
+(comprobada descomprimiendo el `.docx`: tipografía, paleta, orden de secciones, foto, títulos y
+visibilidad del perfil) y a PDF. Las 35 pruebas unitarias pasan con `npm test`.
 
 Pendiente, por orden de valor:
 
-- [ ] Que Word y Markdown respeten también el orden de secciones del perfil.
+- [ ] Que Markdown respete también el orden de secciones del perfil.
 - [ ] Varios CV por perfil, con duplicar y archivar.
 - [ ] Generador de carta de presentación a partir de la misma oferta.
 - [ ] Pruebas de extremo a extremo (las unitarias ya cubren el analizador).

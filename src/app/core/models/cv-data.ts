@@ -170,4 +170,9 @@ export interface SavedPalette {
 
 /* ── Export ────────────────────────────────────────────────────────────── */
 
-export type ExportFormat = 'docx' | 'pdf' | 'markdown';
+/**
+ * `pdf` is the file the app builds and downloads on the spot; `pdf-print` is
+ * the browser's print dialog, which is the only way to get a PDF whose text can
+ * still be selected — handy when a job portal parses the file.
+ */
+export type ExportFormat = 'docx' | 'pdf' | 'pdf-print' | 'markdown';

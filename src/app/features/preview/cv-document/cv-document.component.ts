@@ -14,9 +14,9 @@ import {
   toHref,
 } from '../../../core/models/labels';
 import {
-  ALL_SECTION_KEYS,
   DEFAULT_SECTION_ORDER,
-  SIDE_SECTION_KEYS,
+  isSideSection,
+  orderedSections,
   type SectionKey,
 } from '../../../core/models/sections';
 
@@ -108,19 +108,11 @@ export class CvDocumentComponent {
   readonly isTwoColumn = computed(() => this.layoutId() === 'two-column');
 
   /** Section order for the single-column and two-column layouts. */
-  readonly singleOrder = computed<SectionKey[]>(() => {
-    const provided = this.order().filter((k) => ALL_SECTION_KEYS.includes(k));
-    const missing = ALL_SECTION_KEYS.filter((k) => !provided.includes(k));
-    return [...provided, ...missing];
-  });
+  readonly singleOrder = computed<SectionKey[]>(() => orderedSections(this.order()));
 
-  readonly mainOrder = computed(() =>
-    this.singleOrder().filter((k) => !SIDE_SECTION_KEYS.includes(k)),
-  );
+  readonly mainOrder = computed(() => this.singleOrder().filter((key) => !isSideSection(key)));
 
-  readonly sideOrder = computed(() =>
-    this.singleOrder().filter((k) => SIDE_SECTION_KEYS.includes(k)),
-  );
+  readonly sideOrder = computed(() => this.singleOrder().filter(isSideSection));
 
   private readonly visible = computed<Record<SectionKey, boolean>>(() => {
     const d = this.data();
