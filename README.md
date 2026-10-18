@@ -88,6 +88,10 @@ Además:
   apagar una sección entra en el historial como cualquier otra edición.
 - **Autoguardado** en `localStorage`: cada cambio se guarda solo, sin botones ni avisos.
 - **Copia de seguridad en JSON**: exportar e importar el CV completo.
+- **Enlaces con nombre**: el correo, el teléfono y la ciudad se leen como texto, pero LinkedIn,
+  GitHub, la web y el portafolio se muestran con su nombre (no con la URL) y se abren en una pestaña
+  nueva. Cada proyecto admite **dos enlaces opcionales, «Demo» y «GitHub»**, y en el Word salen como
+  hipervínculos de verdad.
 
 ### Análisis frente a la oferta
 

@@ -16,9 +16,12 @@ import {
 } from 'docx';
 import type { CVData, ExportFormat, PaletteColors } from '../models/cv-data';
 import {
+  CONTACT_LABELS,
   PROFICIENCY_LABELS,
+  PROJECT_LABELS,
   SECTION_TITLES as BASE_SECTION_TITLES,
   safeFileName,
+  toHref,
 } from '../models/labels';
 import type { SectionKey } from '../models/sections';
 
@@ -91,15 +94,11 @@ export class ExporterService {
     if (p.name) out.push(`# ${p.name}`);
     if (p.title) out.push(`**${p.title}**`);
 
-    const contacts = [
-      p.email,
-      p.phone,
-      p.location,
-      p.website,
-      p.linkedin,
-      p.github,
-      p.portfolio,
-    ].filter(Boolean) as string[];
+    // Email, phone and city as plain text; the profile links by name, so the
+    // header reads "LinkedIn · GitHub" instead of a wall of URLs.
+    const contacts = this.contactsOf(p).map((c) =>
+      c.href ? `[${c.text}](${toHref(c.href)})` : c.text,
+    );
     if (contacts.length) out.push(contacts.join(' · '));
 
     if (cv.summary) out.push('', `## ${SECTION_TITLES.summary}`, '', cv.summary);
@@ -148,7 +147,11 @@ export class ExporterService {
         if (pr.description) out.push('', pr.description);
         const tech = pr.technologies.filter(Boolean);
         if (tech.length) out.push('', `Tecnologías: ${tech.join(', ')}`);
-        if (pr.url) out.push('', `[${pr.url}](${pr.url})`);
+        const projectLinks = [
+          pr.demoUrl ? `[${PROJECT_LABELS.demo}](${toHref(pr.demoUrl)})` : '',
+          pr.repoUrl ? `[${PROJECT_LABELS.repo}](${toHref(pr.repoUrl)})` : '',
+        ].filter(Boolean);
+        if (projectLinks.length) out.push('', projectLinks.join(' · '));
       }
     }
 
@@ -266,6 +269,28 @@ export class ExporterService {
     this.download(blob, `${name}.docx`);
   }
 
+  /**
+   * The header line, as parts. Email, phone and city are text; the profile
+   * links are name + target, so the exports can render them as real hyperlinks
+   * ("LinkedIn") instead of pasting the raw URL.
+   */
+  private contactsOf(p: CVData['personalInfo']): { text: string; href?: string }[] {
+    const out: { text: string; href?: string }[] = [];
+    for (const value of [p.email, p.phone, p.location]) {
+      if (value?.trim()) out.push({ text: value.trim() });
+    }
+    const links: [string, string | undefined][] = [
+      [CONTACT_LABELS.website, p.website],
+      [CONTACT_LABELS.linkedin, p.linkedin],
+      [CONTACT_LABELS.github, p.github],
+      [CONTACT_LABELS.portfolio, p.portfolio],
+    ];
+    for (const [label, url] of links) {
+      if (url?.trim()) out.push({ text: label, href: url.trim() });
+    }
+    return out;
+  }
+
   private sectionHeading(text: string, accent: string): Paragraph {
     return new Paragraph({
       heading: HeadingLevel.HEADING_2,
@@ -350,17 +375,25 @@ export class ExporterService {
       );
     }
 
-    // Contact line, joined with a middle dot — plain text so ATS parsers read it.
-    const contacts = [p.email, p.phone, p.location, p.website, p.linkedin, p.github, p.portfolio]
-      .filter(Boolean)
-      .join('  ·  ');
-    if (contacts) {
-      nodes.push(
-        new Paragraph({
-          spacing: { after: 60 },
-          children: [new TextRun({ text: contacts, size: 19, color: '71717A' })],
-        }),
+    // Contact line, joined with a middle dot. Email, phone and city stay as
+    // plain text (that is what an ATS reads); the profile links carry their
+    // name and stay clickable in Word.
+    const contactRuns: (TextRun | ExternalHyperlink)[] = [];
+    for (const c of this.contactsOf(p)) {
+      if (contactRuns.length) {
+        contactRuns.push(new TextRun({ text: '  ·  ', size: 19, color: '71717A' }));
+      }
+      contactRuns.push(
+        c.href
+          ? new ExternalHyperlink({
+              link: toHref(c.href),
+              children: [new TextRun({ text: c.text, size: 19, color: accent, underline: {} })],
+            })
+          : new TextRun({ text: c.text, size: 19, color: '71717A' }),
       );
+    }
+    if (contactRuns.length) {
+      nodes.push(new Paragraph({ spacing: { after: 60 }, children: contactRuns }));
     }
 
     if (cv.summary) {
@@ -490,18 +523,23 @@ export class ExporterService {
             }),
           );
         }
-        if (pr.url) {
-          nodes.push(
-            new Paragraph({
-              spacing: { after: 40 },
-              children: [
-                new ExternalHyperlink({
-                  link: pr.url,
-                  children: [new TextRun({ text: pr.url, size: 19, color: accent, underline: {} })],
-                }),
-              ],
-            }),
-          );
+        const projectLinks: { label: string; url: string }[] = [];
+        if (pr.demoUrl) projectLinks.push({ label: PROJECT_LABELS.demo, url: pr.demoUrl });
+        if (pr.repoUrl) projectLinks.push({ label: PROJECT_LABELS.repo, url: pr.repoUrl });
+        if (projectLinks.length) {
+          const runs: (TextRun | ExternalHyperlink)[] = [];
+          for (const link of projectLinks) {
+            if (runs.length) runs.push(new TextRun({ text: '  ·  ', size: 19, color: '71717A' }));
+            runs.push(
+              new ExternalHyperlink({
+                link: toHref(link.url),
+                children: [
+                  new TextRun({ text: link.label, size: 19, color: accent, underline: {} }),
+                ],
+              }),
+            );
+          }
+          nodes.push(new Paragraph({ spacing: { after: 40 }, children: runs }));
         }
       }
     }

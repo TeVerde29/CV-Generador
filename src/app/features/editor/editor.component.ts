@@ -156,7 +156,8 @@ export class EditorComponent {
       name: '',
       description: '',
       technologies: [],
-      url: '',
+      demoUrl: '',
+      repoUrl: '',
     }));
   }
 

@@ -9,6 +9,32 @@ export const PROFICIENCY_LABELS: Record<Proficiency, string> = {
   basic: 'Básico',
 };
 
+/**
+ * What the reader sees instead of a raw URL. The links travel as their target,
+ * but the document shows a name: a header full of "linkedin.com/in/…" is noise,
+ * and the label is what a person actually scans for.
+ */
+export const CONTACT_LABELS = {
+  website: 'Web',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  portfolio: 'Portafolio',
+} as const;
+
+export const PROJECT_LABELS = { demo: 'Demo', repo: 'GitHub' } as const;
+
+/**
+ * Turns a stored link into something a browser can follow. Values are typed by
+ * hand, so "linkedin.com/in/x" and "https://linkedin.com/in/x" both have to
+ * work: the scheme is added only when it is missing.
+ */
+export function toHref(value?: string): string {
+  const link = (value ?? '').trim();
+  if (!link) return '';
+  if (/^[a-z][a-z0-9+.-]*:/i.test(link) || link.startsWith('//')) return link;
+  return `https://${link}`;
+}
+
 export const SECTION_TITLES = {
   summary: 'Perfil profesional',
   experience: 'Experiencia profesional',

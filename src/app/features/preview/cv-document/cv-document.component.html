@@ -14,9 +14,20 @@
       }
       @if (contacts().length) {
         <p class="cv-contacts">
-          @for (c of contacts(); track c; let last = $last) {
+          @for (c of contacts(); track c.text; let last = $last) {
             <span class="cv-contact-item">
-              <span class="cv-contact">{{ c }}</span>
+              @if (c.href) {
+                <a
+                  class="cv-contact cv-contact--link"
+                  [href]="linkHref(c.href)"
+                  [title]="c.href"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{{ c.text }}</a
+                >
+              } @else {
+                <span class="cv-contact">{{ c.text }}</span>
+              }
               @if (!last) {
                 <span class="cv-sep" aria-hidden="true">·</span>
               }
@@ -180,8 +191,29 @@
             <div class="cv-item">
               <div class="cv-item-head">
                 <h3 class="cv-item-title">{{ pr.name }}</h3>
-                @if (pr.url) {
-                  <span class="cv-item-period">{{ pr.url }}</span>
+                @if (pr.demoUrl || pr.repoUrl) {
+                  <span class="cv-item-links">
+                    @if (pr.demoUrl) {
+                      <a
+                        class="cv-link"
+                        [href]="linkHref(pr.demoUrl)"
+                        [title]="pr.demoUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{{ projectLabels.demo }}</a
+                      >
+                    }
+                    @if (pr.repoUrl) {
+                      <a
+                        class="cv-link"
+                        [href]="linkHref(pr.repoUrl)"
+                        [title]="pr.repoUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{{ projectLabels.repo }}</a
+                      >
+                    }
+                  </span>
                 }
               </div>
               @if (pr.description) {

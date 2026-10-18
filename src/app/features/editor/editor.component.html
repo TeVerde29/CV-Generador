@@ -639,7 +639,7 @@
             </header>
 
             <div class="item-body">
-              <div class="fields fields--2">
+              <div class="fields fields--3">
                 <label class="field">
                   <span class="label">Nombre</span>
                   <input
@@ -650,16 +650,33 @@
                   />
                 </label>
                 <label class="field">
-                  <span class="label">Enlace</span>
+                  <span class="label">Demo</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="https://…"
+                    [value]="pr.demoUrl"
+                    (input)="
+                      store.patchItem('projects', pr.id, { demoUrl: $any($event.target).value })
+                    "
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">GitHub</span>
                   <input
                     class="input"
                     type="text"
                     placeholder="https://github.com/…"
-                    [value]="pr.url"
-                    (input)="store.patchItem('projects', pr.id, { url: $any($event.target).value })"
+                    [value]="pr.repoUrl"
+                    (input)="
+                      store.patchItem('projects', pr.id, { repoUrl: $any($event.target).value })
+                    "
                   />
                 </label>
               </div>
+              <p class="block-hint">
+                Los dos enlaces son opcionales y se muestran como «Demo» y «GitHub».
+              </p>
               <label class="field">
                 <span class="label">Descripción</span>
                 <textarea

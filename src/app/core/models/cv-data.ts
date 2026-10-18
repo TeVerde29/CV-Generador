@@ -65,7 +65,10 @@ export interface ProjectItem {
   name: string;
   description: string;
   technologies: string[];
-  url?: string;
+  /** Live demo, when the project has one published. */
+  demoUrl?: string;
+  /** Source repository, when the code is public. */
+  repoUrl?: string;
 }
 
 export interface CertificationItem {

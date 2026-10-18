@@ -84,6 +84,12 @@ function safeParse<T>(raw: string | null, fallback: T): T {
 
 const arr = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 
+/** A link field, trimmed, or `undefined` when it is empty or not a string. */
+const asLink = (v: unknown): string | undefined => {
+  const link = typeof v === 'string' ? v.trim() : '';
+  return link || undefined;
+};
+
 /** Guarantees every section exists so the preview never crashes on odd input. */
 export function normalizeCVData(input: unknown): CVData {
   const d = (input && typeof input === 'object' ? input : {}) as Record<string, any>;
@@ -100,10 +106,17 @@ export function normalizeCVData(input: unknown): CVData {
     education: arr<EducationItem>(d['education']),
     skills: arr<SkillGroup>(d['skills']).map((x) => ({ ...x, items: arr<string>(x?.items) })),
     languages: arr<LanguageItem>(d['languages']),
-    projects: arr<ProjectItem>(d['projects']).map((x) => ({
-      ...x,
-      technologies: arr<string>(x?.technologies),
-    })),
+    projects: arr<ProjectItem & { url?: string }>(d['projects']).map((raw) => {
+      // An older copy of the CV (or an imported JSON) still carries the single
+      // `url`; it becomes the demo link instead of being silently dropped.
+      const { url, ...rest } = (raw ?? {}) as ProjectItem & { url?: string };
+      return {
+        ...rest,
+        technologies: arr<string>(rest.technologies),
+        demoUrl: asLink(rest.demoUrl) || asLink(url) || '',
+        repoUrl: asLink(rest.repoUrl) || '',
+      };
+    }),
     certifications: arr<CertificationItem>(d['certifications']),
     publications: arr<PublicationItem>(d['publications']),
     volunteerWork: arr<VolunteerItem>(d['volunteerWork']),

@@ -6,7 +6,13 @@ import type {
   LayoutOption,
   PaletteColors,
 } from '../../../core/models/cv-data';
-import { PROFICIENCY_LABELS, SECTION_TITLES } from '../../../core/models/labels';
+import {
+  CONTACT_LABELS,
+  PROFICIENCY_LABELS,
+  PROJECT_LABELS,
+  SECTION_TITLES,
+  toHref,
+} from '../../../core/models/labels';
 import {
   ALL_SECTION_KEYS,
   DEFAULT_SECTION_ORDER,
@@ -15,6 +21,12 @@ import {
 } from '../../../core/models/sections';
 
 export type { SectionKey };
+
+/** One item of the contact line: plain text, or a named link. */
+export interface ContactLink {
+  text: string;
+  href?: string;
+}
 
 /**
  * Renders one CV "sheet".
@@ -63,12 +75,32 @@ export class CvDocumentComponent {
 
   readonly photo = computed(() => this.data().personalInfo.photo ?? '');
 
-  readonly contacts = computed(() => {
+  /**
+   * The contact line. Email, phone and city stay as plain text — they are what
+   * an ATS reads — while the profile links show their name ("GitHub") instead
+   * of a raw URL, because that is what a person scans for.
+   */
+  readonly contacts = computed<ContactLink[]>(() => {
     const p = this.profile();
-    return [p.email, p.phone, p.location, p.website, p.linkedin, p.github, p.portfolio].filter(
-      Boolean,
-    ) as string[];
+    const out: ContactLink[] = [];
+    if (p.email) out.push({ text: p.email });
+    if (p.phone) out.push({ text: p.phone });
+    if (p.location) out.push({ text: p.location });
+    const links: [string, string | undefined][] = [
+      [CONTACT_LABELS.website, p.website],
+      [CONTACT_LABELS.linkedin, p.linkedin],
+      [CONTACT_LABELS.github, p.github],
+      [CONTACT_LABELS.portfolio, p.portfolio],
+    ];
+    for (const [label, href] of links) {
+      if (href?.trim()) out.push({ text: label, href: href.trim() });
+    }
+    return out;
   });
+
+  /** Exposed so the template can turn a stored link into something clickable. */
+  readonly linkHref = toHref;
+  readonly projectLabels = PROJECT_LABELS;
 
   readonly hasSidebar = computed(
     () => this.layoutId() === 'sidebar-left' || this.layoutId() === 'sidebar-right',

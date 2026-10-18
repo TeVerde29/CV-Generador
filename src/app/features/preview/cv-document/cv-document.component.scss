@@ -153,6 +153,19 @@
   color: var(--cv-rule);
 }
 
+/* Links carry their name, not the URL, so they need to look clickable: an
+   underline in the contact's own colour, and the accent on hover. */
+.cv-contact--link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.cv-contact--link:hover {
+  color: var(--cv-accent);
+}
+
 /* ── Body layouts ──────────────────────────────────────────────────────── */
 
 .cv-body {
@@ -265,6 +278,25 @@
   color: var(--cv-muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* Demo / GitHub, side by side at the end of the project's title line. */
+.cv-item-links {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--cv-meta-font);
+  font-size: calc(var(--cv-base) * 0.86);
+  white-space: nowrap;
+}
+
+.cv-link {
+  color: var(--cv-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 .cv-item-sub {
