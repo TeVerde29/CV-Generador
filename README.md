@@ -1,3 +1,5 @@
+<img src="public/logo-cv-generador.png" alt="Logotipo de CV Generador" width="112">
+
 # CV Generador — editor de currículums que corre entero en tu navegador
 
 > Escribes el CV una vez, eliges perfil y plantilla, lo ves en A4 en vivo y lo descargas en Word,

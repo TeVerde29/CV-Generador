@@ -29,22 +29,11 @@
 }
 
 .brand-mark {
-  position: relative;
-  width: 17px;
-  height: 17px;
-  border-radius: 4px;
-  background: var(--ink);
+  display: block;
+  width: 26px;
+  height: 26px;
   flex: none;
-}
-.brand-mark::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  top: 8px;
-  height: 1.5px;
-  background: var(--text-inverse);
-  opacity: 0.85;
+  object-fit: contain;
 }
 
 .brand-name {
