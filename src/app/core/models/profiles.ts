@@ -100,28 +100,6 @@ export const PROFILES: CvProfile[] = [
       skills: 'Habilidades',
     },
   },
-  {
-    id: 'ricra',
-    name: 'Ricra',
-    description: 'Perfil técnico completo: resumen, habilidades por familias y proyectos.',
-    order: [
-      'summary',
-      'skills',
-      'experience',
-      'projects',
-      'education',
-      'languages',
-      'certifications',
-    ],
-    titles: {
-      summary: 'Resumen profesional',
-      skills: 'Habilidades técnicas',
-      experience: 'Experiencia profesional',
-      projects: 'Proyectos relevantes',
-      education: 'Educación',
-      certifications: 'Certificaciones y cursos',
-    },
-  },
 ];
 
 export const findProfile = (id: string): CvProfile | undefined =>

@@ -245,7 +245,7 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
       layoutId: 'single',
       sectionOrder: ['education', 'interests', 'summary', 'experience', 'skills'],
     });
-    const education = xml.indexOf('Formación académica');
+    const education = xml.indexOf('Formación Académica');
     const interests = xml.indexOf('Intereses');
     const summary = xml.indexOf('Perfil profesional');
     expect(education).toBeGreaterThan(-1);
@@ -268,7 +268,7 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
     const xml = (
       await documentXml({ templateId: 'folha', layoutId: 'sidebar-left', sectionOrder: [] })
     ).toUpperCase();
-    expect(xml.indexOf('COMPETENCIAS')).toBeLessThan(xml.indexOf('PERFIL PROFESIONAL'));
+    expect(xml.indexOf('HABILIDADES Y COMPETENCIAS')).toBeLessThan(xml.indexOf('PERFIL PROFESIONAL'));
   });
 });
 

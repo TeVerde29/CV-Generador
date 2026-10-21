@@ -45,7 +45,6 @@ export interface EducationItem {
   field: string;
   startDate: string;
   endDate: string;
-  gpa?: string;
 }
 
 export interface SkillGroup {
@@ -105,6 +104,24 @@ export interface AwardItem {
   description?: string;
 }
 
+export interface ReferenceItem {
+  id: string;
+  name: string;
+  title: string;
+  email: string;
+  phone: string;
+}
+
+export interface CustomSectionItem {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  link: string;
+  description: string;
+  items: string[];
+}
+
 export interface CVData {
   personalInfo: PersonalInfo;
   summary: string;
@@ -118,6 +135,8 @@ export interface CVData {
   volunteerWork: VolunteerItem[];
   awards: AwardItem[];
   interests: string[];
+  references: ReferenceItem[];
+  customSections: CustomSectionItem[];
 }
 
 /* ── Template / layout / palette catalog types ─────────────────────────── */

@@ -142,8 +142,7 @@ export class ExporterService {
         const period = [ed.startDate, ed.endDate].filter(Boolean).join(' – ');
         const degree = [ed.degree, ed.field].filter(Boolean).join(', ');
         out.push('', `### ${[degree, ed.institution].filter(Boolean).join(' — ')}`);
-        const meta = [period, ed.gpa ? `Nota: ${ed.gpa}` : ''].filter(Boolean).join(' · ');
-        if (meta) out.push(`*${meta}*`);
+        if (period) out.push(`*${period}*`);
       }
     }
 
@@ -217,6 +216,29 @@ export class ExporterService {
 
     if (cv.interests.length) {
       out.push('', `## ${SECTION_TITLES.interests}`, '', cv.interests.join(' · '));
+    }
+
+    if (cv.references.length) {
+      out.push('', `## ${SECTION_TITLES.references}`);
+      for (const r of cv.references) {
+        const meta = [r.email, r.phone].filter(Boolean).join(' · ');
+        const line = [r.name, r.title].filter(Boolean).join(' — ');
+        out.push(`- **${line}**${meta ? ` — ${meta}` : ''}`);
+        if (r.email) out.push(`  ${r.email}`);
+        if (r.phone) out.push(`  ${r.phone}`);
+      }
+    }
+
+    if (cv.customSections.length) {
+      out.push('', `## ${SECTION_TITLES.customSection}`);
+      for (const c of cv.customSections) {
+        const period = [c.startDate, c.endDate].filter(Boolean).join(' – ');
+        out.push('', `### ${c.title}`);
+        if (period) out.push(`*${period}*`);
+        if (c.link) out.push('', `Enlace: ${toHref(c.link)}`);
+        if (c.description) out.push('', c.description);
+        for (const item of c.items.filter(Boolean)) out.push(`- ${item}`);
+      }
     }
 
     if (watermark?.enabled && watermark.text.trim()) {
@@ -555,12 +577,9 @@ export class ExporterService {
           nodes.push(this.sectionHeading(SECTION_TITLES.education, look, ++number));
           for (const ed of cv.education) {
             const degree = [ed.degree, ed.field].filter(Boolean).join(', ');
-            const right = [
-              [ed.startDate, ed.endDate].filter(Boolean).join(' – '),
-              ed.gpa ? `Nota: ${ed.gpa}` : '',
-            ]
+            const right = [ed.startDate, ed.endDate]
               .filter(Boolean)
-              .join('  ·  ');
+              .join(' – ');
             nodes.push(
               head(
                 [
@@ -569,7 +588,7 @@ export class ExporterService {
                     ? [text(`  ·  ${ed.institution}`, entry, look.secondary)]
                     : []),
                 ],
-                right,
+                right || undefined,
               ),
             );
           }
@@ -762,6 +781,87 @@ export class ExporterService {
           nodes.push(
             new Paragraph({ children: [text(cv.interests.join('  ·  '))] }),
           );
+          break;
+        }
+
+        case 'references': {
+          if (!cv.references.length) break;
+          nodes.push(this.sectionHeading(SECTION_TITLES.references, look, ++number));
+          for (const r of cv.references) {
+            const line = [r.name, r.title].filter(Boolean).join(' — ');
+            const meta = [r.email, r.phone].filter(Boolean).join(' · ');
+            nodes.push(
+              new Paragraph({
+                spacing: { after: 20 },
+                children: [
+                  text(line, body, look.ink, true),
+                  ...(meta ? [text(` — ${meta}`, body, look.muted)] : []),
+                ],
+              }),
+            );
+          }
+          break;
+        }
+
+        case 'customSection': {
+          if (!cv.customSections.length) break;
+          nodes.push(this.sectionHeading(SECTION_TITLES.customSection, look, ++number));
+          for (const c of cv.customSections) {
+            const period = [c.startDate, c.endDate].filter(Boolean).join(' – ');
+            nodes.push(
+              new Paragraph({
+                spacing: { before: 120, after: 0 },
+                children: [text(c.title || '', entry, look.ink, true)],
+              }),
+            );
+            if (period) {
+              nodes.push(
+                new Paragraph({
+                  spacing: { after: 40 },
+                  children: [
+                    new TextRun({
+                      text: period,
+                      font: look.accentFont,
+                      size: meta,
+                      color: look.muted,
+                      italics: true,
+                    }),
+                  ],
+                }),
+              );
+            }
+            if (c.link) {
+              nodes.push(
+                new Paragraph({
+                  spacing: { after: 40 },
+                  children: [
+                    text('Enlace: ', meta, look.ink, true),
+                    new ExternalHyperlink({
+                      link: toHref(c.link),
+                      children: [new TextRun({ text: c.link, font: look.bodyFont, size: meta, color: look.accent, underline: {} })],
+                    }),
+                  ],
+                }),
+              );
+            }
+            if (c.description) {
+              nodes.push(
+                new Paragraph({
+                  spacing: { after: 40 },
+                  children: [text(c.description)],
+                }),
+              );
+            }
+            for (const item of c.items.filter(Boolean)) {
+              nodes.push(
+                new Paragraph({
+                  bullet: { level: 0 },
+                  spacing: { after: 20 },
+                  children: [text(item)],
+                }),
+              );
+            }
+          }
           break;
         }
       }

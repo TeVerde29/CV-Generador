@@ -22,13 +22,24 @@ import type {
   Preset,
   ProjectItem,
   PublicationItem,
+  ReferenceItem,
   SavedPalette,
   SkillGroup,
+  CustomSectionItem,
   VolunteerItem,
 } from '../models/cv-data';
 import { SECTION_TITLES } from '../models/labels';
-import { PROFILES, findProfile, profileFullOrder, profileHidden } from '../models/profiles';
-import { ALL_SECTION_KEYS, DEFAULT_SECTION_ORDER, type SectionKey } from '../models/sections';
+import {
+  PROFILES,
+  findProfile,
+  profileFullOrder,
+  profileHidden,
+} from '../models/profiles';
+import {
+  ALL_SECTION_KEYS,
+  DEFAULT_SECTION_ORDER,
+  type SectionKey,
+} from '../models/sections';
 
 /* ── Collection plumbing ───────────────────────────────────────────────── */
 
@@ -42,6 +53,8 @@ interface CollectionMap {
   publications: PublicationItem;
   volunteerWork: VolunteerItem;
   awards: AwardItem;
+  references: ReferenceItem;
+  customSections: CustomSectionItem;
 }
 
 export type CollectionKey = keyof CollectionMap;
@@ -56,6 +69,8 @@ export const COLLECTION_LABELS: Record<CollectionKey, { singular: string; plural
   publications: { singular: 'publicación', plural: 'publicaciones' },
   volunteerWork: { singular: 'voluntariado', plural: 'voluntariados' },
   awards: { singular: 'reconocimiento', plural: 'reconocimientos' },
+  references: { singular: 'referencia', plural: 'referencias' },
+  customSections: { singular: 'entrada', plural: 'entradas' },
 };
 
 const KEY = {
@@ -122,6 +137,11 @@ export function normalizeCVData(input: unknown): CVData {
     volunteerWork: arr<VolunteerItem>(d['volunteerWork']),
     awards: arr<AwardItem>(d['awards']),
     interests: arr<string>(d['interests']),
+    references: arr<ReferenceItem>(d['references']),
+    customSections: arr<CustomSectionItem>(d['customSections']).map((x) => ({
+      ...x,
+      items: arr<string>(x?.items),
+    })),
   };
 }
 

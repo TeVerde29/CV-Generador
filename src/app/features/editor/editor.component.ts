@@ -53,6 +53,8 @@ export class EditorComponent {
       d.publications.length > 0,
       d.volunteerWork.length > 0,
       d.awards.length > 0,
+      d.references.length > 0,
+      d.customSections.length > 0,
     ];
     const done = checks.filter(Boolean).length;
     return { done, total: checks.length, percent: Math.round((done / checks.length) * 100) };
@@ -88,6 +90,8 @@ export class EditorComponent {
         'volunteerWork',
         'awards',
         'interests',
+        'references',
+        'customSection',
       ]),
     );
   }
@@ -105,6 +109,10 @@ export class EditorComponent {
         return d.summary.trim() ? 1 : 0;
       case 'interests':
         return d.interests.length;
+      case 'references':
+        return d.references.length;
+      case 'customSection':
+        return d.customSections.length;
       default:
         return (d[key] as unknown[]).length;
     }
@@ -132,7 +140,6 @@ export class EditorComponent {
       field: '',
       startDate: '',
       endDate: '',
-      gpa: '',
     }));
   }
 
@@ -193,6 +200,28 @@ export class EditorComponent {
 
   addAward(): void {
     this.store.addItem('awards', (id) => ({ id, title: '', issuer: '', date: '', description: '' }));
+  }
+
+  addReference(): void {
+    this.store.addItem('references', (id) => ({
+      id,
+      name: '',
+      title: '',
+      email: '',
+      phone: '',
+    }));
+  }
+
+  addCustomSection(): void {
+    this.store.addItem('customSections', (id) => ({
+      id,
+      title: '',
+      startDate: '',
+      endDate: '',
+      link: '',
+      description: '',
+      items: [],
+    }));
   }
 
   /* ── Nested list setters ────────────────────────────────────────────── */

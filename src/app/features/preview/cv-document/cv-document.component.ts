@@ -128,6 +128,8 @@ export class CvDocumentComponent {
       volunteerWork: d.volunteerWork.length > 0,
       awards: d.awards.length > 0,
       interests: d.interests.length > 0,
+      references: d.references.length > 0,
+      customSection: d.customSections.length > 0,
     };
   });
 

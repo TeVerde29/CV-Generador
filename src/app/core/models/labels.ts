@@ -38,15 +38,17 @@ export function toHref(value?: string): string {
 export const SECTION_TITLES = {
   summary: 'Perfil profesional',
   experience: 'Experiencia profesional',
-  education: 'Formación académica',
-  skills: 'Competencias',
+  education: 'Formación Académica',
+  skills: 'Habilidades y Competencias',
   languages: 'Idiomas',
   projects: 'Proyectos',
-  certifications: 'Certificaciones',
+  certifications: 'Certificaciones y cursos',
   publications: 'Publicaciones',
   volunteerWork: 'Voluntariado',
   awards: 'Reconocimientos',
   interests: 'Intereses',
+  references: 'Referencias',
+  customSection: 'Sección Personalizada',
 } as const;
 
 /** File name safe for Windows/macOS/Linux and for the browser download API. */

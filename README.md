@@ -83,8 +83,8 @@ analizador de ofertas y marca al pie).
 
 ## Características principales
 
-- **Perfil y plantilla como ejes independientes:** ocho perfiles (Predeterminado, Clásico,
-  Ejecutivo, Técnico, Estudiante, Sin experiencia, Una página y Ricra) que cambian secciones, orden y
+- **Perfil y plantilla como ejes independientes:** siete perfiles (Predeterminado, Clásico,
+  Ejecutivo, Técnico, Estudiante, Sin experiencia y Una página) que cambian secciones, orden y
   títulos, y doce plantillas (Folha, Linha, Manuscrito, Corporativo, Executivo, Consultoría, Técnico,
   Revista, Compacto, Académico, Universidad y Tesis) agrupadas en cuatro familias: Esencial,
   Corporativo, Creativo y Académico.
@@ -152,7 +152,7 @@ src/
     │   ├── models/
     │   │   ├── cv-data.ts                # contrato CVData + normalizeCVData() tolerante
     │   │   ├── catalog.ts                # 12 plantillas, 4 estructuras, 15 paletas y SAMPLE_CV_DATA
-    │   │   ├── profiles.ts               # 8 perfiles: secciones visibles, orden y títulos
+    │   │   ├── profiles.ts               # 7 perfiles: secciones visibles, orden y títulos
     │   │   ├── sections.ts               # SectionKey, orden por defecto, lado y documentOrder()
     │   │   ├── template-look.ts          # el aspecto de cada plantilla como datos (lo que lee el .docx)
     │   │   ├── labels.ts                 # etiquetas de contacto y proyecto, toHref() y safeFileName()
@@ -164,7 +164,7 @@ src/
     │       ├── preview-registry.service.ts # expone el A4 renderizado al exportador de PDF
     │       └── toast.service.ts
     ├── features/
-    │   ├── editor/              # panel de datos: doce bloques, orden y visibilidad de secciones
+    │   ├── editor/              # panel de datos: catorce bloques, orden y visibilidad de secciones
     │   ├── design/              # panel de diseño: perfil, plantilla, estructura, paleta y colores propios
     │   ├── ats/                 # panel de análisis frente a la oferta
     │   ├── export/              # popover de exportación
@@ -213,8 +213,8 @@ Pages, Netlify o un bucket S3 tal cual.
 
 ### Flujo básico de uso
 
-1. **Escribe los datos** en el panel «Datos»: los doce bloques se despliegan por separado y cada uno
-   muestra cuántos elementos tiene. La barra superior lleva la cuenta (`12/12`).
+1. **Escribe los datos** en el panel «Datos»: los catorce bloques se despliegan por separado y cada
+   uno muestra cuántos elementos tiene. La barra superior lleva la cuenta (`14/14`).
 2. **Ajusta el orden y apaga lo que no quieras** desde «Orden de las secciones», dentro del propio
    editor. Apagar una sección no borra sus datos.
 3. **Elige el perfil** en «Diseño → Perfil del currículum» (qué secciones aparecen y en qué orden) y
@@ -253,7 +253,7 @@ interface CVData {
   summary: string;
   experience: ExperienceItem[];      // position, company, location, startDate, endDate,
                                      // description, achievements[]
-  education: EducationItem[];        // degree, field, institution, startDate, endDate, description
+  education: EducationItem[];        // degree, field, institution, startDate, endDate
   skills: SkillGroup[];              // { category, items[] }
   languages: LanguageItem[];         // { name, level }
   projects: ProjectItem[];           // name, role, description, technologies[], demoUrl?, repoUrl?
@@ -262,6 +262,8 @@ interface CVData {
   volunteerWork: VolunteerItem[];
   awards: AwardItem[];
   interests: string[];
+  references: ReferenceItem[];       // { name, title, email, phone }
+  customSections: CustomSectionItem[]; // { title, startDate, endDate, link, description, items[] }
 }
 ```
 
@@ -343,7 +345,7 @@ DevTools por el puerto 9222.
 
 ## Estado y siguientes pasos
 
-Funciona de punta a punta y está verificado en navegador: los ocho perfiles, las doce plantillas, las
+Funciona de punta a punta y está verificado en navegador: los siete perfiles, las doce plantillas, las
 cuatro estructuras, las quince paletas, el autoguardado, deshacer y rehacer, la reordenación
 arrastrando, las secciones que se encienden y se apagan, la foto opcional, el analizador y la
 exportación. El `.docx` se comprueba descomprimiendo el archivo (tipografía, colores, orden y

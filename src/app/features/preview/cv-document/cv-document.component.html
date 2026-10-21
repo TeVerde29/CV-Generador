@@ -144,9 +144,6 @@
               @if (ed.institution) {
                 <p class="cv-item-sub">{{ ed.institution }}</p>
               }
-              @if (ed.gpa) {
-                <p class="cv-item-meta">Nota: {{ ed.gpa }}</p>
-              }
             </div>
           }
         </section>
@@ -304,6 +301,49 @@
         <section class="cv-section">
           <h2 class="cv-section-title">{{ T.interests }}</h2>
           <p class="cv-interests">{{ d.interests.join(' · ') }}</p>
+        </section>
+      }
+
+      @case ('references') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.references }}</h2>
+          <ul class="cv-list cv-list--plain">
+            @for (r of d.references; track r.id) {
+              <li>
+                <span class="cv-strong">{{ r.name }}</span>
+                @if (r.title) {
+                  <span class="cv-item-meta"> — {{ r.title }}</span>
+                }
+                <p class="cv-item-text">{{ joinDot(r.email, r.phone) }}</p>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @case ('customSection') {
+        <section class="cv-section">
+          <h2 class="cv-section-title">{{ T.customSection }}</h2>
+          @for (c of d.customSections; track c.id) {
+            <div class="cv-item">
+              <div class="cv-item-head">
+                <h3 class="cv-item-title">{{ c.title }}</h3>
+                @if (joinDot(c.startDate, c.endDate, c.link); as meta) {
+                  <span class="cv-item-period">{{ meta }}</span>
+                }
+              </div>
+              @if (c.description) {
+                <p class="cv-item-text">{{ c.description }}</p>
+              }
+              @if (c.items.length) {
+                <ul class="cv-list">
+                  @for (item of c.items; track $index) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          }
         </section>
       }
     }

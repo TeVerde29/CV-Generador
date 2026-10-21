@@ -88,6 +88,8 @@ export function emptyCVData(): CVData {
     volunteerWork: [],
     awards: [],
     interests: [],
+    references: [],
+    customSections: [],
   };
 }
 
@@ -104,7 +106,7 @@ export const SAMPLE_CV_DATA: CVData = {
     portfolio: 'https://teverde29.github.io/Portafolio/',
   },
   summary:
-    'Estudiante de Ingeniería de Sistemas (X ciclo) en la Universidad Nacional de Ucayali, con experiencia práctica en desarrollo de software, integración frontend–backend y automatización de pruebas. Construyo soluciones orientadas a problemas reales: aplicaciones web full-stack, APIs REST documentadas y herramientas de escritorio que funcionan sin conexión. Trabajo con Angular, Node.js, Java y Spring Boot sobre MySQL, con Scrum, control de versiones y pruebas funcionales antes de cada despliegue.',
+    'Estudiante de Ingeniería de Sistemas (VIII ciclo) en la Universidad Nacional de Ucayali, con experiencia práctica en desarrollo de software y testing. He participado en el desarrollo y mejora de interfaces web, integración frontend y backend, diseño de bases de datos y automatización de pruebas. Experiencia trabajando con HTML, CSS, JavaScript, Angular, Node.js y MySQL, y trabajando en equipo.',
   experience: [
     {
       id: 'exp-1',
@@ -113,14 +115,14 @@ export const SAMPLE_CV_DATA: CVData = {
       startDate: 'abr 2025',
       endDate: 'jul 2025',
       description:
-        'Sistema de Posgrado y plataforma AURA: desarrollo de interfaces, modelo de datos y un proceso formal de pruebas que antes no existía.',
+        'Apoyé en el desarrollo del sistema de Posgrado mediante la implementación y mejora de interfaces, incorporando validaciones de datos e integridad de campos y realizando la conexión de las interfaces con el backend.',
       achievements: [
-        'Implementé y mejoré interfaces del sistema de Posgrado, con validaciones de datos, integridad de campos y conexión con el backend',
-        'Traduje el reglamento de Posgrado en requerimientos funcionales y apoyé el diseño del modelo de base de datos',
-        'Diseñé una metodología de pruebas funcionales en 5 etapas para AURA, con un proceso previo al despliegue que antes no existía',
-        'Automaticé pruebas con Selenium IDE y validaciones en Python: 25 funcionalidades de 8 módulos y 12 fallos documentados con evidencias',
-        'Reejecuté los casos fallidos tras las correcciones para validar su solución',
-        'Registré biométricamente, por huella y reconocimiento facial, al personal de la Facultad de Ciencias de la Salud',
+        'Analicé el reglamento de Posgrado para identificar y traducir reglas del proceso en requerimientos funcionales y apoyar en el diseño del modelo de base de datos',
+        'Diseñé una metodología de pruebas funcionales en 5 etapas para la plataforma AURA, estableciendo un proceso formal de testing previo al despliegue, inexistente anteriormente',
+        'Automaticé pruebas funcionales con Selenium IDE y validaciones backend con Python y Google Colab en 25 funcionalidades de 8 módulos, detectando y documentando 12 fallos con evidencias para el equipo de desarrollo',
+        'Reejecuté los casos fallidos después de las correcciones para validar su solución',
+        'Realicé el registro biométrico mediante huella y reconocimiento facial del personal de la Facultad de Ciencias de la Salud',
+        'Herramientas: Selenium IDE, Python, Jupyter Notebook, Google Colab, Git y GitHub',
       ],
     },
     {
@@ -140,7 +142,7 @@ export const SAMPLE_CV_DATA: CVData = {
   education: [
     {
       id: 'edu-1',
-      institution: 'Universidad Nacional de Ucayali (UNU)',
+      institution: 'Universidad Nacional de Ucayali, Pucallpa, Perú',
       degree: 'Ingeniería de Sistemas',
       field: 'X ciclo',
       startDate: '2022',
@@ -156,25 +158,38 @@ export const SAMPLE_CV_DATA: CVData = {
     {
       id: 'sk-2',
       category: 'Desarrollo frontend y UI',
-      items: ['Angular', 'HTML5', 'CSS3', 'Figma', 'Balsamiq'],
+      items: ['Angular', 'HTML5', 'CSS3', 'Figma', 'Balsamiq Wireframes'],
     },
     {
       id: 'sk-3',
       category: 'Backend y APIs',
-      items: ['Node.js', 'Spring Boot', 'REST APIs', 'Postman', 'Swagger UI'],
+      items: ['Node.js', 'Spring Boot', 'Postman', 'Swagger UI', 'Arquitectura REST'],
     },
     { id: 'sk-4', category: 'Bases de datos', items: ['MySQL', 'SQL Server'] },
     {
       id: 'sk-5',
       category: 'Testing y automatización',
-      items: ['Selenium IDE', 'Pruebas funcionales', 'Python'],
+      items: ['Selenium IDE', 'Pruebas funcionales'],
     },
     {
       id: 'sk-6',
-      category: 'DevOps y herramientas',
-      items: ['Docker', 'Docker Compose', 'Git', 'GitHub', 'Scrum'],
+      category: 'DevOps, despliegue y herramientas',
+      items: ['Docker', 'Git', 'GitHub'],
     },
-    { id: 'sk-7', category: 'Escritorio y datos geográficos', items: ['Electron', 'Leaflet', 'Chart.js'] },
+    {
+      id: 'sk-7',
+      category: 'Competencias profesionales',
+      items: [
+        'Comunicación técnica',
+        'trabajo en equipo',
+        'pensamiento analítico',
+        'orientación a la calidad',
+        'proactividad',
+        'aprendizaje continuo',
+        'documentación técnica',
+        'gestión del tiempo bajo presión',
+      ],
+    },
   ],
   languages: [
     { id: 'lang-1', language: 'Español', proficiency: 'native' },
@@ -183,10 +198,10 @@ export const SAMPLE_CV_DATA: CVData = {
   projects: [
     {
       id: 'proj-1',
-      name: 'Reportes UNU — Sistema de reporte de incidencias',
+      name: 'Sistema de Reporte de Incidencias',
       description:
-        'Aplicación web full-stack para reportar y monitorear incidencias de infraestructura del campus: panel del trabajador con pendientes, aceptados y solucionados, dashboard con KPIs y módulo del estudiante con fotografía, tipo de incidencia y ubicación.',
-      technologies: ['Angular', 'Node.js', 'MySQL', 'Scrum'],
+        'Aplicación web full-stack para reportar y gestionar incidencias de infraestructura del campus de la UNU (Universidad Nacional de Ucayali): panel del trabajador con pendientes, aceptados y solucionados, dashboard con KPIs y módulo del estudiante con fotografía, tipo de incidencia y ubicación.',
+      technologies: ['Angular', 'Node.js', 'MySQL'],
       demoUrl: 'https://reportes-unu.vercel.app/',
       repoUrl: 'https://github.com/TeVerde29/Reportes_UNU',
     },
@@ -219,9 +234,9 @@ export const SAMPLE_CV_DATA: CVData = {
   certifications: [
     {
       id: 'cert-1',
-      name: 'Participación académica — CONEIMERA',
-      issuer: 'Universidad Nacional de Trujillo',
-      date: 'oct 2025',
+      name: 'Introducción a las Bases de Datos Relacionales (con MySQL)',
+      issuer: 'TodoCode',
+      date: 'oct 2026',
     },
   ],
   publications: [
@@ -263,4 +278,6 @@ export const SAMPLE_CV_DATA: CVData = {
     'Automatización de pruebas',
     'Videojuegos indie',
   ],
+  references: [],
+  customSections: [],
 };

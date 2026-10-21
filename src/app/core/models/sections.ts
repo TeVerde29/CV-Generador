@@ -16,7 +16,9 @@ export type SectionKey =
   | 'publications'
   | 'volunteerWork'
   | 'awards'
-  | 'interests';
+  | 'interests'
+  | 'references'
+  | 'customSection';
 
 /** Every section, in the default reading order. */
 export const ALL_SECTION_KEYS: SectionKey[] = [
@@ -31,6 +33,8 @@ export const ALL_SECTION_KEYS: SectionKey[] = [
   'volunteerWork',
   'awards',
   'interests',
+  'references',
+  'customSection',
 ];
 
 export const DEFAULT_SECTION_ORDER: SectionKey[] = [...ALL_SECTION_KEYS];
@@ -74,15 +78,17 @@ export function documentOrder(
 export const SECTION_LABELS: Record<SectionKey, string> = {
   summary: 'Perfil profesional',
   experience: 'Experiencia',
-  education: 'Formación',
-  skills: 'Competencias',
+  education: 'Formación Académica',
+  skills: 'Habilidades y Competencias',
   languages: 'Idiomas',
   projects: 'Proyectos',
-  certifications: 'Certificaciones',
+  certifications: 'Certificaciones y cursos',
   publications: 'Publicaciones',
   volunteerWork: 'Voluntariado',
   awards: 'Reconocimientos',
   interests: 'Intereses',
+  references: 'Referencias',
+  customSection: 'Sección Personalizada',
 };
 
 /** Short helper used by the editor for "N elementos" badges. */
@@ -98,4 +104,6 @@ export const SECTION_HINTS: Record<SectionKey, string> = {
   volunteerWork: 'Actividad solidaria o asociativa.',
   awards: 'Premios y reconocimientos.',
   interests: 'Aficiones, con moderación.',
+  references: 'Personas que pueden hablar de tu trabajo.',
+  customSection: 'Título libre, fechas, enlace y entradas propias.',
 };

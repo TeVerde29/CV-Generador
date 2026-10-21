@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  effect,
   inject,
   signal,
   viewChild,
@@ -38,6 +39,8 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
   readonly photoShape = this.store.photoShape;
 
   readonly zoom = signal(80);
+  /** Cuántas páginas A4 ocupa el currículum al alto natural del papel. */
+  readonly pages = signal(1);
 
   private readonly holder = viewChild.required<ElementRef<HTMLElement>>('holder');
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -47,10 +50,20 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
     const el = this.viewport().nativeElement;
     this.observer = new ResizeObserver(() => {
       /* keep the current zoom, but make sure the paper stays centred */
+      this.measurePages();
     });
     this.observer.observe(el);
     this.fitWidth();
+    this.measurePages();
     this.registry.register(this.getSheetElement());
+
+    // Re-cuenta si el contenido del CV cambia (texto, foto, orden…).
+    effect(() => {
+      this.data();
+      this.templateId();
+      this.layoutId();
+      this.measurePages();
+    });
   }
 
   ngOnDestroy(): void {
@@ -76,10 +89,26 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
     this.setZoom(80);
   }
 
+  /** A4 is 210mm ≈ 793.7 CSS px tall at 96 dpi. */
+  private readonly A4_HEIGHT_PX = 793.7;
+
+  /** Cuántas páginas A4 ocuparía el currículum impreso. */
+  measurePages(): void {
+    const sheet = this.getSheetElement();
+    if (!sheet) {
+      this.pages.set(1);
+      return;
+    }
+    const factor = this.zoom() / 100 || 1;
+    const naturalHeight = sheet.offsetHeight / factor;
+    this.pages.set(Math.max(1, Math.ceil(naturalHeight / this.A4_HEIGHT_PX)));
+  }
+
   /** A4 is 210mm ≈ 793.7 CSS px at 96 dpi. */
   fitWidth(): void {
     const available = this.viewport().nativeElement.clientWidth - 56;
     if (available <= 0) return;
     this.setZoom((available / 793.7) * 100);
+    this.measurePages();
   }
 }

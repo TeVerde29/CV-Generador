@@ -411,7 +411,7 @@
                   (input)="store.patchItem('education', ed.id, { institution: $any($event.target).value })"
                 />
               </label>
-              <div class="fields fields--3">
+              <div class="fields fields--2">
                 <label class="field">
                   <span class="label">Desde</span>
                   <input
@@ -430,16 +430,6 @@
                     placeholder="2017"
                     [value]="ed.endDate"
                     (input)="store.patchItem('education', ed.id, { endDate: $any($event.target).value })"
-                  />
-                </label>
-                <label class="field">
-                  <span class="label">Nota media</span>
-                  <input
-                    class="input"
-                    type="text"
-                    placeholder="8,4 / 10"
-                    [value]="ed.gpa"
-                    (input)="store.patchItem('education', ed.id, { gpa: $any($event.target).value })"
                   />
                 </label>
               </div>
@@ -1083,6 +1073,15 @@
                   />
                 </label>
               </div>
+              <label class="field">
+                <span class="label">Descripción</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  [value]="a.description"
+                  (input)="store.patchItem('awards', a.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
             </div>
           </article>
         } @empty {
@@ -1096,7 +1095,225 @@
     }
   </section>
 
-  <!-- 12 · Intereses -->
+  <!-- 13 · Referencias -->
+  <section class="block" [class.is-open]="isOpen('references')">
+    <button type="button" class="block-head" (click)="toggle('references')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.references }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().references.length }}</span>
+    </button>
+
+    @if (isOpen('references')) {
+      <div class="block-body" appSortable="references" (moveTo)="sortMove($event)">
+        <p class="block-hint">{{ SECTION_HINTS.references }}</p>
+
+        @for (r of data().references; track r.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ r.name || 'Nueva referencia' }}</span>
+              @if (r.title) {
+                <span class="dim item-company">· {{ r.title }}</span>
+              }
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().references.length < 2"
+                  (keydown.arrowup)="store.moveItem('references', r.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('references', r.id, 1); $event.preventDefault()"
+                >
+                  <span class="grip" aria-hidden="true"></span>
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('references', r.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Nombre completo</span>
+                <input
+                  class="input"
+                  type="text"
+                  placeholder="Ana Pérez Gil"
+                  [value]="r.name"
+                  (input)="store.patchItem('references', r.id, { name: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Título profesional</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="Ingeniera de datos"
+                    [value]="r.title"
+                    (input)="store.patchItem('references', r.id, { title: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Correo</span>
+                  <input
+                    class="input"
+                    type="email"
+                    placeholder="ana@correo.com"
+                    [value]="r.email"
+                    (input)="store.patchItem('references', r.id, { email: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Teléfono</span>
+                  <input
+                    class="input"
+                    type="tel"
+                    placeholder="+34 600 000 000"
+                    [value]="r.phone"
+                    (input)="store.patchItem('references', r.id, { phone: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay referencias.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addReference()">
+          + Añadir {{ collectionLabels.references.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 14 · Sección personalizada -->
+  <section class="block" [class.is-open]="isOpen('customSection')">
+    <button type="button" class="block-head" (click)="toggle('customSection')">
+      <span class="caret" aria-hidden="true"></span>
+      <span class="block-title">{{ SECTION_LABELS.customSection }}</span>
+      <span class="spacer"></span>
+      <span class="badge">{{ data().customSections.length }}</span>
+    </button>
+
+    @if (isOpen('customSection')) {
+      <div class="block-body" appSortable="customSections" (moveTo)="sortMove($event)">
+        <p class="block-hint">{{ SECTION_HINTS.customSection }}</p>
+
+        @for (c of data().customSections; track c.id; let i = $index) {
+          <article class="item">
+            <header class="item-head">
+              <span class="item-index mono">{{ i + 1 }}</span>
+              <span class="item-name">{{ c.title || 'Nueva sección' }}</span>
+              <span class="spacer"></span>
+              <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn handle"
+                  data-drag-handle
+                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+                  aria-label="Reordenar elemento"
+                  [disabled]="data().customSections.length < 2"
+                  (keydown.arrowup)="store.moveItem('customSections', c.id, -1); $event.preventDefault()"
+                  (keydown.arrowdown)="store.moveItem('customSections', c.id, 1); $event.preventDefault()"
+                >
+                  <span class="grip" aria-hidden="true"></span>
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn icon-btn--danger"
+                  title="Eliminar"
+                  (click)="store.removeItem('customSections', c.id)"
+                >
+                  &times;
+                </button>
+              </span>
+            </header>
+
+            <div class="item-body">
+              <label class="field">
+                <span class="label">Título</span>
+                <input
+                  class="input"
+                  type="text"
+                  placeholder="Formación complementaria"
+                  [value]="c.title"
+                  (input)="store.patchItem('customSections', c.id, { title: $any($event.target).value })"
+                />
+              </label>
+              <div class="fields fields--2">
+                <label class="field">
+                  <span class="label">Desde</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="2021"
+                    [value]="c.startDate"
+                    (input)="store.patchItem('customSections', c.id, { startDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Hasta</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="Actualidad"
+                    [value]="c.endDate"
+                    (input)="store.patchItem('customSections', c.id, { endDate: $any($event.target).value })"
+                  />
+                </label>
+                <label class="field">
+                  <span class="label">Enlace</span>
+                  <input
+                    class="input"
+                    type="text"
+                    placeholder="https://…"
+                    [value]="c.link"
+                    (input)="store.patchItem('customSections', c.id, { link: $any($event.target).value })"
+                  />
+                </label>
+              </div>
+              <label class="field">
+                <span class="label">Descripción</span>
+                <textarea
+                  class="textarea"
+                  rows="2"
+                  [value]="c.description"
+                  (input)="store.patchItem('customSections', c.id, { description: $any($event.target).value })"
+                ></textarea>
+              </label>
+              <div class="field">
+                <span class="label">Entradas</span>
+                <app-tag-input
+                  [values]="c.items"
+                  placeholder="Detalle suelto de la sección…"
+                  (changed)="store.patchItem('customSections', c.id, { items: $event })"
+                />
+              </div>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty">Todavía no hay entradas personalizadas.</p>
+        }
+
+        <button type="button" class="btn btn--sm btn--add" (click)="addCustomSection()">
+          + Añadir {{ collectionLabels.customSections.singular }}
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- 16 · Intereses -->
   <section class="block" [class.is-open]="isOpen('interests')">
     <button type="button" class="block-head" (click)="toggle('interests')">
       <span class="caret" aria-hidden="true"></span>
@@ -1143,7 +1360,7 @@
     }
   </section>
 
-  <!-- 13 · Orden de las secciones -->
+  <!-- 17 · Orden de las secciones -->
   <section class="block" [class.is-open]="isOpen('order')">
     <button type="button" class="block-head" (click)="toggle('order')">
       <span class="caret" aria-hidden="true"></span>
