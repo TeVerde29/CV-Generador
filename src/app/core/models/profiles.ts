@@ -100,6 +100,48 @@ export const PROFILES: CvProfile[] = [
       skills: 'Habilidades',
     },
   },
+  {
+    id: 'mba-posgrado',
+    name: 'MBA y Posgrado',
+    description: 'Enfocado en experiencia, liderazgo y resultados medibles.',
+    order: ['education', 'experience', 'volunteerWork', 'skills', 'interests', 'languages'],
+    titles: {
+      education: 'Educación',
+      experience: 'Experiencia Profesional',
+      volunteerWork: 'Liderazgo y Actividades Extracurriculares',
+      skills: 'Habilidades e Intereses',
+      interests: 'Intereses',
+      languages: 'Idiomas',
+    },
+  },
+  {
+    id: 'para-becas',
+    name: 'Para Becas',
+    description: 'Enfocado en formación académica, promedio y reconocimientos.',
+    order: ['education', 'awards', 'experience', 'volunteerWork', 'languages', 'skills'],
+    titles: {
+      education: 'Educación',
+      awards: 'Reconocimientos y Becas',
+      experience: 'Experiencia',
+      volunteerWork: 'Servicio a la Comunidad y Liderazgo',
+      languages: 'Idiomas',
+      skills: 'Habilidades',
+    },
+  },
+  {
+    id: 'investigacion',
+    name: 'Investigación',
+    description: 'Enfocado en publicaciones, ponencias y competencias técnicas.',
+    order: ['education', 'experience', 'publications', 'awards', 'skills', 'languages'],
+    titles: {
+      education: 'Formación Académica',
+      experience: 'Experiencia en Investigación',
+      publications: 'Publicaciones y Ponencias',
+      awards: 'Becas y Distinciones',
+      skills: 'Competencias Técnicas',
+      languages: 'Idiomas',
+    },
+  },
 ];
 
 export const findProfile = (id: string): CvProfile | undefined =>

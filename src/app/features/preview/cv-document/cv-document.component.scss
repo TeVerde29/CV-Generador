@@ -351,42 +351,21 @@
   margin-bottom: 3px;
 }
 
-.cv-skills {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.cv-skill {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 6px;
-  margin-bottom: 3px;
-}
-.cv-side .cv-skill {
-  display: block;
+.cv-skill-row {
+  margin: 0 0 4px 0;
 }
 /* La categoría es una pieza entera: nunca se parte a mitad de una palabra, así
    que un nombre largo baja a la línea siguiente en lugar de fingir dos
    categorías. Las competencias fluyen detrás y se envuelven con normalidad. */
 .cv-skill-cat {
-  flex: 0 0 auto;
   font-weight: 650;
-  color: var(--cv-primary);
-}
-.cv-side .cv-skill-cat {
-  display: block;
+  color: #000000;
 }
 .cv-skill-items {
   /* El texto arranca justo al lado de los dos puntos y se envuelve con
      sangría francesa: la categoría nunca se parte, pero las competencias
      empiezan en la misma línea. */
-  flex: 1 1 0;
-  min-width: 8ch;
-  color: var(--cv-ink);
-}
-.cv-side .cv-skill-items {
-  color: var(--cv-secondary);
+  color: #000000;
 }
 
 .cv-interests {

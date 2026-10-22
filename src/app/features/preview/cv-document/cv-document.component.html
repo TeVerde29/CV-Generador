@@ -152,18 +152,16 @@
       @case ('skills') {
         <section class="cv-section">
           <h2 class="cv-section-title">{{ T.skills }}</h2>
-          <ul class="cv-skills">
-            @for (s of d.skills; track s.id) {
-              <li class="cv-skill">
-                @if (s.category) {
-                  <span class="cv-skill-cat">{{ s.category }}:</span>
-                }
-                @if (s.items.length) {
-                  <span class="cv-skill-items">{{ s.items.join(', ') }}</span>
-                }
-              </li>
-            }
-          </ul>
+          @for (s of d.skills; track s.id) {
+            <p class="cv-skill-row">
+              @if (s.category) {
+                <span class="cv-skill-cat">{{ s.category }}:</span>
+              }
+              @if (s.items.length) {
+                <span class="cv-skill-items">{{ s.items.join(', ') }}</span>
+              }
+            </p>
+          }
         </section>
       }
 
