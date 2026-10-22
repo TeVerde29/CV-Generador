@@ -48,12 +48,12 @@ export const SECTION_TITLES = {
   skills: 'Habilidades y Competencias',
   languages: 'Idiomas',
   projects: 'Proyectos',
-  certifications: 'Certificaciones y cursos',
+  certifications: 'Certificaciones, cursos y eventos',
   publications: 'Publicaciones',
   volunteerWork: 'Voluntariado',
   awards: 'Reconocimientos',
   interests: 'Intereses',
-  references: 'Referencias',
+  references: 'Referencias personales',
   customSection: 'Sección Personalizada',
 } as const;
 

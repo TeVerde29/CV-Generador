@@ -224,7 +224,7 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
   it('pinta con la paleta elegida y no con el azul de Word', async () => {
     const xml = (await documentXml({ templateId: 'folha', layoutId: 'single', sectionOrder: [] }))
       .toUpperCase();
-    expect(xml).toContain('294635');
+    expect(xml).toContain('14532D');
     expect(xml).not.toContain('2F5496');
   });
 

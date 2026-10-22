@@ -24,17 +24,17 @@ export type SectionKey =
 export const ALL_SECTION_KEYS: SectionKey[] = [
   'summary',
   'experience',
+  'projects',
   'education',
   'skills',
   'languages',
-  'projects',
   'certifications',
   'publications',
-  'volunteerWork',
   'awards',
+  'volunteerWork',
+  'customSection',
   'interests',
   'references',
-  'customSection',
 ];
 
 export const DEFAULT_SECTION_ORDER: SectionKey[] = [...ALL_SECTION_KEYS];
@@ -82,12 +82,12 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   skills: 'Habilidades y Competencias',
   languages: 'Idiomas',
   projects: 'Proyectos',
-  certifications: 'Certificaciones y cursos',
+  certifications: 'Certificaciones, cursos y eventos',
   publications: 'Publicaciones',
   volunteerWork: 'Voluntariado',
   awards: 'Reconocimientos',
   interests: 'Intereses',
-  references: 'Referencias',
+  references: 'Referencias personales',
   customSection: 'Sección Personalizada',
 };
 
