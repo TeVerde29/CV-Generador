@@ -15,12 +15,14 @@ import {
   TextWrappingType,
   VerticalPositionRelativeFrom,
 } from 'docx';
-import { DEFAULT_LAYOUT_ID, DEFAULT_TEMPLATE_ID } from '../models/catalog';
+import { DEFAULT_LAYOUT_ID, DEFAULT_PALETTE_ID, DEFAULT_TEMPLATE_ID } from '../models/catalog';
 import type { CVData, ExportFormat, PaletteColors } from '../models/cv-data';
+import { stringifyJson } from '../models/json-payload';
 import {
   CONTACT_LABELS,
   PROFICIENCY_LABELS,
   PROJECT_LABELS,
+  LINK_LABEL,
   SECTION_TITLES as BASE_SECTION_TITLES,
   safeFileName,
   toHref,
@@ -56,6 +58,8 @@ export interface ExportOptions {
   watermark?: { enabled: boolean; text: string };
   /** Typography, palette and order for the .docx. */
   design?: ExportDesign;
+  /** The whole state as JSON, ready to download. */
+  json?: string;
 }
 
 export interface ExportResult {
@@ -88,6 +92,9 @@ export class ExporterService {
         case 'pdf':
           await this.exportPdf(opts.paperEl ?? null, name);
           return { format, ok: true, message: `PDF descargado (${name}.pdf).` };
+        case 'json':
+          this.exportJson(opts.json ?? this.buildJson(opts.data), name);
+          return { format, ok: true, message: `JSON descargado (${name}.json).` };
         default:
           return { format, ok: false, message: 'Formato no soportado.' };
       }
@@ -100,8 +107,32 @@ export class ExporterService {
     }
   }
 
-  /* ── Markdown ────────────────────────────────────────────────────────── */
+  /* ── JSON ────────────────────────────────────────────────────────────── */
 
+  /**
+   * The state as JSON. When the caller already has it (the store builds it),
+   * that text is used as is; otherwise a data-only payload is built.
+   */
+  buildJson(cv: CVData): string {
+    return stringifyJson(cv, {
+      templateId: DEFAULT_TEMPLATE_ID,
+      layoutId: DEFAULT_LAYOUT_ID,
+      paletteId: DEFAULT_PALETTE_ID,
+      customColors: null,
+      sectionOrder: [...DEFAULT_SECTION_ORDER],
+      hiddenSections: [],
+      photoShape: 'square',
+      showWatermark: false,
+      watermarkText: '',
+    });
+  }
+
+  exportJson(json: string, name: string): void {
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    this.download(blob, `${name}.json`);
+  }
+
+  /* ── Markdown ────────────────────────────────────────────────────────── */
   buildMarkdown(
     cv: CVData,
     watermark?: { enabled: boolean; text: string },
@@ -180,7 +211,8 @@ export class ExporterService {
       out.push('', `## ${SECTION_TITLES.certifications}`);
       for (const c of cv.certifications) {
         const meta = [c.issuer, c.date].filter(Boolean).join(', ');
-        out.push(`- **${c.name}**${meta ? ` — ${meta}` : ''}`);
+        const link = c.url ? ` ([${LINK_LABEL}](${toHref(c.url)}))` : '';
+        out.push(`- **${c.name}**${meta ? ` — ${meta}` : ''}${link}`);
       }
     }
 
@@ -188,7 +220,8 @@ export class ExporterService {
       out.push('', `## ${SECTION_TITLES.publications}`);
       for (const pub of cv.publications) {
         const meta = [pub.publisher, pub.date].filter(Boolean).join(', ');
-        out.push(`- **${pub.title}**${meta ? ` — ${meta}` : ''}`);
+        const link = pub.url ? ` ([${LINK_LABEL}](${toHref(pub.url)}))` : '';
+        out.push(`- **${pub.title}**${meta ? ` — ${meta}` : ''}${link}`);
         if (pub.description) out.push(`  ${pub.description}`);
       }
     }
@@ -691,12 +724,27 @@ export class ExporterService {
           nodes.push(this.sectionHeading(SECTION_TITLES.certifications, look, ++number));
           for (const c of cv.certifications) {
             const metaLine = [c.issuer, c.date].filter(Boolean).join(', ');
+            const linkRun = c.url
+              ? new ExternalHyperlink({
+                  link: toHref(c.url),
+                  children: [
+                    new TextRun({
+                      text: ` ${LINK_LABEL}`,
+                      font: look.accentFont,
+                      size: meta,
+                      color: look.accent,
+                      underline: {},
+                    }),
+                  ],
+                })
+              : null;
             nodes.push(
               new Paragraph({
                 spacing: { after: 20 },
                 children: [
                   text(c.name, body, look.ink, true),
                   ...(metaLine ? [text(` — ${metaLine}`, body, look.muted)] : []),
+                  ...(linkRun ? [linkRun] : []),
                 ],
               }),
             );
@@ -709,12 +757,27 @@ export class ExporterService {
           nodes.push(this.sectionHeading(SECTION_TITLES.publications, look, ++number));
           for (const pub of cv.publications) {
             const metaLine = [pub.publisher, pub.date].filter(Boolean).join(', ');
+            const linkRun = pub.url
+              ? new ExternalHyperlink({
+                  link: toHref(pub.url),
+                  children: [
+                    new TextRun({
+                      text: ` ${LINK_LABEL}`,
+                      font: look.accentFont,
+                      size: meta,
+                      color: look.accent,
+                      underline: {},
+                    }),
+                  ],
+                })
+              : null;
             nodes.push(
               new Paragraph({
                 spacing: { after: 20 },
                 children: [
                   text(pub.title, body, look.ink, true),
                   ...(metaLine ? [text(` — ${metaLine}`, body, look.muted)] : []),
+                  ...(linkRun ? [linkRun] : []),
                 ],
               }),
             );

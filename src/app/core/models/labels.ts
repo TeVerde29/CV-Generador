@@ -24,6 +24,12 @@ export const CONTACT_LABELS = {
 export const PROJECT_LABELS = { demo: 'Demo', repo: 'GitHub' } as const;
 
 /**
+ * The text a lone link shows in the document. The address goes in the tooltip,
+ * not in the CV: a line of full URLs is noise for whoever reads it.
+ */
+export const LINK_LABEL = 'Enlace';
+
+/**
  * Turns a stored link into something a browser can follow. Values are typed by
  * hand, so "linkedin.com/in/x" and "https://linkedin.com/in/x" both have to
  * work: the scheme is added only when it is missing.

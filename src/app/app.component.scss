@@ -30,10 +30,12 @@
 
 .brand-mark {
   display: block;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   flex: none;
-  object-fit: contain;
+  object-fit: cover;
+  border-radius: 7px;
+  box-shadow: var(--shadow-1);
 }
 
 .brand-name {

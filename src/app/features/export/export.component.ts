@@ -41,12 +41,18 @@ export class ExportComponent {
       label: 'Markdown (.md)',
       hint: 'Texto estructurado, ideal para portales de empleo y perfiles técnicos.',
     },
+    {
+      id: 'json',
+      label: 'JSON (.json)',
+      hint: 'Todos los datos y el diseño, en texto plano. Se puede volver a importar aquí o usar en otro programa.',
+    },
   ];
 
   readonly selected = signal<Record<ExportFormat, boolean>>({
     docx: true,
     pdf: true,
     markdown: false,
+    json: false,
   });
 
   readonly running = signal(false);
@@ -129,6 +135,7 @@ export class ExportComponent {
         layoutId: this.store.layoutId(),
         sectionOrder: this.store.sectionOrder(),
       },
+      json: this.store.json(),
       watermark: {
         enabled: this.store.showWatermark(),
         text: this.store.watermarkText(),

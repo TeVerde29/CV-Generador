@@ -1,0 +1,184 @@
+<div class="landing">
+  <header class="landing-top">
+    <div class="brand">
+      <img
+        class="brand-mark"
+        src="logo-cv-generador.png"
+        alt=""
+        aria-hidden="true"
+        width="30"
+        height="30"
+      />
+      <span class="brand-name">CV<span class="brand-thin">Generador</span></span>
+    </div>
+
+    <span class="spacer"></span>
+
+    <span class="badge badge--info">Gratis · Sin registro</span>
+    <button
+      type="button"
+      class="btn btn--sm btn--icon"
+      [title]="themeLabel()"
+      [attr.aria-label]="themeLabel()"
+      (click)="toggleTheme.emit()"
+    >
+      ☾
+    </button>
+    <button type="button" class="btn btn--sm btn--primary" (click)="startFresh()">
+      Generar mi CV
+    </button>
+  </header>
+
+  <!-- ── Portada ─────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <span class="eyebrow">Currículums claros, con tu propio estilo</span>
+    <h1>Escribe tu currículum una vez y envíalo a donde haga falta</h1>
+    <p class="lede">
+      Rellena los datos, elige perfil, plantilla y paleta, y mira el A4 en vivo mientras
+      escribes. Al final lo descargas en Word, PDF o Markdown. Sin servidor, sin registro y
+      sin que tu información salga del navegador: ni una IA que la lea.
+    </p>
+
+    <div class="hero-actions">
+      <button type="button" class="btn btn--primary btn--lg" (click)="startFresh()">
+        Generar mi CV
+      </button>
+      <button type="button" class="btn btn--lg" (click)="loadSample()">
+        Ver un CV de ejemplo
+      </button>
+    </div>
+
+    @if (hasSavedCv()) {
+      <p class="saved-note">
+        Guardaste un currículum en este navegador.
+        <button type="button" class="link-btn" (click)="continueSaved()">
+          Continuar donde lo dejaste
+        </button>
+      </p>
+    }
+
+    <ul class="stats">
+      @for (stat of stats; track stat.label) {
+        <li>
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.label }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- ── El problema ─────────────────────────────────────────────────────── -->
+  <section class="section">
+    <span class="eyebrow">El problema</span>
+    <h2>Un currículum, muchos sitios</h2>
+    <p class="section-lede">
+      Un portal con un formulario que lee el texto, un correo que espera un PDF maquetado y
+      una web técnica que pide Markdown. Cada uno pide el currículum de una manera, y
+      rehacerlo cada vez es donde se van las horas.
+    </p>
+
+    <div class="cards">
+      @for (item of problems; track item.title) {
+        <article class="card">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ── Cómo funciona ───────────────────────────────────────────────────── -->
+  <section class="section">
+    <span class="eyebrow">Cómo funciona</span>
+    <h2>Tres pasos, sin obligatorio</h2>
+
+    <ol class="steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="step">
+          <span class="step-index mono">{{ i + 1 }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.text }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <!-- ── Lo que trae ─────────────────────────────────────────────────────── -->
+  <section class="section">
+    <span class="eyebrow">Lo que trae</span>
+    <h2>Todo lo que hace falta, y nada más</h2>
+
+    <div class="features">
+      @for (feature of features; track feature.title) {
+        <article class="feature">
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ── El JSON ────────────────────────────────────────────────────────── -->
+  <section class="section">
+    <span class="eyebrow">El JSON</span>
+    <h2>Tu currículum, también en texto plano</h2>
+    <p class="section-lede">
+      Además de Word, PDF y Markdown, el generador descarga un <strong>.json</strong> con
+      todos los datos y el diseño que elegiste. Es un archivo de texto: se puede leer,
+      guardar, versionar y volver a abrir cuando quieras.
+    </p>
+
+    <div class="cards">
+      @for (item of jsonUses; track item.title) {
+        <article class="card">
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.text }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- ── Privacidad ──────────────────────────────────────────────────────── -->
+  <section class="section privacy">
+    <div class="privacy-text">
+      <span class="eyebrow">Privacidad</span>
+      <h2>Tus datos no se van de aquí</h2>
+      <p>
+        El currículum se guarda en el almacenamiento local de tu navegador y los archivos se
+        generan en esa misma pestaña. No hay servidor, ni cuentas, ni analítica de
+        currículums, ni IA que procese lo que escribes.
+      </p>
+      <p>
+        Si borras los datos del navegador, el currículum se borra con ellos. Puedes
+        exportarlo antes para quedarte con una copia.
+      </p>
+    </div>
+    <ul class="privacy-list">
+      <li><strong>0</strong><span>peticiones a un servidor</span></li>
+      <li><strong>0</strong><span>claves y contraseñas</span></li>
+      <li><strong>0</strong><span>IA que lee tu CV</span></li>
+    </ul>
+  </section>
+
+  <!-- ── Cierre ──────────────────────────────────────────────────────────── -->
+  <section class="closing">
+    <h2>¿Empezamos?</h2>
+    <p>El editor se abre en blanco, con un ejemplo a un clic y todo guardado solo.</p>
+    <div class="hero-actions">
+      <button type="button" class="btn btn--primary btn--lg" (click)="startFresh()">
+        Generar mi CV
+      </button>
+      <button type="button" class="btn btn--lg" (click)="loadSample()">
+        Ver un CV de ejemplo
+      </button>
+    </div>
+  </section>
+
+  <footer class="landing-foot">
+    <span>Pedro Giovanni Ricra Figueroa — Ingeniería de Sistemas</span>
+    <span class="spacer"></span>
+    <a href="https://github.com/TeVerde29" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <span class="dot" aria-hidden="true">·</span>
+    <span>Hecho con Angular, sin backend</span>
+  </footer>
+</div>

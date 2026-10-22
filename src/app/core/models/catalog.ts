@@ -11,15 +11,19 @@ export const TEMPLATES: TemplateOption[] = [
   { id: 'folha', name: 'Folha', family: 'Esencial', voice: 'sans', description: 'Sóbrio, aireado, sin adornos. El más neutro.' },
   { id: 'linha', name: 'Linha', family: 'Esencial', voice: 'sans', description: 'Reglas finas y jerarquía estricta.' },
   { id: 'manuscrito', name: 'Manuscrito', family: 'Esencial', voice: 'serif', description: 'Serif cálida, ritmo de imprenta.' },
+  { id: 'carta', name: 'Carta', family: 'Esencial', voice: 'serif', description: 'Serif con mucho aire, como una carta bien escrita.' },
   { id: 'corporativo', name: 'Corporativo', family: 'Corporativo', voice: 'sans', description: 'Formato clásico de reclutamiento.' },
   { id: 'executivo', name: 'Executivo', family: 'Corporativo', voice: 'serif', description: 'Mayúsculas espaciadas y peso bajo el título.' },
   { id: 'consultoria', name: 'Consultoría', family: 'Corporativo', voice: 'serif', description: 'Bloque denso, orientado a resultados.' },
+  { id: 'institucional', name: 'Institucional', family: 'Corporativo', voice: 'sans', description: 'Institución serena: aire, versalitas y una sola tinta.' },
   { id: 'tecnico', name: 'Técnico', family: 'Creativo', voice: 'mono', description: 'Monoespaciada, aire de especificación.' },
   { id: 'revista', name: 'Revista', family: 'Creativo', voice: 'mixed', description: 'Editorial, con acentos de color.' },
   { id: 'compacto', name: 'Compacto', family: 'Creativo', voice: 'sans', description: 'Aprovecha cada línea de la página.' },
+  { id: 'cartel', name: 'Cartel', family: 'Creativo', voice: 'sans', description: 'Cartel deolicited: titular grande y aire entre bloques.' },
   { id: 'academico', name: 'Académico', family: 'Académico', voice: 'serif', description: 'Cursivas y estructura de publicación.' },
   { id: 'universidad', name: 'Universidad', family: 'Académico', voice: 'serif', description: 'Estilo de servicio de carreras.' },
   { id: 'tesis', name: 'Tesis', family: 'Académico', voice: 'serif', description: 'Formal, con numeración sobria.' },
+  { id: 'congreso', name: 'Congreso', family: 'Académico', voice: 'serif', description: 'Artículo de congreso: interlineado amplio y versalitas.' },
 ];
 
 export const TEMPLATE_FAMILIES: TemplateOption['family'][] = [
@@ -56,6 +60,15 @@ export const PALETTES: PaletteOption[] = [
   { id: 'ciruela', name: 'Ciruela', colors: { primary: '#4a1d5f', secondary: '#7e22ce', accent: '#c4b5fd' } },
   { id: 'grafito', name: 'Grafito', colors: { primary: '#1c1917', secondary: '#44403c', accent: '#78716c' } },
   { id: 'monocromo', name: 'Monocromo', colors: { primary: '#000000', secondary: '#525252', accent: '#a3a3a3' } },
+  { id: 'menta', name: 'Menta', colors: { primary: '#1f4d3d', secondary: '#3f7a5e', accent: '#7fb89a' } },
+  { id: 'eucalipto', name: 'Eucalipto', colors: { primary: '#2f4f43', secondary: '#5b8a72', accent: '#9cc4ae' } },
+  { id: 'pistacho', name: 'Pistacho', colors: { primary: '#4a5a23', secondary: '#7c8f3d', accent: '#b3c47a' } },
+  { id: 'turquesa', name: 'Turquesa', colors: { primary: '#10505a', secondary: '#2b8492', accent: '#7cc3cd' } },
+  { id: 'cobalto', name: 'Cobalto', colors: { primary: '#1e3a5f', secondary: '#3b6491', accent: '#8aa9c9' } },
+  { id: 'lavanda', name: 'Lavanda', colors: { primary: '#4b3a63', secondary: '#7a6299', accent: '#b3a0cc' } },
+  { id: 'cereza', name: 'Cereza', colors: { primary: '#7b1e35', secondary: '#b83a56', accent: '#e08b9e' } },
+  { id: 'cobre', name: 'Cobre', colors: { primary: '#6b3410', secondary: '#a35a2a', accent: '#cf9568' } },
+  { id: 'arena', name: 'Arena', colors: { primary: '#6b5b3e', secondary: '#a08a5c', accent: '#d4c193' } },
 ];
 
 export const DEFAULT_TEMPLATE_ID = 'folha';

@@ -13,10 +13,14 @@ import { AtsComponent } from './features/ats/ats.component';
 import { DesignComponent } from './features/design/design.component';
 import { EditorComponent } from './features/editor/editor.component';
 import { ExportComponent } from './features/export/export.component';
+import { ImportComponent } from './features/import/import.component';
+import { LandingComponent } from './features/landing/landing.component';
 import { PreviewComponent } from './features/preview/preview.component';
 
 type Tab = 'data' | 'design' | 'ats';
 type Theme = 'light' | 'dark';
+/** La portada se ve al entrar; el editor, cuando ya se está trabajando. */
+type View = 'landing' | 'editor';
 
 const THEME_KEY = 'cvgen.theme';
 
@@ -28,6 +32,8 @@ const THEME_KEY = 'cvgen.theme';
     AtsComponent,
     PreviewComponent,
     ExportComponent,
+    ImportComponent,
+    LandingComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -37,9 +43,11 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly store = inject(CvStoreService);
   readonly toasts = inject(ToastService);
 
+  readonly view = signal<View>('landing');
   readonly tab = signal<Tab>('data');
   readonly theme = signal<Theme>('light');
   readonly exportOpen = signal(false);
+  readonly importOpen = signal(false);
   readonly mobileView = signal<'panel' | 'preview'>('panel');
 
   readonly tabs: { id: Tab; label: string; icon: string }[] = [
@@ -55,11 +63,26 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.theme.set(this.resolveTheme());
     this.applyTheme();
+    // Siempre se entra por la portada: es la puerta de entrada y la que
+    // explica la herramienta. Desde ahí se abre el generador.
+    this.view.set('landing');
     document.addEventListener('keydown', this.onKeydown);
   }
 
   ngOnDestroy(): void {
     document.removeEventListener('keydown', this.onKeydown);
+  }
+
+  /* ── Portada y editor ─────────────────────────────────────────────────── */
+
+  /** Abre el editor, que es lo que hay detrás del botón inicial. */
+  openEditor(): void {
+    this.view.set('editor');
+  }
+
+  /** Vuelve a la portada. */
+  goLanding(): void {
+    this.view.set('landing');
   }
 
   /* ── Theme ───────────────────────────────────────────────────────────── */
@@ -117,9 +140,19 @@ export class AppComponent implements OnInit, OnDestroy {
 
   toggleExport(): void {
     this.exportOpen.update((v) => !v);
+    if (this.exportOpen()) this.importOpen.set(false);
   }
 
   closeExport(): void {
     this.exportOpen.set(false);
+  }
+
+  toggleImport(): void {
+    this.importOpen.update((v) => !v);
+    if (this.importOpen()) this.exportOpen.set(false);
+  }
+
+  closeImport(): void {
+    this.importOpen.set(false);
   }
 }

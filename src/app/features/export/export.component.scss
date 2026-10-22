@@ -102,3 +102,22 @@
 .sep {
   margin: 12px 0;
 }
+
+/* Importar un JSON: pegar o abrir archivo. */
+.import {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.import .textarea {
+  min-height: 64px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.import .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

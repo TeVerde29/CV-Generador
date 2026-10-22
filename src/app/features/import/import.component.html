@@ -1,0 +1,34 @@
+<div class="import-panel" role="dialog" aria-label="Importar un currículum en JSON">
+  <header class="panel-head">
+    <h2 class="panel-title">Importar JSON</h2>
+    <p class="panel-sub">Trae un currículum guardado en un archivo .json</p>
+  </header>
+
+  <p class="dim small">
+    Pega el contenido del archivo o ábrelo directamente. Reemplaza el currículum
+    actual, así que conviene tener una copia descargada antes.
+  </p>
+
+  <textarea
+    class="textarea mono"
+    rows="5"
+    placeholder='{ "version": 1, "data": { … } }'
+    [value]="draft()"
+    (input)="onInput($event)"
+  ></textarea>
+
+  <div class="row">
+    <button type="button" class="btn btn--primary" (click)="importPasted()">
+      Importar
+    </button>
+    <label class="btn">
+      Abrir archivo
+      <input
+        type="file"
+        accept=".json,application/json"
+        hidden
+        (change)="onFile($event)"
+      />
+    </label>
+  </div>
+</div>

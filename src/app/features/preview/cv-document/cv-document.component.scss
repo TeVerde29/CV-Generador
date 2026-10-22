@@ -299,6 +299,14 @@
   cursor: pointer;
 }
 
+/* Enlace suelto, en su propia línea (certificaciones, publicaciones). */
+.cv-inline-link {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--cv-meta-font);
+  font-size: calc(var(--cv-base) * 0.88);
+}
+
 .cv-item-sub {
   margin: 1px 0 0;
   font-size: calc(var(--cv-base) * 0.98);
@@ -350,13 +358,19 @@
 }
 .cv-skill {
   display: flex;
-  gap: 6px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
   margin-bottom: 3px;
 }
 .cv-side .cv-skill {
   display: block;
 }
+/* La categoría es una pieza entera: nunca se parte a mitad de una palabra, así
+   que un nombre largo baja a la línea siguiente en lugar de fingir dos
+   categorías. Las competencias fluyen detrás y se envuelven con normalidad. */
 .cv-skill-cat {
+  flex: 0 0 auto;
   font-weight: 650;
   color: var(--cv-primary);
 }
@@ -364,6 +378,11 @@
   display: block;
 }
 .cv-skill-items {
+  /* El texto arranca justo al lado de los dos puntos y se envuelve con
+     sangría francesa: la categoría nunca se parte, pero las competencias
+     empiezan en la misma línea. */
+  flex: 1 1 0;
+  min-width: 8ch;
   color: var(--cv-ink);
 }
 .cv-side .cv-skill-items {
@@ -556,4 +575,80 @@
    reads fine, but titles there stay compact. */
 .tpl-tesis .cv-side .cv-section-title::before {
   content: "";
+}
+
+/* 13 · Carta — serif with plenty of air */
+.tpl-carta {
+  --cv-font: var(--cv-serif);
+  --cv-base: 12.8px;
+  --cv-body-lh: 1.7;
+  --cv-section-gap: 20px;
+  --cv-doc-pad: 46px 44px;
+  --cv-name-size: 28px;
+  --cv-name-weight: 500;
+  --cv-name-tracking: 0;
+  --cv-title-size: 13.5px;
+  --cv-title-style: italic;
+  --cv-title-color: var(--cv-secondary);
+  --cv-heading-size: 10px;
+  --cv-heading-weight: 600;
+  --cv-heading-tracking: 0.18em;
+  --cv-heading-color: var(--cv-secondary);
+  --cv-heading-rule: 1px solid var(--cv-rule);
+}
+
+/* 14 · Institucional — a calm institution, one ink and a lot of air */
+.tpl-institucional {
+  --cv-base: 12.4px;
+  --cv-body-lh: 1.5;
+  --cv-section-gap: 20px;
+  --cv-doc-pad: 48px 44px;
+  --cv-name-size: 30px;
+  --cv-name-weight: 600;
+  --cv-name-tracking: 0;
+  --cv-title-size: 12.5px;
+  --cv-title-transform: uppercase;
+  --cv-title-tracking: 0.12em;
+  --cv-title-color: var(--cv-secondary);
+  --cv-heading-size: 10px;
+  --cv-heading-weight: 600;
+  --cv-heading-tracking: 0.22em;
+  --cv-heading-color: var(--cv-secondary);
+  --cv-heading-rule: 1px solid var(--cv-rule);
+}
+
+/* 15 · Cartel — a poster: a big name and room between the blocks */
+.tpl-cartel {
+  --cv-base: 12.2px;
+  --cv-body-lh: 1.6;
+  --cv-section-gap: 22px;
+  --cv-name-size: 34px;
+  --cv-name-weight: 800;
+  --cv-name-tracking: -0.02em;
+  --cv-title-size: 12.5px;
+  --cv-title-transform: uppercase;
+  --cv-title-tracking: 0.22em;
+  --cv-title-color: var(--cv-accent);
+  --cv-heading-size: 10px;
+  --cv-heading-weight: 800;
+  --cv-heading-tracking: 0.2em;
+  --cv-heading-color: var(--cv-accent);
+  --cv-heading-rule: 0;
+  --cv-heading-margin: 0 0 8px;
+}
+
+/* 16 · Congreso — a conference paper: wide leading and small caps */
+.tpl-congreso {
+  --cv-font: var(--cv-serif);
+  --cv-base: 11.9px;
+  --cv-body-lh: 1.7;
+  --cv-section-gap: 18px;
+  --cv-name-size: 25px;
+  --cv-name-weight: 600;
+  --cv-title-size: 12.5px;
+  --cv-title-style: italic;
+  --cv-heading-size: 10.5px;
+  --cv-heading-weight: 600;
+  --cv-heading-tracking: 0.12em;
+  --cv-heading-rule: 1px solid var(--cv-rule);
 }

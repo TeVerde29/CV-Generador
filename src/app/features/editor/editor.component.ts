@@ -5,7 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { PROFICIENCIES, type Proficiency } from '../../core/models/cv-data';
+import { PROFICIENCIES, SUMMARY_MAX_LENGTH, type Proficiency } from '../../core/models/cv-data';
 import { PROFICIENCY_LABELS } from '../../core/models/labels';
 import { SECTION_HINTS, SECTION_LABELS, type SectionKey } from '../../core/models/sections';
 import { COLLECTION_LABELS, CvStoreService, type CollectionKey } from '../../core/services/cv-store.service';
@@ -28,6 +28,8 @@ export class EditorComponent {
   readonly SECTION_LABELS = SECTION_LABELS;
   readonly SECTION_HINTS = SECTION_HINTS;
   readonly PROFICIENCIES = PROFICIENCIES;
+  /** Cupo del perfil profesional. */
+  readonly summaryMax = SUMMARY_MAX_LENGTH;
   readonly proficiencyLabels = PROFICIENCY_LABELS;
   readonly collectionLabels = COLLECTION_LABELS;
 
@@ -98,6 +100,50 @@ export class EditorComponent {
 
   collapseAll(): void {
     this.open.set(new Set());
+  }
+
+  /* ── Elementos plegados ─────────────────────────────────────────────── */
+
+  /**
+   * Elementos de las listas que están contraídos: de ellos solo se ve el
+   * título, sin el formulario debajo.
+   *
+   * Por defecto todo está abierto — es como se escribe — pero con muchas
+   * entradas el panel se vuelve largo, y plegar deja el CV entero a la vista
+   * mientras se retoca una sola cosa.
+   */
+  private readonly foldedItems = signal<ReadonlySet<string>>(new Set());
+
+  isFolded(id: string): boolean {
+    return this.foldedItems().has(id);
+  }
+
+  toggleFolded(id: string): void {
+    this.foldedItems.update((set) => {
+      const next = new Set(set);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  /** Los identificadores de los elementos de una sección, sea cual sea su forma. */
+  private idsOf(section: CollectionKey): string[] {
+    const list = (this.data() as unknown as Record<string, { id: string }[]>)[section];
+    return Array.isArray(list) ? list.map((item) => item.id) : [];
+  }
+
+  /** Todos los elementos de la sección están contraídos: el botón los abre. */
+  allFoldedIn(section: CollectionKey): boolean {
+    const ids = this.idsOf(section);
+    return ids.length > 0 && ids.every((id) => this.foldedItems().has(id));
+  }
+
+  /** Contrae o despliega todos los elementos de una sección de una vez. */
+  toggleAllIn(section: CollectionKey): void {
+    this.foldedItems.set(
+      this.allFoldedIn(section) ? new Set() : new Set(this.idsOf(section)),
+    );
   }
 
   /* ── Section counts ─────────────────────────────────────────────────── */

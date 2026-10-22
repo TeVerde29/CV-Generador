@@ -8,6 +8,7 @@ import type {
 } from '../../../core/models/cv-data';
 import {
   CONTACT_LABELS,
+  LINK_LABEL,
   PROFICIENCY_LABELS,
   PROJECT_LABELS,
   SECTION_TITLES,
@@ -100,6 +101,8 @@ export class CvDocumentComponent {
 
   /** Exposed so the template can turn a stored link into something clickable. */
   readonly linkHref = toHref;
+  /** What a lone link says in the document. */
+  readonly LINK_LABEL = LINK_LABEL;
   readonly projectLabels = PROJECT_LABELS;
 
   readonly hasSidebar = computed(

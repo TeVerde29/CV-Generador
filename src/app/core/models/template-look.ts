@@ -112,6 +112,17 @@ export const TEMPLATE_LOOKS: Record<string, TemplateLook> = {
     title: { size: 14.5, italic: true },
     heading: { size: 13, weight: 700, upper: false, tracking: 0.01 },
   }),
+  carta: look({
+    serif: true,
+    base: 12.8,
+    lineHeight: 1.7,
+    sectionGap: 20,
+    padY: 46,
+    padX: 44,
+    name: { size: 28, weight: 500, tracking: 0 },
+    title: { size: 13.5, italic: true, color: 'secondary' },
+    heading: { size: 10, weight: 600, tracking: 0.18, color: 'secondary', rule: 'solid' },
+  }),
   corporativo: look({
     name: { size: 27, weight: 700, upper: true, tracking: 0.05 },
     heading: { size: 11, rule: 'none' },
@@ -128,6 +139,16 @@ export const TEMPLATE_LOOKS: Record<string, TemplateLook> = {
     sectionGap: 14,
     name: { size: 26 },
     heading: { size: 14, upper: false, tracking: 0, color: 'ink', rule: 'none', edge: true },
+  }),
+  institucional: look({
+    base: 12.4,
+    lineHeight: 1.5,
+    sectionGap: 20,
+    padY: 48,
+    padX: 44,
+    name: { size: 30, weight: 600, tracking: 0 },
+    title: { size: 12.5, upper: true, tracking: 0.12, color: 'secondary' },
+    heading: { size: 10, weight: 600, tracking: 0.22, color: 'secondary', rule: 'solid' },
   }),
   tecnico: look({
     mono: true,
@@ -148,6 +169,14 @@ export const TEMPLATE_LOOKS: Record<string, TemplateLook> = {
     name: { size: 23 },
     heading: { size: 9.5 },
   }),
+  cartel: look({
+    base: 12.2,
+    lineHeight: 1.6,
+    sectionGap: 22,
+    name: { size: 34, weight: 800, tracking: -0.02 },
+    title: { size: 12.5, upper: true, tracking: 0.22, color: 'accent' },
+    heading: { size: 10, weight: 800, tracking: 0.2, color: 'accent', rule: 'none' },
+  }),
   academico: look({
     serif: true,
     align: 'center',
@@ -164,6 +193,15 @@ export const TEMPLATE_LOOKS: Record<string, TemplateLook> = {
   tesis: look({
     serif: true,
     heading: { size: 12.5, upper: false, tracking: 0, rule: 'none', numbered: true },
+  }),
+  congreso: look({
+    serif: true,
+    base: 11.9,
+    lineHeight: 1.7,
+    sectionGap: 18,
+    name: { size: 25, weight: 600 },
+    title: { size: 12.5, italic: true },
+    heading: { size: 10.5, weight: 600, tracking: 0.12, rule: 'solid' },
   }),
 };
 

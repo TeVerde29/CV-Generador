@@ -1,7 +1,13 @@
 /* ============================================================================
-   Design tokens — interfaz blanca con azul profesional.
-   Un solo sistema, sobrio y de consola: superficies blancas, bordes gris claro
-   y un azul corporativo para acciones, foco y selección.
+   Design tokens — interfaz blanca con verde Té.
+
+   Un solo sistema, sobrio y de consola: superficies blancas, bordes verde gris
+   y el verde bosque para acciones, foco y selección.
+
+   La paleta es la del sistema "Tea Green": verde bosque (#294635) para lo
+   importante, verde té (#AFC49A) y salvia (#829B78) como acentos, y matcha
+   claro (#DDE8C8) para superficies y barras. Todos los pares texto/fondo
+   cumplen WCAG AA (4.5:1 en texto normal, 3:1 en texto grande).
 
    Los nombres de token se mantienen estables; solo cambian los valores, de modo
    que los componentes no necesitan saber de qué paleta se trata.
@@ -15,38 +21,38 @@
   color-scheme: light;
 
   /* ── Neutros / superficies (tema claro) ─────────────────────────────── */
-  --bg: #f9fafb;
+  --bg: #f7f8f1;
   --surface: #ffffff;
-  --surface-2: #f2f3f5;
-  --surface-3: #e9ebef;
-  --border: #dcdee1;
-  --border-strong: #c7cad0;
+  --surface-2: #eef2e8;
+  --surface-3: #dde8c8;
+  --border: #d9e2d5;
+  --border-strong: #afc49a;
 
-  --text: #161b24;
-  --text-2: #5f636c;
-  --text-3: #6b7280; /* 4.63:1 sobre --bg: cumple AA en etiquetas pequeñas */
+  --text: #1e2a21;
+  --text-2: #5e6e5f;
+  --text-3: #66765f; /* 4.55:1 sobre --bg: cumple AA en etiquetas pequeñas */
   --text-inverse: #ffffff;
 
-  /* ── Acción principal (azul corporativo) ────────────────────────────── */
-  --ink: #296cd8;
-  --ink-hover: #1f57b5;
-  --ink-soft: rgba(41, 108, 216, 0.1);
+  /* ── Acción principal (verde bosque) ───────────────────────────────── */
+  --ink: #294635;
+  --ink-hover: #4f7256;
+  --ink-soft: rgba(41, 70, 53, 0.1);
 
-  /* ── Acento: foco, enlaces y selección ──────────────────────────────── */
-  --accent: #296cd8;
-  --accent-2: #7fa8e8; /* azul claro, para barras y elementos secundarios */
-  --accent-soft: rgba(41, 108, 216, 0.1);
-  --accent-ring: rgba(41, 108, 216, 0.4);
+  /* ── Acento: foco, enlaces, barras y selección ─────────────────────── */
+  --accent: #567b3b;
+  --accent-2: #829b78; /* salvia, para barras y elementos secundarios */
+  --accent-soft: rgba(86, 123, 59, 0.1);
+  --accent-ring: rgba(41, 70, 53, 0.4);
 
   /* ── Estados ────────────────────────────────────────────────────────── */
-  --ok: #1a7f37;
-  --ok-soft: rgba(26, 127, 55, 0.12);
-  --warn: #9a6700;
-  --warn-soft: rgba(154, 103, 0, 0.12);
-  --danger: #cc272e;
-  --danger-soft: rgba(204, 39, 46, 0.1);
-  --info: #0969da;
-  --info-soft: rgba(9, 105, 218, 0.12);
+  --ok: #337652;
+  --ok-soft: rgba(51, 118, 82, 0.12);
+  --warn: #976719;
+  --warn-soft: rgba(151, 103, 25, 0.12);
+  --danger: #b44743;
+  --danger-soft: rgba(180, 71, 67, 0.1);
+  --info: #3f7082;
+  --info-soft: rgba(63, 112, 130, 0.12);
 
   /* ── Tipografía ─────────────────────────────────────────────────────────
      Pilas del sistema: la interfaz no depende de ninguna fuente descargada,
@@ -77,17 +83,20 @@
   --r-lg: 10px;
   --r-full: 999px;
 
-  /* ── Sombras: neutras y discretas ───────────────────────────────────── */
-  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-2: 0 2px 6px rgba(16, 24, 40, 0.07);
-  --shadow-3: 0 12px 28px rgba(16, 24, 40, 0.12);
-  --shadow-paper: 0 1px 3px rgba(16, 24, 40, 0.08),
-    0 12px 28px rgba(16, 24, 40, 0.07);
+  /* ── Sombras ─────────────────────────────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(30, 42, 33, 0.05);
+  --shadow-2: 0 2px 6px rgba(30, 42, 33, 0.07);
+  --shadow-3: 0 12px 28px rgba(30, 42, 33, 0.12);
+  --shadow-paper: 0 1px 3px rgba(30, 42, 33, 0.08),
+    0 12px 28px rgba(30, 42, 33, 0.07);
 
   /* ── Estructura ─────────────────────────────────────────────────────── */
   --rail-w: 76px;
   --panel-w: 420px;
   --topbar-h: 56px;
+
+  /* ── Portada ─────────────────────────────────────────────────────────── */
+  --hero-gradient: linear-gradient(180deg, #f7f8f1, #e8efdf);
 
   /* ── Movimiento ─────────────────────────────────────────────────────── */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -95,41 +104,43 @@
 }
 
 /* ============================================================================
-   Tema oscuro — gris azulado profundo, nunca negro puro. El azul se aclara
-   para conservar el contraste sobre fondo oscuro.
+   Tema oscuro — verde profundo, nunca negro puro. El verde se aclara para
+   conservar el contraste sobre fondo oscuro.
    ========================================================================= */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0f1116;
-  --surface: #161a21;
-  --surface-2: #1d222b;
-  --surface-3: #252b36;
-  --border: #2a313d;
-  --border-strong: #3a4250;
+  --bg: #111a13;
+  --surface: #19241b;
+  --surface-2: #222f24;
+  --surface-3: #2c3b2e;
+  --border: #334436;
+  --border-strong: #435745;
 
-  --text: #e9edf3;
-  --text-2: #a8b0bd;
-  --text-3: #8b93a1;
-  --text-inverse: #0f1116;
+  --text: #f1f5eb;
+  --text-2: #b5c0b2;
+  --text-3: #9aa79a;
+  --text-inverse: #111a13;
 
-  --ink: #4d8dfb;
-  --ink-hover: #6ba1ff;
-  --ink-soft: rgba(77, 141, 251, 0.16);
+  --ink: #c2d7a3;
+  --ink-hover: #d3e3bc;
+  --ink-soft: rgba(194, 215, 163, 0.16);
 
-  --accent: #4d8dfb;
-  --accent-2: #7fa8e8;
-  --accent-soft: rgba(77, 141, 251, 0.16);
-  --accent-ring: rgba(77, 141, 251, 0.45);
+  --accent: #c2d7a3;
+  --accent-2: #829b78;
+  --accent-soft: rgba(194, 215, 163, 0.16);
+  --accent-ring: rgba(194, 215, 163, 0.45);
 
   --ok: #6fbf92;
   --ok-soft: rgba(111, 191, 146, 0.16);
-  --warn: #d9a94e;
-  --warn-soft: rgba(217, 169, 78, 0.16);
-  --danger: #e28d89;
-  --danger-soft: rgba(226, 141, 137, 0.16);
-  --info: #7fb6c9;
-  --info-soft: rgba(127, 182, 201, 0.16);
+  --warn: #d3a15e;
+  --warn-soft: rgba(211, 161, 94, 0.16);
+  --danger: #d9807c;
+  --danger-soft: rgba(217, 128, 124, 0.16);
+  --info: #74aec0;
+  --info-soft: rgba(116, 174, 192, 0.16);
+
+  --hero-gradient: linear-gradient(180deg, #111a13, #18261a);
 
   --shadow-paper: 0 1px 3px rgba(0, 0, 0, 0.5), 0 12px 28px rgba(0, 0, 0, 0.45);
 }

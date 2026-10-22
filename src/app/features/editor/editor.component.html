@@ -208,9 +208,13 @@
           class="textarea"
           rows="5"
           placeholder="Ingeniera de datos con ocho años construyendo plataformas analíticas…"
+          [attr.maxlength]="summaryMax"
           [value]="data().summary"
           (input)="store.setSummary($any($event.target).value)"
         ></textarea>
+        <p class="field-note">
+          {{ data().summary.length }} / {{ summaryMax }} caracteres
+        </p>
       </div>
     }
   </section>
@@ -229,7 +233,7 @@
         <p class="block-hint">{{ SECTION_HINTS.experience }}</p>
 
         @for (e of data().experience; track e.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(e.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ e.position || 'Nuevo puesto' }}</span>
@@ -238,6 +242,16 @@
               }
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(e.id)"
+                  [title]="isFolded(e.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(e.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(e.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -349,7 +363,7 @@
         <p class="block-hint">{{ SECTION_HINTS.education }}</p>
 
         @for (ed of data().education; track ed.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(ed.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ ed.degree || 'Nuevo estudio' }}</span>
@@ -358,6 +372,16 @@
               }
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(ed.id)"
+                  [title]="isFolded(ed.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(ed.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(ed.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -459,13 +483,29 @@
       <div class="block-body" appSortable="skills" (moveTo)="sortMove($event)">
         <p class="block-hint">{{ SECTION_HINTS.skills }}</p>
 
+        <div class="row">
+          <button type="button" class="btn btn--sm" (click)="toggleAllIn('skills')">
+            {{ allFoldedIn('skills') ? 'Desplegar los grupos' : 'Contraer los grupos' }}
+          </button>
+        </div>
+
         @for (s of data().skills; track s.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(s.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ s.category || 'Nuevo grupo' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(s.id)"
+                  [title]="isFolded(s.id) ? 'Desplegar este grupo' : 'Contraer este grupo'"
+                  [attr.aria-label]="isFolded(s.id) ? 'Desplegar este grupo' : 'Contraer este grupo'"
+                  (click)="toggleFolded(s.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -535,16 +575,17 @@
         <p class="block-hint">{{ SECTION_HINTS.languages }}</p>
 
         @for (l of data().languages; track l.id; let i = $index) {
-          <div class="row-line">
+          <div class="row-line" [class.is-folded]="isFolded(l.id)">
+            <span class="row-line-label">{{ l.language || 'Nuevo idioma' }}</span>
             <input
-              class="input"
+              class="input row-line-field"
               type="text"
               placeholder="Idioma"
               [value]="l.language"
               (input)="store.patchItem('languages', l.id, { language: $any($event.target).value })"
             />
             <select
-              class="select"
+              class="select row-line-field"
               [value]="l.proficiency"
               (change)="store.patchItem('languages', l.id, { proficiency: $any($event.target).value })"
             >
@@ -552,6 +593,16 @@
                 <option [value]="p">{{ proficiencyLabels[p] }}</option>
               }
             </select>
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-expanded]="!isFolded(l.id)"
+              [title]="isFolded(l.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+              [attr.aria-label]="isFolded(l.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+              (click)="toggleFolded(l.id)"
+            >
+              <span class="item-caret" aria-hidden="true"></span>
+            </button>
             <button
               type="button"
               class="icon-btn handle"
@@ -598,12 +649,22 @@
         <p class="block-hint">{{ SECTION_HINTS.projects }}</p>
 
         @for (pr of data().projects; track pr.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(pr.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ pr.name || 'Nuevo proyecto' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(pr.id)"
+                  [title]="isFolded(pr.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(pr.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(pr.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -710,12 +771,22 @@
         <p class="block-hint">{{ SECTION_HINTS.certifications }}</p>
 
         @for (c of data().certifications; track c.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(c.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ c.name || 'Nueva certificación' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(c.id)"
+                  [title]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(c.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -806,12 +877,22 @@
         <p class="block-hint">{{ SECTION_HINTS.publications }}</p>
 
         @for (pub of data().publications; track pub.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(pub.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ pub.title || 'Nueva publicación' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(pub.id)"
+                  [title]="isFolded(pub.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(pub.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(pub.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -910,12 +991,22 @@
         <p class="block-hint">{{ SECTION_HINTS.volunteerWork }}</p>
 
         @for (v of data().volunteerWork; track v.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(v.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ v.role || 'Nuevo voluntariado' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(v.id)"
+                  [title]="isFolded(v.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(v.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(v.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -1014,12 +1105,22 @@
         <p class="block-hint">{{ SECTION_HINTS.awards }}</p>
 
         @for (a of data().awards; track a.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(a.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ a.title || 'Nuevo reconocimiento' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(a.id)"
+                  [title]="isFolded(a.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(a.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(a.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -1109,7 +1210,7 @@
         <p class="block-hint">{{ SECTION_HINTS.references }}</p>
 
         @for (r of data().references; track r.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(r.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ r.name || 'Nueva referencia' }}</span>
@@ -1118,6 +1219,16 @@
               }
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(r.id)"
+                  [title]="isFolded(r.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(r.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(r.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"
@@ -1211,12 +1322,22 @@
         <p class="block-hint">{{ SECTION_HINTS.customSection }}</p>
 
         @for (c of data().customSections; track c.id; let i = $index) {
-          <article class="item">
+          <article class="item" [class.is-folded]="isFolded(c.id)">
             <header class="item-head">
               <span class="item-index mono">{{ i + 1 }}</span>
               <span class="item-name">{{ c.title || 'Nueva sección' }}</span>
               <span class="spacer"></span>
               <span class="item-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  [attr.aria-expanded]="!isFolded(c.id)"
+                  [title]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  [attr.aria-label]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
+                  (click)="toggleFolded(c.id)"
+                >
+                  <span class="item-caret" aria-hidden="true"></span>
+                </button>
                 <button
                   type="button"
                   class="icon-btn handle"

@@ -1,132 +1,155 @@
-<div class="app">
-  <header class="topbar">
-    <div class="brand">
-      <img
-        class="brand-mark"
-        src="logo-cv-generador.png"
-        alt=""
-        aria-hidden="true"
-        width="26"
-        height="26"
-      />
-      <span class="brand-name">CV<span class="brand-thin">Generador</span></span>
-    </div>
+@if (view() === 'landing') {
+  <app-landing (start)="openEditor()" (toggleTheme)="toggleTheme()" [themeLabel]="themeLabel()" />
+} @else {
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img
+          class="brand-mark"
+          src="logo-cv-generador.png"
+          alt=""
+          aria-hidden="true"
+          width="28"
+          height="28"
+        />
+        <span class="brand-name">CV<span class="brand-thin">Generador</span></span>
+      </div>
 
-    <div class="history-tools">
-      <button
-        type="button"
-        class="btn btn--sm btn--icon"
-        title="Deshacer (Ctrl+Z)"
-        aria-label="Deshacer"
-        [disabled]="!store.canUndo()"
-        (click)="store.undo()"
-      >
-        ↶
+      <button type="button" class="btn btn--sm btn--ghost" (click)="goLanding()">
+        Inicio
       </button>
-      <button
-        type="button"
-        class="btn btn--sm btn--icon"
-        title="Rehacer (Ctrl+Shift+Z)"
-        aria-label="Rehacer"
-        [disabled]="!store.canRedo()"
-        (click)="store.redo()"
-      >
-        ↷
-      </button>
-    </div>
 
-    <span class="spacer"></span>
-
-    <div class="mobile-switch">
-      <button
-        type="button"
-        class="seg"
-        [class.is-active]="mobileView() === 'panel'"
-        (click)="mobileView.set('panel')"
-      >
-        Editar
-      </button>
-      <button
-        type="button"
-        class="seg"
-        [class.is-active]="mobileView() === 'preview'"
-        (click)="mobileView.set('preview')"
-      >
-        Vista previa
-      </button>
-    </div>
-
-    <button
-      type="button"
-      class="btn btn--sm btn--icon"
-      [title]="themeLabel()"
-      [attr.aria-label]="themeLabel()"
-      (click)="toggleTheme()"
-    >
-      {{ theme() === 'light' ? '☾' : '☀' }}
-    </button>
-
-    <div class="export-wrap">
-      <button type="button" class="btn btn--sm btn--primary" (click)="toggleExport()">
-        Exportar
-      </button>
-      @if (exportOpen()) {
-        <div class="export-popover">
-          <app-export />
-        </div>
-      }
-    </div>
-  </header>
-
-  @if (exportOpen()) {
-    <div class="backdrop" (click)="closeExport()" aria-hidden="true"></div>
-  }
-
-  <div class="work" [class.work--preview]="mobileView() === 'preview'">
-    <nav class="rail" aria-label="Secciones de la aplicación">
-      @for (t of tabs; track t.id) {
+      <div class="history-tools">
         <button
           type="button"
-          class="rail-btn"
-          [class.is-active]="tab() === t.id"
-          [title]="t.label"
-          (click)="tab.set(t.id)"
+          class="btn btn--sm btn--icon"
+          title="Deshacer (Ctrl+Z)"
+          aria-label="Deshacer"
+          [disabled]="!store.canUndo()"
+          (click)="store.undo()"
         >
-          <span class="rail-icon" aria-hidden="true">{{ t.icon }}</span>
-          <span class="rail-label">{{ t.label }}</span>
+          ↶
         </button>
-      }
+        <button
+          type="button"
+          class="btn btn--sm btn--icon"
+          title="Rehacer (Ctrl+Shift+Z)"
+          aria-label="Rehacer"
+          [disabled]="!store.canRedo()"
+          (click)="store.redo()"
+        >
+          ↷
+        </button>
+      </div>
+
       <span class="spacer"></span>
-    </nav>
 
-    <section class="panel">
-      <div class="panel-slot" [class.is-hidden]="tab() !== 'data'">
-        <app-editor />
+      <div class="mobile-switch">
+        <button
+          type="button"
+          class="seg"
+          [class.is-active]="mobileView() === 'panel'"
+          (click)="mobileView.set('panel')"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          class="seg"
+          [class.is-active]="mobileView() === 'preview'"
+          (click)="mobileView.set('preview')"
+        >
+          Vista previa
+        </button>
       </div>
-      <div class="panel-slot" [class.is-hidden]="tab() !== 'design'">
-        <app-design />
-      </div>
-      <div class="panel-slot" [class.is-hidden]="tab() !== 'ats'">
-        <app-ats />
-      </div>
-    </section>
 
-    <section class="canvas">
-      <app-preview />
-    </section>
-  </div>
-
-  <div class="toast-wrap">
-    @for (t of toasts.items(); track t.id) {
       <button
         type="button"
-        class="toast"
-        [class.toast--ok]="t.kind === 'ok'"
-        [class.toast--err]="t.kind === 'err'"
-        (click)="toasts.dismiss(t.id)"
+        class="btn btn--sm btn--icon"
+        [title]="themeLabel()"
+        [attr.aria-label]="themeLabel()"
+        (click)="toggleTheme()"
       >
-        {{ t.message }}
+        {{ theme() === 'light' ? '☾' : '☀' }}
       </button>
+
+      <div class="export-wrap">
+        <button type="button" class="btn btn--sm" (click)="toggleImport()">
+          Importar JSON
+        </button>
+        @if (importOpen()) {
+          <div class="export-popover">
+            <app-import (done)="closeImport()" />
+          </div>
+        }
+      </div>
+
+      <div class="export-wrap">
+        <button type="button" class="btn btn--sm btn--primary" (click)="toggleExport()">
+          Exportar
+        </button>
+        @if (exportOpen()) {
+          <div class="export-popover">
+            <app-export />
+          </div>
+        }
+      </div>
+    </header>
+
+    @if (exportOpen() || importOpen()) {
+      <div
+        class="backdrop"
+        (click)="closeExport()"
+        aria-hidden="true"
+      ></div>
     }
+
+    <div class="work" [class.work--preview]="mobileView() === 'preview'">
+      <nav class="rail" aria-label="Secciones de la aplicación">
+        @for (t of tabs; track t.id) {
+          <button
+            type="button"
+            class="rail-btn"
+            [class.is-active]="tab() === t.id"
+            [title]="t.label"
+            (click)="tab.set(t.id)"
+          >
+            <span class="rail-icon" aria-hidden="true">{{ t.icon }}</span>
+            <span class="rail-label">{{ t.label }}</span>
+          </button>
+        }
+        <span class="spacer"></span>
+      </nav>
+
+      <section class="panel">
+        <div class="panel-slot" [class.is-hidden]="tab() !== 'data'">
+          <app-editor />
+        </div>
+        <div class="panel-slot" [class.is-hidden]="tab() !== 'design'">
+          <app-design />
+        </div>
+        <div class="panel-slot" [class.is-hidden]="tab() !== 'ats'">
+          <app-ats />
+        </div>
+      </section>
+
+      <section class="canvas">
+        <app-preview />
+      </section>
+    </div>
+
+    <div class="toast-wrap">
+      @for (t of toasts.items(); track t.id) {
+        <button
+          type="button"
+          class="toast"
+          [class.toast--ok]="t.kind === 'ok'"
+          [class.toast--err]="t.kind === 'err'"
+          (click)="toasts.dismiss(t.id)"
+        >
+          {{ t.message }}
+        </button>
+      }
+    </div>
   </div>
-</div>
+}

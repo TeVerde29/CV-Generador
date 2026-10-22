@@ -59,3 +59,40 @@ app-cv-document {
   box-shadow: var(--shadow-paper);
   border-radius: 2px;
 }
+
+/* ── Vista JSON ────────────────────────────────────────────────────────── */
+
+.view-switch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.json-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.json-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 20px 40px;
+  background: var(--bg);
+}
+
+.json-code {
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 2;
+}

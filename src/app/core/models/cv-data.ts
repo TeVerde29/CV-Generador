@@ -6,6 +6,12 @@
 
 export type Proficiency = 'native' | 'fluent' | 'advanced' | 'intermediate' | 'basic';
 
+/**
+ * Cupo del perfil profesional. Es el bloque que primero lee quien revisa, y
+ * con 1 000 caracteres hay sitio para dos o tres frases con contexto.
+ */
+export const SUMMARY_MAX_LENGTH = 1000;
+
 export const PROFICIENCIES: Proficiency[] = [
   'native',
   'fluent',
@@ -189,4 +195,4 @@ export interface SavedPalette {
 
 /* ── Export ────────────────────────────────────────────────────────────── */
 
-export type ExportFormat = 'docx' | 'pdf' | 'markdown';
+export type ExportFormat = 'docx' | 'pdf' | 'markdown' | 'json';

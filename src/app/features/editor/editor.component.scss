@@ -122,6 +122,14 @@
   color: var(--text-3);
 }
 
+/* Nota al pie de un campo: el contador de caracteres, por ejemplo. */
+.field-note {
+  margin: -2px 0 0;
+  font-size: 11.5px;
+  color: var(--text-3);
+  text-align: right;
+}
+
 /* ── Fields ────────────────────────────────────────────────────────────── */
 
 .fields {
@@ -216,6 +224,44 @@
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   overflow: hidden;
+}
+
+/* Un grupo contraído solo enseña su categoría: la cabecera deja de estar
+   partida en dos, porque ya no hay nada debajo. */
+.item.is-folded .item-head {
+  border-bottom-color: transparent;
+}
+.item.is-folded .item-body {
+  display: none;
+}
+
+/* Los idiomas son una fila suelta: al plegarla queda solo el nombre. */
+.row-line-label {
+  display: none;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.row-line.is-folded .row-line-label {
+  display: inline;
+}
+.row-line.is-folded .row-line-field {
+  display: none;
+}
+
+/* Triángulo de plegado, junto al tirador de arrastre. Apunta hacia abajo
+   cuando el grupo está abierto y hacia la derecha cuando está contraído. */
+.item-caret {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--text-3);
+  transform: rotate(90deg);
+  transition: transform var(--dur) var(--ease);
+}
+.item.is-folded .item-caret {
+  transform: rotate(0deg);
 }
 
 .item-head {

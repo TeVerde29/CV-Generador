@@ -6,52 +6,97 @@
 
     <span class="spacer"></span>
 
-    <div class="zoom">
+    <div class="view-switch" role="group" aria-label="Cómo ver el currículum">
       <button
         type="button"
-        class="btn btn--sm btn--icon"
-        (click)="zoomOut()"
-        [disabled]="zoom() <= 30"
-        title="Alejar"
-        aria-label="Alejar"
+        class="btn btn--sm"
+        [class.btn--primary]="mode() === 'preview'"
+        (click)="setMode('preview')"
+        title="Ver el documento en el A4"
       >
-        &minus;
+        Documento
       </button>
       <button
         type="button"
-        class="zoom-value mono"
-        (click)="resetZoom()"
-        title="Restablecer al 80 %"
+        class="btn btn--sm"
+        [class.btn--primary]="mode() === 'json'"
+        (click)="setMode('json')"
+        title="Ver los datos en JSON"
       >
-        {{ zoom() }}%
+        JSON
       </button>
-      <button
-        type="button"
-        class="btn btn--sm btn--icon"
-        (click)="zoomIn()"
-        [disabled]="zoom() >= 150"
-        title="Acercar"
-        aria-label="Acercar"
-      >
-        +
-      </button>
-      <button type="button" class="btn btn--sm" (click)="fitWidth()">Ajustar ancho</button>
     </div>
+
+    @if (mode() === 'preview') {
+      <div class="zoom">
+        <button
+          type="button"
+          class="btn btn--sm btn--icon"
+          (click)="zoomOut()"
+          [disabled]="zoom() <= 30"
+          title="Alejar"
+          aria-label="Alejar"
+        >
+          &minus;
+        </button>
+        <button
+          type="button"
+          class="zoom-value mono"
+          (click)="resetZoom()"
+          title="Restablecer al 80 %"
+        >
+          {{ zoom() }}%
+        </button>
+        <button
+          type="button"
+          class="btn btn--sm btn--icon"
+          (click)="zoomIn()"
+          [disabled]="zoom() >= 150"
+          title="Acercar"
+          aria-label="Acercar"
+        >
+          +
+        </button>
+        <button type="button" class="btn btn--sm" (click)="fitWidth()">Ajustar ancho</button>
+      </div>
+    } @else {
+      <div class="json-tools">
+        <button type="button" class="btn btn--sm" (click)="copyJson()">Copiar</button>
+        <button type="button" class="btn btn--sm" (click)="downloadJson()">
+          Descargar .json
+        </button>
+        <label class="btn btn--sm">
+          Importar JSON
+          <input
+            type="file"
+            accept=".json,application/json"
+            hidden
+            (change)="onJsonFile($event)"
+          />
+        </label>
+      </div>
+    }
   </div>
 
-  <div class="preview-scroll" #viewport>
-    <div class="paper-holder" #holder [style.zoom]="zoom() / 100">
-      <app-cv-document
-        [data]="data()"
-        [templateId]="templateId()"
-        [layoutId]="layoutId()"
-        [colors]="colors()"
-        [order]="sectionOrder()"
-        [titles]="titles()"
-        [photoShape]="photoShape()"
-        [showWatermark]="showWatermark()"
-        [watermarkLabel]="watermarkText()"
-      />
+  @if (mode() === 'preview') {
+    <div class="preview-scroll" #viewport>
+      <div class="paper-holder" #holder [style.zoom]="zoom() / 100">
+        <app-cv-document
+          [data]="data()"
+          [templateId]="templateId()"
+          [layoutId]="layoutId()"
+          [colors]="colors()"
+          [order]="sectionOrder()"
+          [titles]="titles()"
+          [photoShape]="photoShape()"
+          [showWatermark]="showWatermark()"
+          [watermarkLabel]="watermarkText()"
+        />
+      </div>
     </div>
-  </div>
+  } @else {
+    <div class="json-view">
+      <pre class="json-code mono">{{ json() }}</pre>
+    </div>
+  }
 </div>

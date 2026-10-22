@@ -29,6 +29,14 @@ import type {
   VolunteerItem,
 } from '../models/cv-data';
 import { SECTION_TITLES } from '../models/labels';
+import { SUMMARY_MAX_LENGTH } from '../models/cv-data';
+import {
+  normalizeHiddenSections,
+  normalizeSectionOrder,
+  parseJson,
+  stringifyJson,
+  type JsonDesign,
+} from '../models/json-payload';
 import {
   PROFILES,
   findProfile,
@@ -258,6 +266,13 @@ export class CvStoreService {
     );
   });
 
+  /**
+   * Copia en memoria del currículum que había antes de empezar de cero.
+   * Vive solo en esta sesión: sirve para que la portada pueda ofrecer
+   * «continuar donde lo dejaste» después de un vaciado.
+   */
+  private lastSaved: CVData | null = null;
+
   /** Everything that gets persisted, as a comparable string. */
   private readonly snapshot = computed(() =>
     JSON.stringify({
@@ -383,42 +398,11 @@ export class CvStoreService {
 
   restore(): void {
     this.cv.set(normalizeCVData(safeParse(localStorage.getItem(KEY.data), emptyCVData())));
-    const design = safeParse<Record<string, unknown> | null>(
+    const design = safeParse<Partial<JsonDesign> | null>(
       localStorage.getItem(KEY.design),
       null,
     );
-    if (design) {
-      if (typeof design['templateId'] === 'string') this.templateId.set(design['templateId']);
-      if (typeof design['layoutId'] === 'string') {
-        this.layoutId.set(design['layoutId'] as LayoutOption['id']);
-      }
-      if (typeof design['paletteId'] === 'string') this.paletteId.set(design['paletteId']);
-      const cc = design['customColors'];
-      this.customColors.set(
-        cc && typeof cc === 'object' ? (cc as PaletteColors) : null,
-      );
-      const so = design['sectionOrder'];
-      if (Array.isArray(so)) {
-        const known = so.filter((k): k is SectionKey =>
-          ALL_SECTION_KEYS.includes(k as SectionKey),
-        );
-        const missing = ALL_SECTION_KEYS.filter((k) => !known.includes(k));
-        this.sectionOrder.set([...known, ...missing]);
-      }
-      const hs = design['hiddenSections'];
-      if (Array.isArray(hs)) {
-        this.hiddenSections.set(
-          hs.filter((k): k is SectionKey => ALL_SECTION_KEYS.includes(k as SectionKey)),
-        );
-      }
-      if (design['photoShape'] === 'circle' || design['photoShape'] === 'square') {
-        this.photoShape.set(design['photoShape']);
-      }
-      this.showWatermark.set(design['showWatermark'] === true);
-      if (typeof design['watermarkText'] === 'string') {
-        this.watermarkText.set(design['watermarkText']);
-      }
-    }
+    if (design) this.applyDesign(design);
     this.presets.set(safeParse<Preset[]>(localStorage.getItem(KEY.presets), []));
     this.savedPalettes.set(safeParse<SavedPalette[]>(localStorage.getItem(KEY.palettes), []));
     this.jobOffer.set(localStorage.getItem(KEY.offer) ?? '');
@@ -432,20 +416,7 @@ export class CvStoreService {
   save(): void {
     try {
       localStorage.setItem(KEY.data, JSON.stringify(this.cv()));
-      localStorage.setItem(
-        KEY.design,
-        JSON.stringify({
-          templateId: this.templateId(),
-          layoutId: this.layoutId(),
-          paletteId: this.paletteId(),
-          customColors: this.customColors(),
-          sectionOrder: this.sectionOrder(),
-          hiddenSections: this.hiddenSections(),
-          photoShape: this.photoShape(),
-          showWatermark: this.showWatermark(),
-          watermarkText: this.watermarkText(),
-        }),
-      );
+      localStorage.setItem(KEY.design, JSON.stringify(this.designState()));
       localStorage.setItem(KEY.presets, JSON.stringify(this.presets()));
       localStorage.setItem(KEY.palettes, JSON.stringify(this.savedPalettes()));
       localStorage.setItem(KEY.offer, this.jobOffer());
@@ -453,6 +424,61 @@ export class CvStoreService {
       this.savedSnapshot.set(this.snapshot());
     } catch (err) {
       console.warn('[cv-store] No se pudo guardar:', err);
+    }
+  }
+
+  /* ── JSON ─────────────────────────────────────────────────────────────── */
+
+  /** The design as it travels in the JSON. */
+  readonly designState = computed<JsonDesign>(() => ({
+    templateId: this.templateId(),
+    layoutId: this.layoutId(),
+    paletteId: this.paletteId(),
+    customColors: this.customColors(),
+    sectionOrder: this.sectionOrder(),
+    hiddenSections: this.hiddenSections(),
+    photoShape: this.photoShape(),
+    showWatermark: this.showWatermark(),
+    watermarkText: this.watermarkText(),
+  }));
+
+  /** The whole state as JSON, ready to look at or to download. */
+  readonly json = computed(() => stringifyJson(this.cv(), this.designState()));
+
+  /**
+   * Loads a JSON: the whole payload or just the CV data.
+   *
+   * The data is normalised, so a file written by hand or by another program
+   * still opens; the design is applied only where it makes sense.
+   */
+  importJson(raw: string): void {
+    const { data, design } = parseJson(raw);
+    this.commit(normalizeCVData(data));
+    this.applyDesign(design);
+  }
+
+  /** Applies the parts of a design that are present and valid. */
+  private applyDesign(design: Partial<JsonDesign>): void {
+    if (typeof design.templateId === 'string') this.templateId.set(design.templateId);
+    if (typeof design.layoutId === 'string') {
+      this.layoutId.set(design.layoutId as LayoutOption['id']);
+    }
+    if (typeof design.paletteId === 'string') this.paletteId.set(design.paletteId);
+    if (design.customColors === null || typeof design.customColors === 'object') {
+      this.customColors.set(design.customColors ?? null);
+    }
+    const order = normalizeSectionOrder(design.sectionOrder);
+    if (order) this.sectionOrder.set(order);
+    const hidden = normalizeHiddenSections(design.hiddenSections);
+    if (hidden) this.hiddenSections.set(hidden);
+    if (design.photoShape === 'circle' || design.photoShape === 'square') {
+      this.photoShape.set(design.photoShape);
+    }
+    if (typeof design.showWatermark === 'boolean') {
+      this.showWatermark.set(design.showWatermark);
+    }
+    if (typeof design.watermarkText === 'string') {
+      this.watermarkText.set(design.watermarkText);
     }
   }
 
@@ -466,6 +492,34 @@ export class CvStoreService {
 
   clearAll(): void {
     this.commit(emptyCVData());
+  }
+
+  /**
+   * Empieza de cero: el generador se abre en blanco, como la primera vez.
+   *
+   * Lo que había se aparta en memoria, para que la portada pueda ofrecer
+   * «continuar donde lo dejaste» sin que el vaciado lo borre.
+   */
+  startFresh(): void {
+    if (this.hasContent()) {
+      this.lastSaved = structuredClone(this.cv());
+    }
+    this.commit(emptyCVData());
+  }
+
+  /** Vuelve al currículum que había antes de empezar de cero, si lo había. */
+  restoreLastSaved(): void {
+    if (!this.lastSaved) return;
+    this.commit(structuredClone(this.lastSaved));
+    this.lastSaved = null;
+  }
+
+  /**
+   * ¿Hay algo que continuar? O un currículum escrito, o el que quedó apartado
+   * al empezar de cero.
+   */
+  canContinueSaved(): boolean {
+    return this.hasContent() || this.lastSaved !== null;
   }
 
   loadSample(): void {
@@ -490,7 +544,8 @@ export class CvStoreService {
 
   setSummary(value: string): void {
     this.mutate((d) => {
-      d.summary = value;
+      // El cupo también se aplica al pegar, no solo al teclear.
+      d.summary = value.slice(0, SUMMARY_MAX_LENGTH);
     });
   }
 

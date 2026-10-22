@@ -156,10 +156,10 @@
             @for (s of d.skills; track s.id) {
               <li class="cv-skill">
                 @if (s.category) {
-                  <span class="cv-skill-cat">{{ s.category }}</span>
+                  <span class="cv-skill-cat">{{ s.category }}:</span>
                 }
                 @if (s.items.length) {
-                  <span class="cv-skill-items">{{ s.items.join(' · ') }}</span>
+                  <span class="cv-skill-items">{{ s.items.join(', ') }}</span>
                 }
               </li>
             }
@@ -234,6 +234,18 @@
                 @if (joinComma(c.issuer, c.date); as meta) {
                   <span class="cv-item-meta"> — {{ meta }}</span>
                 }
+                @if (c.url) {
+                  <span class="cv-inline-link">
+                    <a
+                      class="cv-link"
+                      [href]="linkHref(c.url)"
+                      [title]="c.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ LINK_LABEL }}</a
+                    >
+                  </span>
+                }
               </li>
             }
           </ul>
@@ -253,6 +265,18 @@
               </div>
               @if (pub.description) {
                 <p class="cv-item-text">{{ pub.description }}</p>
+              }
+              @if (pub.url) {
+                <span class="cv-inline-link">
+                  <a
+                    class="cv-link"
+                    [href]="linkHref(pub.url)"
+                    [title]="pub.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >{{ LINK_LABEL }}</a
+                  >
+                </span>
               }
             </div>
           }
