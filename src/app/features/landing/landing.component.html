@@ -1,4 +1,4 @@
-<div class="landing">
+<main class="landing" role="main">
   <header class="landing-top">
     <div class="brand">
       <img
@@ -154,6 +154,27 @@
 
   <footer class="landing-foot">
     <span>Pedro Giovanni Ricra Figueroa — Ingeniería de Sistemas</span>
+    <button
+      type="button"
+      class="link-btn"
+      (click)="goPrivacy.emit()"
+    >
+      Política de privacidad
+    </button>
+    <button
+      type="button"
+      class="link-btn"
+      (click)="goAbout.emit()"
+    >
+      Acerca de
+    </button>
+    <button
+      type="button"
+      class="link-btn"
+      (click)="goContact.emit()"
+    >
+      Contacto
+    </button>
     <span class="spacer"></span>
   </footer>
-</div>
+</main>

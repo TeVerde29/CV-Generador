@@ -14,13 +14,16 @@ import { DesignComponent } from './features/design/design.component';
 import { EditorComponent } from './features/editor/editor.component';
 import { ExportComponent } from './features/export/export.component';
 import { ImportComponent } from './features/import/import.component';
+import { AboutComponent } from './features/about/about.component';
+import { ContactComponent } from './features/contact/contact.component';
 import { LandingComponent } from './features/landing/landing.component';
+import { PrivacyComponent } from './features/privacy/privacy.component';
 import { PreviewComponent } from './features/preview/preview.component';
 
 type Tab = 'data' | 'design' | 'ats';
 type Theme = 'light' | 'dark';
 /** La portada se ve al entrar; el editor, cuando ya se está trabajando. */
-type View = 'landing' | 'editor';
+type View = 'landing' | 'editor' | 'privacy' | 'about' | 'contact';
 
 const THEME_KEY = 'cvgen.theme';
 
@@ -34,6 +37,9 @@ const THEME_KEY = 'cvgen.theme';
     ExportComponent,
     ImportComponent,
     LandingComponent,
+    PrivacyComponent,
+    AboutComponent,
+    ContactComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -83,6 +89,21 @@ export class AppComponent implements OnInit, OnDestroy {
   /** Vuelve a la portada. */
   goLanding(): void {
     this.view.set('landing');
+  }
+
+  /** Abre la página de política de privacidad. */
+  goPrivacy(): void {
+    this.view.set('privacy');
+  }
+
+  /** Abre la página "Acerca de". */
+  goAbout(): void {
+    this.view.set('about');
+  }
+
+  /** Abre la página de contacto. */
+  goContact(): void {
+    this.view.set('contact');
   }
 
   /* ── Theme ───────────────────────────────────────────────────────────── */

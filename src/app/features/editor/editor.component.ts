@@ -12,10 +12,11 @@ import { COLLECTION_LABELS, CvStoreService, type CollectionKey } from '../../cor
 import { ToastService } from '../../core/services/toast.service';
 import { SortableDirective, type SortMove } from '../../shared/sortable/sortable.directive';
 import { TagInputComponent } from '../../shared/tag-input/tag-input.component';
+import { CvItemComponent } from './cv-item/cv-item.component';
 
 @Component({
   selector: 'app-editor',
-  imports: [TagInputComponent, SortableDirective],
+  imports: [TagInputComponent, SortableDirective, CvItemComponent],
   templateUrl: './editor.component.html',
   styleUrl: './editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -350,6 +351,11 @@ export class EditorComponent {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       this.toast.err('Ese archivo no es una imagen.');
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxSize) {
+      this.toast.err('La foto es demasiado grande (máximo 5 MB).');
       return;
     }
     this.cropToSquare(file)

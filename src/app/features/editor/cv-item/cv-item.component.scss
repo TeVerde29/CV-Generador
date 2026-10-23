@@ -1,0 +1,140 @@
+/* ── Item card ─────────────────────────────────────────────────────────── */
+
+.item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.item.is-folded .item-head {
+  border-bottom-color: transparent;
+}
+
+.item.is-folded .item-body {
+  display: none;
+}
+
+/* ── Cabecera del ítem ─────────────────────────────────────────────────── */
+
+.item-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 6px 6px 9px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  min-width: 0;
+}
+
+.item-index {
+  flex: none;
+  width: 14px;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.item-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-actions {
+  display: flex;
+  gap: 1px;
+  flex: none;
+}
+
+.item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+/* ── Triángulo de plegado ──────────────────────────────────────────────── */
+
+.item-caret {
+  flex: none;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--text-3);
+  transform: rotate(90deg);
+  transition: transform var(--dur) var(--ease);
+}
+
+.item.is-folded .item-caret {
+  transform: rotate(0deg);
+}
+
+/* ── Botones de icono ─────────────────────────────────────────────────── */
+
+.icon-btn {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.icon-btn--danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ── Tirador de arrastre ───────────────────────────────────────────────── */
+
+.handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.handle:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+/* Seis puntos dibujados con gradiente, sin depender de una fuente. */
+
+.grip {
+  width: 8px;
+  height: 12px;
+  background-image: radial-gradient(circle, currentColor 1.05px, transparent 1.6px);
+  background-size: 4px 4px;
+  opacity: 0.55;
+}
+
+.handle:hover:not(:disabled) .grip,
+.handle:focus-visible .grip {
+  opacity: 1;
+}
+
+/* Fantasma del ítem que se está arrastrando. */
+
+.is-dragging {
+  opacity: 0.45;
+  outline: 1px dashed var(--accent);
+  outline-offset: 1px;
+}

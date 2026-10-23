@@ -1,0 +1,21 @@
+# CV Generador
+
+Editor de currículums que funciona entero en el navegador. Sin servidor, sin registro y sin IA.
+
+## Páginas principales
+- / — Portada del generador de CV
+- /acerca — Acerca de CV Generador
+- /contacto — Contacto
+- /privacidad — Política de privacidad
+
+## Características
+- 16 plantillas de currículum
+- 24 paletas de color
+- Exportación a Word (.docx), PDF, Markdown y JSON
+- Foto opcional con recorte en el navegador
+- Analizador de ofertas de empleo (ATS)
+- Deshacer/rehacer y autoguardado
+
+## Contacto
+- Email: hikih020@gmail.com
+- GitHub: https://github.com/TeVerde29

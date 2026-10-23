@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import {
   DEFAULT_LAYOUT_ID,
   DEFAULT_PALETTE_ID,
@@ -31,23 +31,22 @@ import type {
 import { SECTION_TITLES } from '../models/labels';
 import { SUMMARY_MAX_LENGTH } from '../models/cv-data';
 import {
-  normalizeHiddenSections,
-  normalizeSectionOrder,
   parseJson,
   stringifyJson,
   type JsonDesign,
 } from '../models/json-payload';
 import {
-  PROFILES,
-  findProfile,
-  profileFullOrder,
-  profileHidden,
-} from '../models/profiles';
+  normalizeHiddenSections,
+  normalizeSectionOrder,
+} from '../models/json-payload';
 import {
   ALL_SECTION_KEYS,
   DEFAULT_SECTION_ORDER,
   type SectionKey,
 } from '../models/sections';
+import { CvHistoryService, type Snapshot } from './cv-history.service';
+import { CvPersistenceService, STORAGE_KEYS } from './cv-persistence.service';
+import { CvDesignService } from './cv-design.service';
 
 /* ── Collection plumbing ───────────────────────────────────────────────── */
 
@@ -79,14 +78,6 @@ export const COLLECTION_LABELS: Record<CollectionKey, { singular: string; plural
   awards: { singular: 'reconocimiento', plural: 'reconocimientos' },
   references: { singular: 'referencia', plural: 'referencias' },
   customSections: { singular: 'entrada', plural: 'entradas' },
-};
-
-const KEY = {
-  data: 'cvgen.data',
-  design: 'cvgen.design',
-  presets: 'cvgen.presets',
-  palettes: 'cvgen.palettes',
-  offer: 'cvgen.offer',
 };
 
 let seq = 0;
@@ -130,8 +121,6 @@ export function normalizeCVData(input: unknown): CVData {
     skills: arr<SkillGroup>(d['skills']).map((x) => ({ ...x, items: arr<string>(x?.items) })),
     languages: arr<LanguageItem>(d['languages']),
     projects: arr<ProjectItem & { url?: string }>(d['projects']).map((raw) => {
-      // An older copy of the CV (or an imported JSON) still carries the single
-      // `url`; it becomes the demo link instead of being silently dropped.
       const { url, ...rest } = (raw ?? {}) as ProjectItem & { url?: string };
       return {
         ...rest,
@@ -155,94 +144,49 @@ export function normalizeCVData(input: unknown): CVData {
 
 /* ── Service ───────────────────────────────────────────────────────────── */
 
-/**
- * Everything a single undo step has to restore. The layout of the document is
- * part of the user's work, so the section order travels with the data.
- */
-interface Snapshot {
-  cv: CVData;
-  order: SectionKey[];
-  hidden: SectionKey[];
-}
-
 @Injectable({ providedIn: 'root' })
 export class CvStoreService {
-  /* State */
+  private readonly history = inject(CvHistoryService);
+  private readonly persistence = inject(CvPersistenceService);
+  private readonly design = inject(CvDesignService);
+
+  /* ── Core CV state ─────────────────────────────────────────────────── */
+
   readonly cv = signal<CVData>(emptyCVData());
-  readonly templateId = signal<string>(DEFAULT_TEMPLATE_ID);
-  readonly layoutId = signal<LayoutOption['id']>(DEFAULT_LAYOUT_ID);
-  readonly paletteId = signal<string>(DEFAULT_PALETTE_ID);
-  readonly customColors = signal<PaletteColors | null>(null);
-  readonly presets = signal<Preset[]>([]);
-  readonly savedPalettes = signal<SavedPalette[]>([]);
-  /** Order of the sections in the rendered document. */
-  readonly sectionOrder = signal<SectionKey[]>([...DEFAULT_SECTION_ORDER]);
-  /** Sections turned off: they keep their data but leave the document. */
-  readonly hiddenSections = signal<SectionKey[]>([]);
-  /** Frame of the photo when the CV carries one. */
-  readonly photoShape = signal<'square' | 'circle'>('square');
-  /** Optional footer line on the exported documents (off by default). */
-  readonly showWatermark = signal(false);
-  readonly watermarkText = signal('');
-  /** Text of the job offer used for the keyword analysis. */
+  /** Texto del anuncio para el análisis de palabras clave. */
   readonly jobOffer = signal('');
-  readonly lastSavedAt = signal<number | null>(null);
   /** Serialised state at the last successful save; `dirty` derives from it. */
   private readonly savedSnapshot = signal<string>('');
 
-  /* Derived */
-  readonly template = computed(
-    () => TEMPLATES.find((t) => t.id === this.templateId()) ?? TEMPLATES[0],
-  );
-  readonly layout = computed(
-    () => LAYOUTS.find((l) => l.id === this.layoutId()) ?? LAYOUTS[0],
-  );
-  readonly palette = computed<PaletteOption | null>(() => {
-    const id = this.paletteId();
-    if (id === 'custom') {
-      const colors = this.customColors();
-      return colors ? { id: 'custom', name: 'Personalizada', colors } : null;
-    }
-    const saved = this.savedPalettes().find((p) => p.id === id);
-    if (saved) return { id: saved.id, name: saved.name, colors: saved.colors };
-    return PALETTES.find((p) => p.id === id) ?? PALETTES[0];
-  });
-  readonly colors = computed<PaletteColors>(
-    () => this.palette()?.colors ?? PALETTES[0].colors,
-  );
+  /** Copia en memoria del CV antes de empezar de cero. */
+  private lastSaved: CVData | null = null;
 
-  /* ── CV profile (section layout) ─────────────────────────────────────── */
+  /* ── Delegated design signals (misma API pública, respaldo en CvDesignService) ─── */
 
-  /**
-   * Which profile the current layout corresponds to. Derived rather than
-   * stored, so hand-tuning the order can never leave the selector lying: as
-   * soon as the order stops matching a profile, the selector says so.
-   */
-  readonly activeProfileId = computed<string>(() => {
-    const order = this.sectionOrder().join(',');
-    const hidden = [...this.hiddenSections()].sort().join(',');
-    for (const p of PROFILES) {
-      const sameOrder = profileFullOrder(p).join(',') === order;
-      const sameHidden = profileHidden(p).slice().sort().join(',') === hidden;
-      if (sameOrder && sameHidden) return p.id;
-    }
-    return 'custom';
-  });
+  readonly templateId = this.design.templateId;
+  readonly layoutId = this.design.layoutId;
+  readonly paletteId = this.design.paletteId;
+  readonly customColors = this.design.customColors;
+  readonly presets = this.design.presets;
+  readonly savedPalettes = this.design.savedPalettes;
+  readonly sectionOrder = this.design.sectionOrder;
+  readonly hiddenSections = this.design.hiddenSections;
+  readonly photoShape = this.design.photoShape;
+  readonly showWatermark = this.design.showWatermark;
+  readonly watermarkText = this.design.watermarkText;
+  /** Marca de tiempo del último guardado exitoso. */
+  readonly lastSavedAt = signal<number | null>(null);
 
-  /** The matched profile, or `null` when the layout is hand-made. */
-  readonly profile = computed(() => findProfile(this.activeProfileId()) ?? null);
+  readonly template = this.design.template;
+  readonly layout = this.design.layout;
+  readonly palette = this.design.palette;
+  readonly colors = this.design.colors;
+  readonly activeProfileId = this.design.activeProfileId;
+  readonly profile = this.design.profile;
+  readonly sectionTitles = this.design.sectionTitles;
+  readonly hasSidebar = this.design.hasSidebar;
 
-  /** Titles printed in the document; a profile may override the defaults. */
-  readonly sectionTitles = computed<Record<SectionKey, string>>(() => ({
-    ...SECTION_TITLES,
-    ...(this.profile()?.titles ?? {}),
-  }));
-
-  /**
-   * The CV exactly as the document sees it: sections the profile turned off
-   * are emptied out, so the preview, the PDF, the Word file and the Markdown
-   * all agree without each renderer having to know about the profile.
-   */
+  /** El CV tal como lo ve el documento: secciones desactivadas se vacían. */
   readonly documentData = computed<CVData>(() => {
     const hidden = this.hiddenSections();
     if (!hidden.length) return this.cv();
@@ -266,14 +210,13 @@ export class CvStoreService {
     );
   });
 
-  /**
-   * Copia en memoria del currículum que había antes de empezar de cero.
-   * Vive solo en esta sesión: sirve para que la portada pueda ofrecer
-   * «continuar donde lo dejaste» después de un vaciado.
-   */
-  private lastSaved: CVData | null = null;
+  /** ¿Hay pasos en el historial para deshacer? */
+  readonly canUndo = computed(() => this.history.canUndo());
 
-  /** Everything that gets persisted, as a comparable string. */
+  /** ¿Hay pasos en el historial para rehacer? */
+  readonly canRedo = computed(() => this.history.canRedo());
+
+  /** Todo lo que se persiste, como cadena comparable. */
   private readonly snapshot = computed(() =>
     JSON.stringify({
       data: this.cv(),
@@ -292,144 +235,13 @@ export class CvStoreService {
     }),
   );
 
-  /** True when there are changes that have not been written to storage yet. */
+  /** True cuando hay cambios sin escribir en storage. */
   readonly dirty = computed(() => this.snapshot() !== this.savedSnapshot());
 
-  constructor() {
-    this.restore();
-    // Autosave (debounced) so a refresh never loses work.
-    let t: ReturnType<typeof setTimeout> | undefined;
-    effect(() => {
-      // Any persisted change re-schedules the debounced autosave. The save
-      // itself runs from a timer, outside the reactive context.
-      this.snapshot();
-      if (t) clearTimeout(t);
-      t = setTimeout(() => this.save(), 600);
-    });
-  }
+  /** Todo el estado como JSON, listo para descargar. */
+  readonly json = computed(() => stringifyJson(this.cv(), this.designState()));
 
-  /* ── Undo / redo ─────────────────────────────────────────────────────── */
-
-  private past: Snapshot[] = [];
-  private future: Snapshot[] = [];
-  private lastPushAt = 0;
-  readonly canUndo = signal(false);
-  readonly canRedo = signal(false);
-
-  /** The current state, ready to be recorded. */
-  private state(): Snapshot {
-    return { cv: this.cv(), order: this.sectionOrder(), hidden: this.hiddenSections() };
-  }
-
-  /**
-   * Records the state before a change. Rapid edits (typing, or the many small
-   * moves a drag emits) coalesce into a single step, so one undo does not walk
-   * back character by character or swap by swap.
-   */
-  private pushHistory(before: Snapshot): void {
-    const now = Date.now();
-    const isBurst = now - this.lastPushAt < 700 && this.past.length > 0;
-    if (!isBurst) {
-      this.past.push(structuredClone(before));
-      if (this.past.length > 60) this.past.shift();
-    }
-    this.lastPushAt = now;
-    this.future = [];
-    this.canUndo.set(this.past.length > 0);
-    this.canRedo.set(false);
-  }
-
-  private commit(next: CVData): void {
-    this.pushHistory(this.state());
-    this.cv.set(next);
-  }
-
-  /**
-   * Section order and visibility are not CV data, but they are still the
-   * user's work, so they go through the same history. A no-op change records
-   * nothing.
-   */
-  private commitLayout(order: SectionKey[], hidden: SectionKey[]): void {
-    const curOrder = this.sectionOrder();
-    const curHidden = this.hiddenSections();
-    const unchanged =
-      order.length === curOrder.length &&
-      order.every((k, i) => k === curOrder[i]) &&
-      hidden.length === curHidden.length &&
-      hidden.every((k, i) => k === curHidden[i]);
-    if (unchanged) return;
-    this.pushHistory(this.state());
-    this.sectionOrder.set(order);
-    this.hiddenSections.set(hidden);
-  }
-
-  /** Reorders the sections, leaving visibility alone. */
-  private commitSections(next: SectionKey[]): void {
-    this.commitLayout(next, this.hiddenSections());
-  }
-
-  private apply(snapshot: Snapshot): void {
-    this.cv.set(snapshot.cv);
-    this.sectionOrder.set([...snapshot.order]);
-    this.hiddenSections.set([...(snapshot.hidden ?? [])]);
-  }
-
-  undo(): void {
-    const previous = this.past.pop();
-    if (!previous) return;
-    this.future.push(structuredClone(this.state()));
-    this.apply(previous);
-    this.lastPushAt = 0;
-    this.canUndo.set(this.past.length > 0);
-    this.canRedo.set(this.future.length > 0);
-  }
-
-  redo(): void {
-    const next = this.future.pop();
-    if (!next) return;
-    this.past.push(structuredClone(this.state()));
-    this.apply(next);
-    this.lastPushAt = 0;
-    this.canUndo.set(this.past.length > 0);
-    this.canRedo.set(this.future.length > 0);
-  }
-
-  /* ── Persistence ─────────────────────────────────────────────────────── */
-
-  restore(): void {
-    this.cv.set(normalizeCVData(safeParse(localStorage.getItem(KEY.data), emptyCVData())));
-    const design = safeParse<Partial<JsonDesign> | null>(
-      localStorage.getItem(KEY.design),
-      null,
-    );
-    if (design) this.applyDesign(design);
-    this.presets.set(safeParse<Preset[]>(localStorage.getItem(KEY.presets), []));
-    this.savedPalettes.set(safeParse<SavedPalette[]>(localStorage.getItem(KEY.palettes), []));
-    this.jobOffer.set(localStorage.getItem(KEY.offer) ?? '');
-    this.past = [];
-    this.future = [];
-    this.canUndo.set(false);
-    this.canRedo.set(false);
-    this.savedSnapshot.set(this.snapshot());
-  }
-
-  save(): void {
-    try {
-      localStorage.setItem(KEY.data, JSON.stringify(this.cv()));
-      localStorage.setItem(KEY.design, JSON.stringify(this.designState()));
-      localStorage.setItem(KEY.presets, JSON.stringify(this.presets()));
-      localStorage.setItem(KEY.palettes, JSON.stringify(this.savedPalettes()));
-      localStorage.setItem(KEY.offer, this.jobOffer());
-      this.lastSavedAt.set(Date.now());
-      this.savedSnapshot.set(this.snapshot());
-    } catch (err) {
-      console.warn('[cv-store] No se pudo guardar:', err);
-    }
-  }
-
-  /* ── JSON ─────────────────────────────────────────────────────────────── */
-
-  /** The design as it travels in the JSON. */
+  /** El diseño tal como viaja en el JSON. */
   readonly designState = computed<JsonDesign>(() => ({
     templateId: this.templateId(),
     layoutId: this.layoutId(),
@@ -442,47 +254,87 @@ export class CvStoreService {
     watermarkText: this.watermarkText(),
   }));
 
-  /** The whole state as JSON, ready to look at or to download. */
-  readonly json = computed(() => stringifyJson(this.cv(), this.designState()));
+  constructor() {
+    this.restore();
+    // Autosave (debounced) para que un refresco nunca pierda el trabajo.
+    let t: ReturnType<typeof setTimeout> | undefined;
+    effect(() => {
+      this.snapshot();
+      if (t) clearTimeout(t);
+      t = setTimeout(() => this.save(), 600);
+    });
+  }
 
-  /**
-   * Loads a JSON: the whole payload or just the CV data.
-   *
-   * The data is normalised, so a file written by hand or by another program
-   * still opens; the design is applied only where it makes sense.
-   */
+  /* ── Undo / redo (delega en CvHistoryService) ──────────────────────── */
+
+  undo(): void {
+    this.history.setCurrent(this.cv(), this.sectionOrder(), this.hiddenSections());
+    const snap = this.history.undo();
+    if (!snap) return;
+    this.cv.set(snap.cv);
+    this.sectionOrder.set([...snap.order]);
+    this.hiddenSections.set([...(snap.hidden ?? [])]);
+  }
+
+  redo(): void {
+    this.history.setCurrent(this.cv(), this.sectionOrder(), this.hiddenSections());
+    const snap = this.history.redo();
+    if (!snap) return;
+    this.cv.set(snap.cv);
+    this.sectionOrder.set([...snap.order]);
+    this.hiddenSections.set([...(snap.hidden ?? [])]);
+  }
+
+  /** Graba un snapshot antes de mutar el CV. */
+  private pushHistory(cv: CVData): void {
+    this.history.setCurrent(cv, this.sectionOrder(), this.hiddenSections());
+    this.history.push({ cv, order: this.sectionOrder(), hidden: this.hiddenSections() });
+  }
+
+  private commit(next: CVData): void {
+    this.pushHistory(next);
+    this.cv.set(next);
+  }
+
+  /* ── Persistence (delega en CvPersistenceService) ──────────────────── */
+
+  restore(): void {
+    const loaded = this.persistence.restore();
+    if (!loaded) {
+      this.history.clear();
+      this.savedSnapshot.set(this.snapshot());
+      return;
+    }
+    this.cv.set(loaded.data);
+    if (loaded.design) this.design.applyDesign(loaded.design);
+    this.presets.set(loaded.presets as Preset[]);
+    this.savedPalettes.set(loaded.palettes as SavedPalette[]);
+    this.jobOffer.set(loaded.offer);
+    this.history.clear();
+    this.savedSnapshot.set(this.snapshot());
+  }
+
+  save(): void {
+    this.persistence.save({
+      data: this.cv(),
+      design: this.designState(),
+      presets: this.presets(),
+      palettes: this.savedPalettes(),
+      offer: this.jobOffer(),
+    });
+    this.lastSavedAt.set(Date.now());
+    this.savedSnapshot.set(this.snapshot());
+  }
+
+  /* ── JSON ─────────────────────────────────────────────────────────────── */
+
   importJson(raw: string): void {
     const { data, design } = parseJson(raw);
     this.commit(normalizeCVData(data));
-    this.applyDesign(design);
+    this.design.applyDesign(design);
   }
 
-  /** Applies the parts of a design that are present and valid. */
-  private applyDesign(design: Partial<JsonDesign>): void {
-    if (typeof design.templateId === 'string') this.templateId.set(design.templateId);
-    if (typeof design.layoutId === 'string') {
-      this.layoutId.set(design.layoutId as LayoutOption['id']);
-    }
-    if (typeof design.paletteId === 'string') this.paletteId.set(design.paletteId);
-    if (design.customColors === null || typeof design.customColors === 'object') {
-      this.customColors.set(design.customColors ?? null);
-    }
-    const order = normalizeSectionOrder(design.sectionOrder);
-    if (order) this.sectionOrder.set(order);
-    const hidden = normalizeHiddenSections(design.hiddenSections);
-    if (hidden) this.hiddenSections.set(hidden);
-    if (design.photoShape === 'circle' || design.photoShape === 'square') {
-      this.photoShape.set(design.photoShape);
-    }
-    if (typeof design.showWatermark === 'boolean') {
-      this.showWatermark.set(design.showWatermark);
-    }
-    if (typeof design.watermarkText === 'string') {
-      this.watermarkText.set(design.watermarkText);
-    }
-  }
-
-  /* ── CV data mutation ────────────────────────────────────────────────── */
+  /* ── CV data mutation ──────────────────────────────────────────────── */
 
   private mutate(mutator: (draft: CVData) => void): void {
     const next = structuredClone(this.cv());
@@ -494,12 +346,7 @@ export class CvStoreService {
     this.commit(emptyCVData());
   }
 
-  /**
-   * Empieza de cero: el generador se abre en blanco, como la primera vez.
-   *
-   * Lo que había se aparta en memoria, para que la portada pueda ofrecer
-   * «continuar donde lo dejaste» sin que el vaciado lo borre.
-   */
+  /** Empieza de cero: guarda lo que había en memoria para «continuar después». */
   startFresh(): void {
     if (this.hasContent()) {
       this.lastSaved = structuredClone(this.cv());
@@ -507,17 +354,14 @@ export class CvStoreService {
     this.commit(emptyCVData());
   }
 
-  /** Vuelve al currículum que había antes de empezar de cero, si lo había. */
+  /** Vuelve al CV que había antes de empezar de cero, si lo había. */
   restoreLastSaved(): void {
     if (!this.lastSaved) return;
     this.commit(structuredClone(this.lastSaved));
     this.lastSaved = null;
   }
 
-  /**
-   * ¿Hay algo que continuar? O un currículum escrito, o el que quedó apartado
-   * al empezar de cero.
-   */
+  /** ¿Hay algo que continuar? O un CV escrito, o el apartado al empezar de cero. */
   canContinueSaved(): boolean {
     return this.hasContent() || this.lastSaved !== null;
   }
@@ -530,16 +374,12 @@ export class CvStoreService {
     this.mutate((d) => Object.assign(d.personalInfo, patch));
   }
 
-  /** Adds or removes the optional photo (a data URL, already cropped). */
+  /** Añade o quita la foto opcional (un data URL ya recortado). */
   setPhoto(photo: string | undefined): void {
     this.mutate((d) => {
       if (photo) d.personalInfo.photo = photo;
       else delete d.personalInfo.photo;
     });
-  }
-
-  setPhotoShape(shape: 'square' | 'circle'): void {
-    this.photoShape.set(shape);
   }
 
   setSummary(value: string): void {
@@ -555,17 +395,14 @@ export class CvStoreService {
     });
   }
 
-  /* ── Job offer (keyword analysis) ────────────────────────────────────── */
-
-  /**
-   * The offer the CV is being compared against. It sits outside the CV and
-   * outside the undo history: it is reference material, not document content.
-   */
   setJobOffer(value: string): void {
     this.jobOffer.set(value);
   }
 
-  addItem<K extends CollectionKey>(key: K, factory: (id: string) => CollectionMap[K]): string {
+  addItem<K extends CollectionKey>(
+    key: K,
+    factory: (id: string) => CollectionMap[K],
+  ): string {
     const id = uid(key);
     const item = factory(id);
     this.mutate((d) => {
@@ -594,7 +431,7 @@ export class CvStoreService {
     });
   }
 
-  /** Moves an item up (-1) or down (+1) within its section. */
+  /** Mueve un ítem un puesto arriba (-1) o abajo (+1) dentro de su sección. */
   moveItem<K extends CollectionKey>(key: K, id: string, delta: number): void {
     this.mutate((d) => {
       const list = d[key] as unknown as CollectionMap[K][];
@@ -605,10 +442,7 @@ export class CvStoreService {
     });
   }
 
-  /**
-   * Moves an item to an absolute index. Drag & drop works in positions rather
-   * than steps, so it needs a direct move instead of repeated swaps.
-   */
+  /** Mueve un ítem a un índice absoluto (drag & drop usa posiciones). */
   moveItemTo<K extends CollectionKey>(key: K, from: number, to: number): void {
     this.mutate((d) => {
       const list = d[key] as unknown as CollectionMap[K][];
@@ -618,120 +452,89 @@ export class CvStoreService {
     });
   }
 
-  /* ── Design ──────────────────────────────────────────────────────────── */
+  /* ── Design setters (delegados en CvDesignService) ─────────────────── */
 
   setTemplate(id: string): void {
-    this.templateId.set(id);
+    this.design.setTemplate(id);
   }
+
   setLayout(id: LayoutOption['id']): void {
-    this.layoutId.set(id);
+    this.design.setLayout(id);
   }
+
   setPalette(id: string): void {
-    this.paletteId.set(id);
-    if (id !== 'custom') this.customColors.set(null);
+    this.design.setPalette(id);
   }
+
   setCustomColors(colors: PaletteColors): void {
-    this.customColors.set(colors);
-    this.paletteId.set('custom');
+    this.design.setCustomColors(colors);
   }
 
-  /* ── Section order ───────────────────────────────────────────────────── */
+  setPhotoShape(shape: 'square' | 'circle'): void {
+    this.design.setPhotoShape(shape);
+  }
 
-  /** Moves a section up (-1) or down (+1) in the document. */
+  /* ── Section order ─────────────────────────────────────────────────── */
+
+  /** Mueve una sección un puesto arriba (-1) o abajo (+1). */
   moveSection(key: SectionKey, delta: number): void {
-    const list = this.sectionOrder();
-    const i = list.indexOf(key);
-    const j = i + delta;
-    if (i < 0 || j < 0 || j >= list.length) return;
-    const copy = [...list];
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-    this.commitSections(copy);
+    this.design.moveSection(key, delta);
   }
 
+  /** Restablece el orden de secciones al por defecto. */
   resetSectionOrder(): void {
-    this.commitSections([...DEFAULT_SECTION_ORDER]);
+    this.design.resetSectionOrder();
   }
 
-  /** Moves a section to an absolute position. Used by drag & drop. */
+  /** Mueve una sección a una posición absoluta (drag & drop). */
   moveSectionTo(from: number, to: number): void {
-    const list = this.sectionOrder();
-    if (from === to || from < 0 || from >= list.length || to < 0 || to >= list.length) return;
-    const copy = [...list];
-    const [moved] = copy.splice(from, 1);
-    copy.splice(to, 0, moved);
-    this.commitSections(copy);
+    this.design.moveSectionTo(from, to);
   }
 
-  /* ── Perfiles y visibilidad ──────────────────────────────────────────── */
+  /* ── Perfiles y visibilidad ────────────────────────────────────────── */
 
-  /** Applies a profile: its section order, its visibility and its titles. */
+  /** Aplica un perfil: su orden de secciones, su visibilidad y sus títulos. */
   applyProfile(id: string): void {
-    const profile = findProfile(id);
-    if (!profile) return;
-    this.commitLayout(profileFullOrder(profile), profileHidden(profile));
+    this.design.applyProfile(id);
   }
 
   isSectionHidden(key: SectionKey): boolean {
     return this.hiddenSections().includes(key);
   }
 
-  /** Shows or hides one section. Hiding never deletes the data behind it. */
+  /** Muestra u oculta una sección. Ocultar nunca borra los datos detrás. */
   toggleSection(key: SectionKey): void {
-    const hidden = this.hiddenSections();
-    const next = hidden.includes(key) ? hidden.filter((k) => k !== key) : [...hidden, key];
-    this.commitLayout(this.sectionOrder(), next);
+    this.design.toggleSection(key);
   }
 
-  /** Puts every section back, in the default order. */
+  /** Vuelve a mostrar todas las secciones, en el orden por defecto. */
   showAllSections(): void {
-    this.commitLayout([...DEFAULT_SECTION_ORDER], []);
+    this.design.showAllSections();
   }
+
+  /* ── Paletas y presets personalizados (delegados en CvDesignService) ── */
 
   savePalette(name: string): void {
-    const colors = this.customColors() ?? this.colors();
-    const entry: SavedPalette = {
-      id: uid('sp'),
-      name: name.trim() || `Personalizada ${this.savedPalettes().length + 1}`,
-      colors,
-      createdAt: Date.now(),
-    };
-    this.savedPalettes.update((l) => [...l, entry]);
+    this.design.savePalette(name);
   }
+
   removePalette(id: string): void {
-    this.savedPalettes.update((l) => l.filter((p) => p.id !== id));
-    if (this.paletteId() === id) this.setPalette(DEFAULT_PALETTE_ID);
+    this.design.removePalette(id);
   }
 
   savePreset(name: string): void {
-    const entry: Preset = {
-      id: uid('preset'),
-      name:
-        name.trim() || `${this.template().name} · ${this.layout().name}`,
-      templateId: this.templateId(),
-      layoutId: this.layoutId(),
-      paletteId: this.paletteId(),
-      customColors: this.customColors(),
-      createdAt: Date.now(),
-    };
-    this.presets.update((l) => [...l, entry]);
+    this.design.savePreset(name);
   }
+
   applyPreset(preset: Preset): void {
-    this.templateId.set(preset.templateId);
-    this.layoutId.set(preset.layoutId);
-    this.paletteId.set(preset.paletteId);
-    this.customColors.set(preset.customColors);
+    this.design.applyPreset(preset);
   }
+
   removePreset(id: string): void {
-    this.presets.update((l) => l.filter((p) => p.id !== id));
+    this.design.removePreset(id);
   }
+
   movePreset(id: string, delta: number): void {
-    this.presets.update((list) => {
-      const copy = [...list];
-      const i = copy.findIndex((p) => p.id === id);
-      const j = i + delta;
-      if (i < 0 || j < 0 || j >= copy.length) return list;
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-      return copy;
-    });
+    this.design.movePreset(id, delta);
   }
 }

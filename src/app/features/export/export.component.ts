@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
 import type { ExportFormat } from '../../core/models/cv-data';
 import { safeFileName } from '../../core/models/labels';
 import { CvStoreService } from '../../core/services/cv-store.service';
@@ -49,13 +49,16 @@ export class ExportComponent {
   ];
 
   readonly selected = signal<Record<ExportFormat, boolean>>({
-    docx: true,
-    pdf: true,
+    docx: false,
+    pdf: false,
     markdown: false,
     json: false,
   });
 
   readonly running = signal(false);
+
+  /** Pide al shell que cierre el popover de exportación. */
+  readonly closeExport = output<void>();
 
   readonly chosen = computed(() => this.formats.filter((f) => this.selected()[f.id]));
 
@@ -72,7 +75,7 @@ export class ExportComponent {
   }
 
   toggleWatermark(): void {
-    this.store.showWatermark.update((v) => !v);
+    this.store.showWatermark.update((v: boolean) => !v);
   }
 
   onWatermarkInput(event: Event): void {
@@ -82,7 +85,7 @@ export class ExportComponent {
   /* ── Export ──────────────────────────────────────────────────────────── */
 
   async exportSelected(): Promise<void> {
-    const order: ExportFormat[] = ['pdf', 'docx', 'markdown'];
+    const order: ExportFormat[] = ['pdf', 'docx', 'markdown', 'json'];
     const ids = order.filter((id) => this.selected()[id]);
     await this.runAll(ids);
   }
@@ -134,6 +137,7 @@ export class ExportComponent {
         templateId: this.store.templateId(),
         layoutId: this.store.layoutId(),
         sectionOrder: this.store.sectionOrder(),
+        hiddenSections: this.store.hiddenSections(),
       },
       json: this.store.json(),
       watermark: {

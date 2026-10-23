@@ -33,12 +33,21 @@ export const LINK_LABEL = 'Enlace';
  * Turns a stored link into something a browser can follow. Values are typed by
  * hand, so "linkedin.com/in/x" and "https://linkedin.com/in/x" both have to
  * work: the scheme is added only when it is missing.
+ *
+ * Only safe schemes are allowed (`http:`, `https:`, `mailto:`, `tel:`).
+ * Anything else — including `javascript:` and `data:` — is rejected to avoid
+ * XSS through links typed by hand or imported from a JSON file.
  */
+const SAFE_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:'];
+
 export function toHref(value?: string): string {
   const link = (value ?? '').trim();
   if (!link) return '';
-  if (/^[a-z][a-z0-9+.-]*:/i.test(link) || link.startsWith('//')) return link;
-  return `https://${link}`;
+  if (link.startsWith('//')) return link;
+  const scheme = link.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase();
+  if (scheme && !SAFE_SCHEMES.includes(scheme + ':')) return '';
+  if (!scheme) return `https://${link}`;
+  return link;
 }
 
 export const SECTION_TITLES = {

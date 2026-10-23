@@ -229,48 +229,18 @@
         <p class="block-hint">{{ SECTION_HINTS.experience }}</p>
 
         @for (e of data().experience; track e.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(e.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ e.position || 'Nuevo puesto' }}</span>
-              @if (e.company) {
-                <span class="dim item-company">· {{ e.company }}</span>
-              }
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(e.id)"
-                  [title]="isFolded(e.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(e.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(e.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().experience.length < 2"
-                  (keydown.arrowup)="store.moveItem('experience', e.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('experience', e.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('experience', e.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="e.position || 'Nuevo puesto'"
+            [index]="i"
+            [folded]="isFolded(e.id)"
+            [id]="e.id"
+            [canDrag]="data().experience.length >= 2"
+            (toggleFold)="toggleFolded(e.id)"
+            (remove)="store.removeItem('experience', e.id)"
+            (moveUp)="store.moveItem('experience', e.id, -1)"
+            (moveDown)="store.moveItem('experience', e.id, 1)"
+          >
+            <span class="dim item-company">@if (e.company) { · {{ e.company }}}</span>
             <div class="item-body">
               <div class="fields fields--2">
                 <label class="field">
@@ -333,7 +303,7 @@
                 />
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay puestos.</p>
         }
@@ -359,48 +329,18 @@
         <p class="block-hint">{{ SECTION_HINTS.education }}</p>
 
         @for (ed of data().education; track ed.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(ed.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ ed.degree || 'Nuevo estudio' }}</span>
-              @if (ed.institution) {
-                <span class="dim item-company">· {{ ed.institution }}</span>
-              }
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(ed.id)"
-                  [title]="isFolded(ed.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(ed.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(ed.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().education.length < 2"
-                  (keydown.arrowup)="store.moveItem('education', ed.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('education', ed.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('education', ed.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="ed.degree || 'Nuevo estudio'"
+            [index]="i"
+            [folded]="isFolded(ed.id)"
+            [id]="ed.id"
+            [canDrag]="data().education.length >= 2"
+            (toggleFold)="toggleFolded(ed.id)"
+            (remove)="store.removeItem('education', ed.id)"
+            (moveUp)="store.moveItem('education', ed.id, -1)"
+            (moveDown)="store.moveItem('education', ed.id, 1)"
+          >
+            <span class="dim item-company">@if (ed.institution) { · {{ ed.institution }}}</span>
             <div class="item-body">
               <div class="fields fields--2">
                 <label class="field">
@@ -454,7 +394,7 @@
                 </label>
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay estudios.</p>
         }
@@ -486,45 +426,17 @@
         </div>
 
         @for (s of data().skills; track s.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(s.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ s.category || 'Nuevo grupo' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(s.id)"
-                  [title]="isFolded(s.id) ? 'Desplegar este grupo' : 'Contraer este grupo'"
-                  [attr.aria-label]="isFolded(s.id) ? 'Desplegar este grupo' : 'Contraer este grupo'"
-                  (click)="toggleFolded(s.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().skills.length < 2"
-                  (keydown.arrowup)="store.moveItem('skills', s.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('skills', s.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('skills', s.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="s.category || 'Nuevo grupo'"
+            [index]="i"
+            [folded]="isFolded(s.id)"
+            [id]="s.id"
+            [canDrag]="data().skills.length >= 2"
+            (toggleFold)="toggleFolded(s.id)"
+            (remove)="store.removeItem('skills', s.id)"
+            (moveUp)="store.moveItem('skills', s.id, -1)"
+            (moveDown)="store.moveItem('skills', s.id, 1)"
+          >
             <div class="item-body">
               <label class="field">
                 <span class="label">Categoría</span>
@@ -545,7 +457,7 @@
                 />
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay grupos de competencias.</p>
         }
@@ -645,45 +557,17 @@
         <p class="block-hint">{{ SECTION_HINTS.projects }}</p>
 
         @for (pr of data().projects; track pr.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(pr.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ pr.name || 'Nuevo proyecto' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(pr.id)"
-                  [title]="isFolded(pr.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(pr.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(pr.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().projects.length < 2"
-                  (keydown.arrowup)="store.moveItem('projects', pr.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('projects', pr.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('projects', pr.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="pr.name || 'Nuevo proyecto'"
+            [index]="i"
+            [folded]="isFolded(pr.id)"
+            [id]="pr.id"
+            [canDrag]="data().projects.length >= 2"
+            (toggleFold)="toggleFolded(pr.id)"
+            (remove)="store.removeItem('projects', pr.id)"
+            (moveUp)="store.moveItem('projects', pr.id, -1)"
+            (moveDown)="store.moveItem('projects', pr.id, 1)"
+          >
             <div class="item-body">
               <div class="fields fields--3">
                 <label class="field">
@@ -741,7 +625,7 @@
                 />
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay proyectos.</p>
         }
@@ -767,45 +651,17 @@
         <p class="block-hint">{{ SECTION_HINTS.certifications }}</p>
 
         @for (c of data().certifications; track c.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(c.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ c.name || 'Nueva certificación' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(c.id)"
-                  [title]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(c.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().certifications.length < 2"
-                  (keydown.arrowup)="store.moveItem('certifications', c.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('certifications', c.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('certifications', c.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="c.name || 'Nueva certificación'"
+            [index]="i"
+            [folded]="isFolded(c.id)"
+            [id]="c.id"
+            [canDrag]="data().certifications.length >= 2"
+            (toggleFold)="toggleFolded(c.id)"
+            (remove)="store.removeItem('certifications', c.id)"
+            (moveUp)="store.moveItem('certifications', c.id, -1)"
+            (moveDown)="store.moveItem('certifications', c.id, 1)"
+          >
             <div class="item-body">
               <label class="field">
                 <span class="label">Nombre</span>
@@ -847,7 +703,7 @@
                 </label>
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay certificaciones.</p>
         }
@@ -873,45 +729,17 @@
         <p class="block-hint">{{ SECTION_HINTS.publications }}</p>
 
         @for (pub of data().publications; track pub.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(pub.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ pub.title || 'Nueva publicación' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(pub.id)"
-                  [title]="isFolded(pub.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(pub.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(pub.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().publications.length < 2"
-                  (keydown.arrowup)="store.moveItem('publications', pub.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('publications', pub.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('publications', pub.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="pub.title || 'Nueva publicación'"
+            [index]="i"
+            [folded]="isFolded(pub.id)"
+            [id]="pub.id"
+            [canDrag]="data().publications.length >= 2"
+            (toggleFold)="toggleFolded(pub.id)"
+            (remove)="store.removeItem('publications', pub.id)"
+            (moveUp)="store.moveItem('publications', pub.id, -1)"
+            (moveDown)="store.moveItem('publications', pub.id, 1)"
+          >
             <div class="item-body">
               <label class="field">
                 <span class="label">Título</span>
@@ -961,7 +789,7 @@
                 ></textarea>
               </label>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay publicaciones.</p>
         }
@@ -987,45 +815,17 @@
         <p class="block-hint">{{ SECTION_HINTS.volunteerWork }}</p>
 
         @for (v of data().volunteerWork; track v.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(v.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ v.role || 'Nuevo voluntariado' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(v.id)"
-                  [title]="isFolded(v.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(v.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(v.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().volunteerWork.length < 2"
-                  (keydown.arrowup)="store.moveItem('volunteerWork', v.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('volunteerWork', v.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('volunteerWork', v.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="v.role || 'Nuevo voluntariado'"
+            [index]="i"
+            [folded]="isFolded(v.id)"
+            [id]="v.id"
+            [canDrag]="data().volunteerWork.length >= 2"
+            (toggleFold)="toggleFolded(v.id)"
+            (remove)="store.removeItem('volunteerWork', v.id)"
+            (moveUp)="store.moveItem('volunteerWork', v.id, -1)"
+            (moveDown)="store.moveItem('volunteerWork', v.id, 1)"
+          >
             <div class="item-body">
               <div class="fields fields--2">
                 <label class="field">
@@ -1075,7 +875,7 @@
                 ></textarea>
               </label>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay voluntariados.</p>
         }
@@ -1101,45 +901,17 @@
         <p class="block-hint">{{ SECTION_HINTS.awards }}</p>
 
         @for (a of data().awards; track a.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(a.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ a.title || 'Nuevo reconocimiento' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(a.id)"
-                  [title]="isFolded(a.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(a.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(a.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().awards.length < 2"
-                  (keydown.arrowup)="store.moveItem('awards', a.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('awards', a.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('awards', a.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="a.title || 'Nuevo reconocimiento'"
+            [index]="i"
+            [folded]="isFolded(a.id)"
+            [id]="a.id"
+            [canDrag]="data().awards.length >= 2"
+            (toggleFold)="toggleFolded(a.id)"
+            (remove)="store.removeItem('awards', a.id)"
+            (moveUp)="store.moveItem('awards', a.id, -1)"
+            (moveDown)="store.moveItem('awards', a.id, 1)"
+          >
             <div class="item-body">
               <label class="field">
                 <span class="label">Título</span>
@@ -1180,7 +952,7 @@
                 ></textarea>
               </label>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay reconocimientos.</p>
         }
@@ -1206,48 +978,18 @@
         <p class="block-hint">{{ SECTION_HINTS.references }}</p>
 
         @for (r of data().references; track r.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(r.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ r.name || 'Nueva referencia' }}</span>
-              @if (r.title) {
-                <span class="dim item-company">· {{ r.title }}</span>
-              }
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(r.id)"
-                  [title]="isFolded(r.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(r.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(r.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().references.length < 2"
-                  (keydown.arrowup)="store.moveItem('references', r.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('references', r.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('references', r.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="r.name || 'Nueva referencia'"
+            [index]="i"
+            [folded]="isFolded(r.id)"
+            [id]="r.id"
+            [canDrag]="data().references.length >= 2"
+            (toggleFold)="toggleFolded(r.id)"
+            (remove)="store.removeItem('references', r.id)"
+            (moveUp)="store.moveItem('references', r.id, -1)"
+            (moveDown)="store.moveItem('references', r.id, 1)"
+          >
+            <span class="dim item-company">@if (r.title) { · {{ r.title }}}</span>
             <div class="item-body">
               <label class="field">
                 <span class="label">Nombre completo</span>
@@ -1292,7 +1034,7 @@
                 </label>
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay referencias.</p>
         }
@@ -1318,45 +1060,17 @@
         <p class="block-hint">{{ SECTION_HINTS.customSection }}</p>
 
         @for (c of data().customSections; track c.id; let i = $index) {
-          <article class="item" [class.is-folded]="isFolded(c.id)">
-            <header class="item-head">
-              <span class="item-index mono">{{ i + 1 }}</span>
-              <span class="item-name">{{ c.title || 'Nueva sección' }}</span>
-              <span class="spacer"></span>
-              <span class="item-actions">
-                <button
-                  type="button"
-                  class="icon-btn"
-                  [attr.aria-expanded]="!isFolded(c.id)"
-                  [title]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  [attr.aria-label]="isFolded(c.id) ? 'Desplegar este elemento' : 'Contraer este elemento'"
-                  (click)="toggleFolded(c.id)"
-                >
-                  <span class="item-caret" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn handle"
-                  data-drag-handle
-                  title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
-                  aria-label="Reordenar elemento"
-                  [disabled]="data().customSections.length < 2"
-                  (keydown.arrowup)="store.moveItem('customSections', c.id, -1); $event.preventDefault()"
-                  (keydown.arrowdown)="store.moveItem('customSections', c.id, 1); $event.preventDefault()"
-                >
-                  <span class="grip" aria-hidden="true"></span>
-                </button>
-                <button
-                  type="button"
-                  class="icon-btn icon-btn--danger"
-                  title="Eliminar"
-                  (click)="store.removeItem('customSections', c.id)"
-                >
-                  &times;
-                </button>
-              </span>
-            </header>
-
+          <app-cv-item
+            [name]="c.title || 'Nueva sección'"
+            [index]="i"
+            [folded]="isFolded(c.id)"
+            [id]="c.id"
+            [canDrag]="data().customSections.length >= 2"
+            (toggleFold)="toggleFolded(c.id)"
+            (remove)="store.removeItem('customSections', c.id)"
+            (moveUp)="store.moveItem('customSections', c.id, -1)"
+            (moveDown)="store.moveItem('customSections', c.id, 1)"
+          >
             <div class="item-body">
               <label class="field">
                 <span class="label">Título</span>
@@ -1418,7 +1132,7 @@
                 />
               </div>
             </div>
-          </article>
+          </app-cv-item>
         } @empty {
           <p class="empty">Todavía no hay entradas personalizadas.</p>
         }

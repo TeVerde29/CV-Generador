@@ -1,5 +1,11 @@
 @if (view() === 'landing') {
-  <app-landing (start)="openEditor()" (toggleTheme)="toggleTheme()" [themeLabel]="themeLabel()" />
+  <app-landing (start)="openEditor()" (toggleTheme)="toggleTheme()" (goPrivacy)="goPrivacy()" (goAbout)="goAbout()" (goContact)="goContact()" [themeLabel]="themeLabel()" />
+} @else if (view() === 'privacy') {
+  <app-privacy (back)="goLanding()" />
+} @else if (view() === 'about') {
+  <app-about (back)="goLanding()" />
+} @else if (view() === 'contact') {
+  <app-contact (back)="goLanding()" />
 } @else {
   <div class="app">
     <header class="topbar">
@@ -90,7 +96,7 @@
         </button>
         @if (exportOpen()) {
           <div class="export-popover">
-            <app-export />
+            <app-export (closeExport)="closeExport()" />
           </div>
         }
       </div>
@@ -104,7 +110,13 @@
       ></div>
     }
 
-    <div class="work" [class.work--preview]="mobileView() === 'preview'">
+    <main class="work" [class.work--preview]="mobileView() === 'preview'">
+      <a
+        href="#main-content"
+        class="btn btn--sm btn--ghost skip-link"
+      >
+        Saltar al contenido
+      </a>
       <nav class="rail" aria-label="Secciones de la aplicación">
         @for (t of tabs; track t.id) {
           <button
@@ -121,7 +133,7 @@
         <span class="spacer"></span>
       </nav>
 
-      <section class="panel">
+      <section class="panel" id="main-content">
         <div class="panel-slot" [class.is-hidden]="tab() !== 'data'">
           <app-editor />
         </div>
@@ -136,7 +148,7 @@
       <section class="canvas">
         <app-preview />
       </section>
-    </div>
+    </main>
 
     <div class="toast-wrap">
       @for (t of toasts.items(); track t.id) {

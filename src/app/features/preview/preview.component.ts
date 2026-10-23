@@ -41,13 +41,20 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
   readonly titles = this.store.sectionTitles;
   readonly photoShape = this.store.photoShape;
 
+  /** Secciones ocultas: se pasan al documento para que no se rendericen en el PDF ni en la pantalla. */
+  readonly hiddenSections = this.store.hiddenSections;
+
   readonly zoom = signal(80);
   /** Cuántas páginas A4 ocupa el currículum al alto natural del papel. */
   readonly pages = signal(0);
   /** Vista previa o JSON: el mismo currículum, en texto o en papel. */
   readonly mode = signal<'preview' | 'json'>('preview');
-  /** El estado completo como JSON. */
+  /** El estado completo como JSON (solo lectura). */
   readonly json = this.store.json;
+  /** ¿Está el JSON en modo edición? */
+  readonly editingJson = signal(false);
+  /** Texto JSON que el usuario está editando. */
+  readonly editableJson = signal('');
 
   private readonly holder = viewChild.required<ElementRef<HTMLElement>>('holder');
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -212,5 +219,38 @@ export class PreviewComponent implements AfterViewInit, OnDestroy {
     };
     reader.onerror = () => this.toast.err('No se pudo leer el archivo.');
     reader.readAsText(file);
+  }
+
+  /* ── Edición JSON ────────────────────────────────────────────────────── */
+
+  /** Activa el modo edición del JSON. */
+  startEditing(): void {
+    this.editableJson.set(this.json());
+    this.editingJson.set(true);
+  }
+
+  /** Descarta los cambios y vuelve a la vista de solo lectura. */
+  cancelEditing(): void {
+    this.editingJson.set(false);
+    this.editableJson.set('');
+  }
+
+  /** Valida y aplica el JSON editado al store, actualizando el CV y el diseño. */
+  applyEditing(): void {
+    const raw = this.editableJson().trim();
+    if (!raw) {
+      this.toast.err('El JSON no puede estar vacío.');
+      return;
+    }
+    try {
+      this.store.importJson(raw);
+      this.editingJson.set(false);
+      this.editableJson.set('');
+      this.toast.ok('JSON aplicado al currículum.');
+    } catch (err) {
+      this.toast.err(
+        err instanceof Error ? err.message : 'El JSON no es válido.',
+      );
+    }
   }
 }

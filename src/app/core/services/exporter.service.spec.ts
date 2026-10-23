@@ -3,6 +3,10 @@ import { emptyCVData, PALETTES } from '../models/catalog';
 import type { CVData } from '../models/cv-data';
 import { docxLook } from './docx-look';
 import { ExporterService, type ExportDesign } from './exporter.service';
+import { MarkdownExporter } from './exporters/markdown-exporter';
+import { DocxExporter } from './exporters/docx-exporter';
+import { JsonExporter } from './exporters/json-exporter';
+import { PdfExporter } from './exporters/pdf-exporter';
 
 /**
  * The Markdown export is the one that can be asserted without a DOM, and it is
@@ -11,11 +15,15 @@ import { ExporterService, type ExportDesign } from './exporter.service';
  */
 const cv = (patch: Partial<CVData>): CVData => ({ ...emptyCVData(), ...patch });
 
-const service = new ExporterService();
+const json = new JsonExporter();
+const md: MarkdownExporter = new MarkdownExporter();
+const docx: DocxExporter = new DocxExporter();
+const pdf = new PdfExporter();
+const service = new ExporterService(json, md, docx, pdf);
 
 describe('buildMarkdown — datos de contacto', () => {
   it('deja el correo, el teléfono y la ciudad como texto plano', () => {
-    const md = service.buildMarkdown(
+    const result = md.buildMarkdown(
       cv({
         personalInfo: {
           name: 'Pedro',
@@ -25,13 +33,13 @@ describe('buildMarkdown — datos de contacto', () => {
         },
       }),
     );
-    expect(md).toContain('pedro@ejemplo.com');
-    expect(md).toContain('+51 900 000 000');
-    expect(md).toContain('Pucallpa, Perú');
+    expect(result).toContain('pedro@ejemplo.com');
+    expect(result).toContain('+51 900 000 000');
+    expect(result).toContain('Pucallpa, Perú');
   });
 
   it('escribe los enlaces del perfil con su nombre, no con la URL', () => {
-    const md = service.buildMarkdown(
+    const result = md.buildMarkdown(
       cv({
         personalInfo: {
           name: 'Pedro',
@@ -44,31 +52,31 @@ describe('buildMarkdown — datos de contacto', () => {
         },
       }),
     );
-    expect(md).toContain('[LinkedIn](https://linkedin.com/in/pedro)');
-    expect(md).toContain('[GitHub](https://github.com/TeVerde29)');
-    expect(md).toContain('[Portafolio](https://teverde29.github.io/Portafolio/)');
+    expect(result).toContain('[LinkedIn](https://linkedin.com/in/pedro)');
+    expect(result).toContain('[GitHub](https://github.com/TeVerde29)');
+    expect(result).toContain('[Portafolio](https://teverde29.github.io/Portafolio/)');
     // La URL cruda no debe aparecer suelta en la cabecera.
-    expect(md).not.toContain('linkedin.com/in/pedro ·');
+    expect(result).not.toContain('linkedin.com/in/pedro ·');
   });
 
   it('no repite el esquema cuando el enlace ya lo trae', () => {
-    const md = service.buildMarkdown(
+    const result = md.buildMarkdown(
       cv({
         personalInfo: { name: 'Pedro', email: '', phone: '', location: '', github: 'https://github.com/x' },
       }),
     );
-    expect(md).toContain('[GitHub](https://github.com/x)');
-    expect(md).not.toContain('https://https://');
+    expect(result).toContain('[GitHub](https://github.com/x)');
+    expect(result).not.toContain('https://https://');
   });
 
   it('omite los enlaces vacíos en lugar de dejar un hueco', () => {
-    const md = service.buildMarkdown(
+    const result = md.buildMarkdown(
       cv({
         personalInfo: { name: 'Pedro', email: 'a@b.co', phone: '', location: '', website: '   ' },
       }),
     );
-    expect(md).not.toContain('[Web]');
-    expect(md).not.toContain(']()');
+    expect(result).not.toContain('[Web]');
+    expect(result).not.toContain(']()');
   });
 });
 
@@ -83,23 +91,23 @@ describe('buildMarkdown — proyectos', () => {
   });
 
   it('publica la demo y el repositorio como enlaces con nombre', () => {
-    const md = service.buildMarkdown(
+    const result = md.buildMarkdown(
       cv({ projects: [project('https://demo.dev/', 'https://github.com/x/y')] }),
     );
-    expect(md).toContain('[Demo](https://demo.dev/) · [GitHub](https://github.com/x/y)');
+    expect(result).toContain('[Demo](https://demo.dev/) · [GitHub](https://github.com/x/y)');
   });
 
   it('admite proyectos con un solo enlace', () => {
-    const md = service.buildMarkdown(cv({ projects: [project(undefined, 'github.com/x/y')] }));
-    expect(md).toContain('[GitHub](https://github.com/x/y)');
-    expect(md).not.toContain('[Demo]');
+    const result = md.buildMarkdown(cv({ projects: [project(undefined, 'github.com/x/y')] }));
+    expect(result).toContain('[GitHub](https://github.com/x/y)');
+    expect(result).not.toContain('[Demo]');
   });
 
   it('no imprime nada cuando el proyecto no tiene enlaces', () => {
-    const md = service.buildMarkdown(cv({ projects: [project()] }));
-    expect(md).toContain('### Proyecto');
-    expect(md).not.toContain('[Demo]');
-    expect(md).not.toContain('[GitHub]');
+    const result = md.buildMarkdown(cv({ projects: [project()] }));
+    expect(result).toContain('### Proyecto');
+    expect(result).not.toContain('[Demo]');
+    expect(result).not.toContain('[GitHub]');
   });
 });
 
@@ -194,7 +202,7 @@ describe('buildDocx — el diseño elegido llega al Word', () => {
 
   /** Word splits the file into a zip; the body lives in `document.xml`. */
   const documentXml = async (design?: ExportDesign): Promise<string> => {
-    const blob = await service.buildDocx(data, colors, undefined, undefined, design);
+    const blob = await docx.buildDocx(data, colors, undefined, undefined, design);
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
     const file = zip.file('word/document.xml');
     if (!file) throw new Error('El paquete no trae word/document.xml');

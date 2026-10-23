@@ -1,0 +1,40 @@
+<article class="item" [class.is-folded]="folded">
+  <header class="item-head">
+    <span class="item-index mono">{{ index + 1 }}</span>
+    <span class="item-name">{{ name }}</span>
+    <span class="spacer"></span>
+    <span class="item-actions">
+      <button
+        type="button"
+        class="icon-btn"
+        [attr.aria-expanded]="!folded"
+        [title]="folded ? 'Desplegar este elemento' : 'Contraer este elemento'"
+        [attr.aria-label]="folded ? 'Desplegar este elemento' : 'Contraer este elemento'"
+        (click)="toggleFold.emit()"
+      >
+        <span class="item-caret" aria-hidden="true"></span>
+      </button>
+      <button
+        type="button"
+        class="icon-btn handle"
+        data-drag-handle
+        title="Arrastra para reordenar (con el teclado, flechas arriba y abajo)"
+        aria-label="Reordenar elemento"
+        [disabled]="!canDrag"
+        (keydown.arrowup)="moveUp.emit(); $event.preventDefault()"
+        (keydown.arrowdown)="moveDown.emit(); $event.preventDefault()"
+      >
+        <span class="grip" aria-hidden="true"></span>
+      </button>
+      <button
+        type="button"
+        class="icon-btn icon-btn--danger"
+        title="Eliminar"
+        (click)="remove.emit()"
+      >
+        &times;
+      </button>
+    </span>
+  </header>
+  <div class="item-body"><ng-content /></div>
+</article>

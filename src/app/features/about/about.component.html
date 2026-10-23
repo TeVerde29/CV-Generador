@@ -1,0 +1,84 @@
+<div class="about-page">
+  <header class="about-head">
+    <button
+      type="button"
+      class="btn btn--sm btn--ghost"
+      (click)="goBack()"
+      title="Volver a la portada"
+      aria-label="Volver a la portada"
+    >
+      ← Volver
+    </button>
+    <h1>Acerca de CV Generador</h1>
+  </header>
+
+  <main class="about-content">
+    <section>
+      <h2>¿Qué es CV Generador?</h2>
+      <p>
+        CV Generador es un editor de currículums que funciona entero dentro del
+        navegador. No hay servidor, ni cuentas, ni base de datos: el currículum
+        vive en el <code>localStorage</code> de tu equipo y los archivos se
+        generan en esa misma pestaña.
+      </p>
+    </section>
+
+    <section>
+      <h2>¿Por qué existe?</h2>
+      <p>
+        Un currículum se escribe una vez y se envía a sitios que no se parecen en
+        nada: un portal con un formulario que lee el texto, un correo que espera
+        un PDF maquetado y una web técnica que pide un perfil técnico. La mayoría
+        de generadores obligan a elegir: o dan un editor bonito que exporta una
+        imagen ilegible para un filtro, o dan una plantilla rígida que no se
+        puede adaptar al sector. Además suelen pedir cuenta y subir los datos a
+        un servidor sin necesidad.
+      </p>
+      <p>
+        Este editor resuelve las dos cosas: perfil y plantilla son ejes
+        independientes, y cada export va al formato que le sirve a quien lo
+        recibe.
+      </p>
+    </section>
+
+    <section>
+      <h2>¿Quién lo hizo?</h2>
+      <p>
+        <strong>Pedro Giovanni Ricra Figueroa</strong> — Ingeniería de
+        Sistemas.
+      </p>
+      <p>
+        <a href="https://github.com/TeVerde29" target="_blank" rel="noopener">GitHub</a>
+        ·
+        <a href="mailto:hikih020@gmail.com">hikih020&#64;gmail.com</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Tecnologías utilizadas</h2>
+      <ul>
+        <li>Angular 19.2 — SPA, componentes y signals</li>
+        <li>TypeScript 5.7 — Tipado estático</li>
+        <li>docx 9.12 — Generación de Word (.docx) en el navegador</li>
+        <li>html2canvas 1.4 + jspdf 4.2 — Generación de PDF</li>
+        <li>SCSS + variables CSS — Diseño y temas</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Privacidad</h2>
+      <p>
+        Los datos nunca salen de tu navegador. Para más detalles, consulta la
+        <button type="button" class="link-btn" (click)="goBack()">política de privacidad</button>.
+      </p>
+    </section>
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="goBack()"
+    >
+      Volver a la portada
+    </button>
+  </main>
+</div>

@@ -61,6 +61,12 @@
       </div>
     } @else {
       <div class="json-tools">
+        @if (editingJson()) {
+          <button type="button" class="btn btn--ghost" (click)="cancelEditing()">Cancelar</button>
+          <button type="button" class="btn btn--primary" (click)="applyEditing()">Aplicar</button>
+        } @else {
+          <button type="button" class="btn btn--sm" (click)="startEditing()">Editar</button>
+        }
         <button type="button" class="btn btn--sm" (click)="copyJson()">Copiar</button>
         <button type="button" class="btn btn--sm" (click)="downloadJson()">
           Descargar .json
@@ -91,12 +97,23 @@
           [photoShape]="photoShape()"
           [showWatermark]="showWatermark()"
           [watermarkLabel]="watermarkText()"
+          [hiddenSections]="hiddenSections()"
         />
       </div>
     </div>
   } @else {
     <div class="json-view">
-      <pre class="json-code mono">{{ json() }}</pre>
+      @if (editingJson()) {
+        <textarea
+          class="json-code mono"
+          [value]="editableJson()"
+          (input)="editableJson.set($any($event.target).value)"
+          spellcheck="false"
+          wrap="off"
+        ></textarea>
+      } @else {
+        <pre class="json-code mono">{{ json() }}</pre>
+      }
     </div>
   }
 </div>

@@ -45,41 +45,39 @@ export const LAYOUTS: LayoutOption[] = [
 /* ── Palettes ──────────────────────────────────────────────────────────── */
 
 export const PALETTES: PaletteOption[] = [
-  /* ── Verdes ────────────────────────────────────────────────────────── */
+  /* ── Verdes (incluye Té verde que se mantiene) ──────────────────────── */
+  { id: 'te-verde', name: 'Té verde', colors: { primary: '#294635', secondary: '#4f7256', accent: '#829b78' } },
   { id: 'bosque', name: 'Bosque', colors: { primary: '#14532d', secondary: '#15803d', accent: '#22c55e' } },
   { id: 'oliva', name: 'Oliva', colors: { primary: '#3f4a1c', secondary: '#6b7a3a', accent: '#a3b565' } },
-  { id: 'salvia', name: 'Salvia', colors: { primary: '#3f5136', secondary: '#6b7f5e', accent: '#a9bd94' } },
-  { id: 'te-verde', name: 'Té verde', colors: { primary: '#294635', secondary: '#4f7256', accent: '#829b78' } },
-  { id: 'matcha', name: 'Matcha', colors: { primary: '#294635', secondary: '#829b78', accent: '#afc49a' } },
-  { id: 'eucalipto', name: 'Eucalipto', colors: { primary: '#2f4f43', secondary: '#5b8a72', accent: '#9cc4ae' } },
-  { id: 'menta', name: 'Menta', colors: { primary: '#1f4d3d', secondary: '#3f7a5e', accent: '#7fb89a' } },
-  { id: 'pistacho', name: 'Pistacho', colors: { primary: '#4a5a23', secondary: '#7c8f3d', accent: '#b3c47a' } },
+  { id: 'esmeralda', name: 'Esmeralda', colors: { primary: '#045a46', secondary: '#0e8a6c', accent: '#14b8a6' } },
 
-  /* ── Azules y teal ─────────────────────────────────────────────────── */
-  { id: 'océano', name: 'Océano', colors: { primary: '#0c4a6e', secondary: '#0e7490', accent: '#06b6d4' } },
-  { id: 'turquesa', name: 'Turquesa', colors: { primary: '#10505a', secondary: '#2b8492', accent: '#7cc3cd' } },
-  { id: 'cielo', name: 'Cielo', colors: { primary: '#0077BE', secondary: '#4DA6FF', accent: '#7FD1FF' } },
+  /* ── Azules ────────────────────────────────────────────────────────── */
+  { id: 'azul-marina', name: 'Azul Marino', colors: { primary: '#1e3a5f', secondary: '#3d5a80', accent: '#6e8b9d' } },
+  { id: 'azul-real', name: 'Azul Real', colors: { primary: '#153065', secondary: '#2a5db0', accent: '#4d88d9' } },
+  { id: 'azul-acero', name: 'Azul Acero', colors: { primary: '#3c5a7a', secondary: '#5a7a9a', accent: '#7a9aba' } },
+  { id: 'azul-cobalto', name: 'Azul Cobalto', colors: { primary: '#0047ab', secondary: '#1d68d8', accent: '#3d8bfd' } },
+  { id: 'azul-medianoche', name: 'Azul Medianoche', colors: { primary: '#0f172a', secondary: '#1e293b', accent: '#334155' } },
+  { id: 'azul-zafiro', name: 'Azul Zafiro', colors: { primary: '#08429c', secondary: '#0d6efd', accent: '#2d8cff' } },
+  { id: 'azul-petreo', name: 'Azul Pétreo', colors: { primary: '#2c3e50', secondary: '#34495e', accent: '#4a6582' } },
 
-  /* ── Azul oscuro ───────────────────────────────────────────────────── */
-  { id: 'noche', name: 'Noche', colors: { primary: '#0F172A', secondary: '#334155', accent: '#64748B' } },
+  /* ── Morados y rosas ───────────────────────────────────────────────── */
+  { id: 'indigo', name: 'Índigo', colors: { primary: '#312e81', secondary: '#4f46e5', accent: '#a5b4fc' } },
+  { id: 'violeta', name: 'Violeta', colors: { primary: '#5b21b6', secondary: '#7c3aed', accent: '#a855f7' } },
+  { id: 'orquidea', name: 'Orquídea', colors: { primary: '#8E24AA', secondary: '#AB47BC', accent: '#E1BEE7' } },
 
-  /* ── Morados ───────────────────────────────────────────────────────── */
-  { id: 'índigo', name: 'Índigo', colors: { primary: '#312e81', secondary: '#4f46e5', accent: '#a5b4fc' } },
-  { id: 'orquídea', name: 'Orquídea', colors: { primary: '#8E24AA', secondary: '#AB47BC', accent: '#E1BEE7' } },
-  { id: 'ciruela', name: 'Ciruela', colors: { primary: '#4a1d5f', secondary: '#7e22ce', accent: '#c4b5fd' } },
-  { id: 'vino', name: 'Vino', colors: { primary: '#5b1720', secondary: '#9f1239', accent: '#fb7185' } },
-
-  /* ── Tierra y rojos ────────────────────────────────────────────────── */
+  /* ── Rojos y tierra ────────────────────────────────────────────────── */
+  { id: 'borgoña', name: 'Borgoña', colors: { primary: '#5b1720', secondary: '#8d2333', accent: '#bf4055' } },
+  { id: 'rubi', name: 'Rubí', colors: { primary: '#7f0000', secondary: '#b00000', accent: '#d93025' } },
   { id: 'terracota', name: 'Terracota', colors: { primary: '#7c2d12', secondary: '#c2410c', accent: '#fb923c' } },
-  { id: 'cobre', name: 'Cobre', colors: { primary: '#8B4513', secondary: '#CD853F', accent: '#DEB887' } },
-  { id: 'mostaza', name: 'Mostaza', colors: { primary: '#713f12', secondary: '#b45309', accent: '#fbbf24' } },
-  { id: 'oro', name: 'Oro', colors: { primary: '#D4AF37', secondary: '#F0C040', accent: '#F9E077' } },
+  { id: 'naranja-quemado', name: 'Naranja Quemado', colors: { primary: '#b45309', secondary: '#d97706', accent: '#f59e0b' } },
 
-  /* ── Gris y neutros ────────────────────────────────────────────────── */
-  { id: 'tinta', name: 'Tinta', colors: { primary: '#18181b', secondary: '#71717a', accent: '#3f3f46' } },
-  { id: 'pizarra', name: 'Pizarra', colors: { primary: '#1f2937', secondary: '#6b7280', accent: '#0ea5e9' } },
+  /* ── Dorados y neutros ─────────────────────────────────────────────── */
+  { id: 'oro', name: 'Oro', colors: { primary: '#D4AF37', secondary: '#F0C040', accent: '#F9E077' } },
+  { id: 'crema-oscura', name: 'Crema Oscura', colors: { primary: '#4a4429', secondary: '#7a6e3e', accent: '#aa9a5a' } },
+  { id: 'carbón', name: 'Carbón', colors: { primary: '#2d2d2d', secondary: '#4a4a4a', accent: '#7a7a7a' } },
   { id: 'grafito', name: 'Grafito', colors: { primary: '#1c1917', secondary: '#44403c', accent: '#78716c' } },
-  { id: 'monocromo', name: 'Monocromo', colors: { primary: '#000000', secondary: '#525252', accent: '#a3a3a3' } },
+  { id: 'platino', name: 'Platino', colors: { primary: '#525252', secondary: '#78716c', accent: '#a3a3a3' } },
+  { id: 'tinta', name: 'Tinta', colors: { primary: '#18181b', secondary: '#71717a', accent: '#3f3f46' } },
 ];
 
 export const DEFAULT_TEMPLATE_ID = 'folha';

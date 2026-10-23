@@ -24,6 +24,15 @@ export class LandingComponent {
   /** Pide al shell que cambie el tema: el estado vive en la barra superior. */
   readonly toggleTheme = output<void>();
 
+  /** Pide al shell que abra la página de privacidad. */
+  readonly goPrivacy = output<void>();
+
+  /** Pide al shell que abra la página "Acerca de". */
+  readonly goAbout = output<void>();
+
+  /** Pide al shell que abra la página de contacto. */
+  readonly goContact = output<void>();
+
   /** Lo que pone en el botón del tema, para no repetir el texto aquí. */
   readonly themeLabel = input('');
 

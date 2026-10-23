@@ -61,6 +61,9 @@ export class CvDocumentComponent {
   /** Frame of the optional photo. */
   readonly photoShape = input<'square' | 'circle'>('square');
 
+  /** Sections the user has turned off: they keep their data but leave the document. */
+  readonly hiddenSections = input<SectionKey[]>([]);
+
   readonly labels = PROFICIENCY_LABELS;
 
   /** A getter so the templates keep reading the titles as `T.section`. */
@@ -119,20 +122,21 @@ export class CvDocumentComponent {
 
   private readonly visible = computed<Record<SectionKey, boolean>>(() => {
     const d = this.data();
+    const hidden = new Set(this.hiddenSections());
     return {
-      summary: d.summary.trim().length > 0,
-      experience: d.experience.length > 0,
-      education: d.education.length > 0,
-      skills: d.skills.length > 0,
-      languages: d.languages.length > 0,
-      projects: d.projects.length > 0,
-      certifications: d.certifications.length > 0,
-      publications: d.publications.length > 0,
-      volunteerWork: d.volunteerWork.length > 0,
-      awards: d.awards.length > 0,
-      interests: d.interests.length > 0,
-      references: d.references.length > 0,
-      customSection: d.customSections.length > 0,
+      summary: !hidden.has('summary') && d.summary.trim().length > 0,
+      experience: !hidden.has('experience') && d.experience.length > 0,
+      education: !hidden.has('education') && d.education.length > 0,
+      skills: !hidden.has('skills') && d.skills.length > 0,
+      languages: !hidden.has('languages') && d.languages.length > 0,
+      projects: !hidden.has('projects') && d.projects.length > 0,
+      certifications: !hidden.has('certifications') && d.certifications.length > 0,
+      publications: !hidden.has('publications') && d.publications.length > 0,
+      volunteerWork: !hidden.has('volunteerWork') && d.volunteerWork.length > 0,
+      awards: !hidden.has('awards') && d.awards.length > 0,
+      interests: !hidden.has('interests') && d.interests.length > 0,
+      references: !hidden.has('references') && d.references.length > 0,
+      customSection: !hidden.has('customSection') && d.customSections.length > 0,
     };
   });
 
